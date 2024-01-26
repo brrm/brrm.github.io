@@ -1,13 +1,13 @@
 # Setup
-title:        Causal Effect Boosting 
+title:        Bruce's Posts 
 tagline:      Bruce Mauger
-baseurl:      "/uplift-boosting"
+baseurl:      ""
 locale:       "en"
 
 # About/contact
 author:
   name:       Bruce Mauger
-  url:        https://brrm.io 
+  url:        https://blog.brrm.io 
 
 #Others
 markdown: kramdown
