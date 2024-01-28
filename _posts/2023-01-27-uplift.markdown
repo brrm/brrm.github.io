@@ -5,6 +5,8 @@ date:   2023-01-27
 categories: main
 ---
 
+# **Boosting for Causal Effect Estimation**
+#### *Can you boost when you don't have labels?*
 
 *This post provides a very brief overview of my own, original adaptation
 of the AdaBoost algorithm to the problem of (heterogeneous) causal
@@ -119,8 +121,8 @@ average treatment effect in the associated region.
 <div class="center">
 <img src="https://raw.githubusercontent.com/brrm/brrm.github.io/main/assets/tree.png" />
 </div>
-<figcaption>Example fit of Rzepakowski and Jaroszewicz’ decision
-tree</figcaption>
+<figcaption style="text-align: center"><i>Example fit of Rzepakowski and Jaroszewicz’ decision
+tree</i></figcaption>
 </figure>
 
 Lastly, Rzepakowski and Jaroszewicz also propose a regularisation
@@ -405,22 +407,29 @@ algorithm's performance, and discuss some of the challenges that come
 with producing useful evaluation metrics without access to the ground
 truths.
 
-::: thebibliography
-10 Gutierrez, P., & Gérardy, J. Causal Inference and Uplift Modelling: A
+# Bibliography
+[1] Gutierrez, P., & Gérardy, J. Causal Inference and Uplift Modelling: A
 Review of the Literature. International Conference on Predictive APIs
-and Apps (2017). D. B. Rubin. Estimating causal effects of treatments in
+and Apps (2017). 
+
+[2] D. B. Rubin. Estimating causal effects of treatments in
 randomized and nonrandomized studies. Journal of Educational Psychology,
-66(5):688 (1974). Rzepakowski, P., & Jaroszewicz, S. Decision trees for
+66(5):688 (1974). 
+
+[3] Rzepakowski, P., & Jaroszewicz, S. Decision trees for
 uplift modeling with single and multiple treatments. Knowl Inf Syst 32,
-303--327 (2012). Freund, Y., & Schapire R. A Decision-Theoretic
+303--327 (2012). 
+
+[4] Freund, Y., & Schapire R. A Decision-Theoretic
 Generalization of On-Line Learning and an Application to Boosting.
 Journal of Computer and System Sciences, Volume 55, Issue 1 (1997).
-Schapire, R., Singer, Y. Improved Boosting Algorithms Using
+
+[5] Schapire, R., Singer, Y. Improved Boosting Algorithms Using
 Confidence-rated Predictions. Machine Learning 37, 297--336 (1999).
-Hastie, T., Tibshirani, R., & Friedman, J. The Elements of Statistical
+
+[6] Hastie, T., Tibshirani, R., & Friedman, J. The Elements of Statistical
 Learning. Springer Series in Statistics Springer New York Inc., New
 York, NY, USA, (2001)
-:::
 
 # Appendix
 
