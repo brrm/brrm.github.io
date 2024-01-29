@@ -186,7 +186,7 @@ considered a vector $\vec f \in \mathbb R^N$.
 The final result ($\ref{eq:graddesc}$) has the intuitive interpretation of finding
 the basis function $h$ closest to the negative gradient of the loss
 $\vec t$. Note that $h$ need not be perfectly optimal to make progress.
-As long as $\sum_{i=1}^N t_i h(\mathbf x_i) < 0$ (that is, the basis
+As long as $\sum_{i=1}^N t_i h(\mathbf x_i) > 0$ (that is, the basis
 function & negative gradient lie on the same side of the hyperplane),
 our loss $\ell$ will decrease. This is the *weak learner* condition: our
 basis function must be better than a random function $h_R$, for which we
