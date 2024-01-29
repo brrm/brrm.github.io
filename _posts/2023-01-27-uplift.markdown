@@ -8,9 +8,10 @@ categories: main
 # **Boosting for Causal Effect Estimation**
 #### *Can you boost when you don't have labels?*
 
-*This post provides a very brief overview of my own, original adaptation
+*This post provides a **very** brief overview of my own, original adaptation
 of the AdaBoost algorithm to the problem of (heterogeneous) causal
-effect estimation. It also includes a light introduction to boosting and
+effect estimation as part of my Part II dissertation on causal machine learning.
+It also includes a light introduction to boosting and
 uplift modelling, though a basic knowledge of probabilities and decision
 trees is assumed.*
 
