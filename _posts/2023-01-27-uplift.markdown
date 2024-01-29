@@ -28,7 +28,7 @@ including medicine, A/B testing and econometrics.
 We consider a formalism of the problem in terms of the potential
 outcomes framework [2]. Given a dataset of $N$ independent and
 identically distributed $(X_i, W_i, Y_i)$ where $X_i \in \mathcal X$ are
-per-individual features, while $W_i \in \{0, 1\}$ and $Y_i \in \{0, 1\}$
+per-individual features, while $W_i \in \\{0, 1\\}$ and $Y_i \in \\{0, 1\\}$
 denote the individual's treatment assignment and outcome respectively.
 Let $\{Y_i(0), Y_i(1)\}$ be the potential outcomes we would have
 observed had individual $i$ be assigned treatment $W_i=0$ or $1$
@@ -72,7 +72,7 @@ the data originates from a randomised control trial (RCT):
 $e(X_i) = 0.5 = (1-e(X_i))$
 
 where we write $e(X_i) = \Pr(W_i = 1 \mid X_i)$ for the treatment
-propensity.
+propensity. That is, each individual is equally likely to be assigned to the treatment or control group.
 
 # Uplift Trees
 
@@ -225,7 +225,7 @@ $\ell(H_t)$. Each weight $D_t(i)$ can be interpreted as the relative
 contribution of the $i^\text{th}$ training sample to the total loss.
 Moreover, in the discrete case where $h(\mathbf x_i) \in \\{-1,1\\}$, the
 learning objective
-($\ref{eq:adaobjective}$) is analogous to maximising accuracy under
+($\ref{eq:adaobjective}$) is equivalent to maximising accuracy under
 the re-weighted distribution.
 
 Most boosting algorithms do not yield a tractable solution for the
@@ -240,7 +240,7 @@ minimisation procedure ($\ref{eq:fsam}$):
 $$\begin{align}
     \alpha_{t+1}
     &= \mathrm{argmin}_{\alpha \in \mathbb R^+} \sum_{i=1}^N \exp(-y_i (H_t(\mathbf x_i) + \alpha h(\mathbf x_i)))  \nonumber\\
-    &= \mathrm{argmin}_{\alpha \in \mathbb R^+} \sum_{i=1}^N \exp(-y_i H_t(\mathbf x_i)) \exp(\alpha h(\mathbf x_i)) \nonumber\\ 
+    &= \mathrm{argmin}_{\alpha \in \mathbb R^+} \sum_{i=1}^N \exp(-y_i H_t(\mathbf x_i)) \exp(-\alpha y_i h(\mathbf x_i)) \nonumber\\ 
     &= \mathrm{argmin}_{\alpha \in \mathbb R^+} \mathbb E_{i \sim D_t} [\exp(-\alpha y_i h(\mathbf x_i))] \label{eq:alphaobjective} \\ 
 \end{align}
 $$
