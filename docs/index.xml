@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <title>Bruce's writing</title>
+    <link>brrm.io</link>
+    <atom:link href="brrm.io/index.xml" rel="self" type="application/rss+xml"/>
+    <description>random scribbles
+</description>
+    <generator>Distill</generator>
+    <lastBuildDate>Sat, 27 Jan 2024 00:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Boosting for Causal Effect Estimation</title>
+      <dc:creator>Bruce Mauger</dc:creator>
+      <link>brrm.io/posts/boosting-for-causal-effect-estimation</link>
+      <description>Can you boost when you don't have labels?</description>
+      <guid>brrm.io/posts/boosting-for-causal-effect-estimation</guid>
+      <pubDate>Sat, 27 Jan 2024 00:00:00 +0000</pubDate>
+    </item>
+  </channel>
+</rss>
