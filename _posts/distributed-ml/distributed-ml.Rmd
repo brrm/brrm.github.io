@@ -1,0 +1,106 @@
+---
+title: "Distributed Machine Learning: How Does it Work?"
+description: |
+  Distribution has become essential to training large ML models. Here we take look at how it works, from top to bottom.
+author:
+  - name: Bruce Mauger 
+date: 12-26-2024
+output:
+  distill::distill_article:
+    mathjax: "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"
+    self_contained: false
+    toc: true
+citation: true
+bibliography: distributed-ml.bib
+csl: cambridge-university-press-numeric.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# Learn more about creating blogs with Distill at:
+# https://rstudio.github.io/distill/blog.html
+
+```
+
+Motivation: models & clusters are *really* big.
+
+We'll take a look at how parallelisation paradigms have evolved to cope with more data, more parameters and more GPUs.
+
+I intended this as a light compilation of various sources; for more detail, I provide references to the relevant resources throughout.
+
+[Outline of sections]
+Though I intend to stay light on implementation specifics, the abstractions provided by PyTorch are nonetheless useful for illustration.
+We'll be using PyTorch to illustrate and discuss implementation details. 
+The first section provides a rough overview of the PyTorch model, particularly for transformers. If you're already familiar, skip to the next section.
+
+
+# 1. PyTorch mental model
+Pytorch is the preeminent framework, though the stuff here also (mostly) applies to other frameworks.
+Useful for understanding how data flows throughout training.
+
+### How do you train a PyTorch neural network?
+[[Further Reading](https://pytorch.org/tutorials/beginner/basics/intro.html)]
+
+PyTorch's fundamental data structure is the `Tensor`, a multi-dimensional matrix (think NumPy's `ndarray`) used to store a model's parameters and encode inputs/outputs. 
+In PyTorch, a neural network is a `Module` composed from other modules (layers). 
+For example, here's a simple network with two linear layers and a ReLU activation in-between:
+
+```{python, eval=FALSE, echo=TRUE}
+from torch import nn
+
+class NeuralNetwork(nn.Module):
+  def __init__(self):
+    super().__init__()
+    self.linear1 = nn.Linear(2, 4)
+    self.activation_fn = nn.ReLU()
+    self.linear2 = nn.Linear(4, 1)
+  
+  def forward(self, x):
+    x = self.linear1(x)
+    x = self.activation_fn(x)
+    x = self.linear2(x)
+    return x
+```
+Unsurprisingly, `forward` defines the network's forward pass: how inputs are mapped to outputs. Here a 2D input is mapped to a 1D output, with a 4D "hidden" layer. Taking the first `Linear` submodule as an example, it holds weight and bias tensors of shapes `[4,2]` and `[4]` respectively. Adding the second linear layer's parameters (the activation function doesn't have any), we can see the network has a total of 17 trainable parameters.
+<!-- TODO: illustration of this network? e.g. https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/tutorial2/Introduction_to_PyTorch.html --->
+
+This is all well and good, but we can't actually train the network yet! 
+For that we need a basic training loop:
+
+```{python, eval=FALSE, echo=TRUE}
+model = NeuralNetwork() 
+optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
+X = torch.ones(10, 2) # input batch tensor
+y = torch.zeros(10, 1) # expected output batch tensor
+
+epochs = 10
+for t in range(epochs): 
+  # Compute prediction and loss
+  pred = model(x)
+  loss = torch.nn.functional.cross_entropy(pred, y)
+  
+  # Update parameters
+  loss.backward()
+  optimizer.step()
+  optimizer.zero_grad()
+```
+
+We train our model for 10 epochs (iterations) on a single batch of 10 (identical) datapoints^[In practice an epoch will loop over an entire training set consisting of several batches (each with their own parameter updates), potentially followed by evaluation on separate validation batches.].
+In each epoch:
+
+1. With `model(x)`, we call the `forward` method defined earlier to obtain predictions for the entire input batch.
+2. We compute the (cross entropy) loss for these predictions and store them in the `loss` tensor.
+3. We calculate the derivative of the loss with respect to each parameter with `loss.backward()`. PyTorch's autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation in the backward pass. It accumulates gradients in each tensor's `.grad` attribute^[Some tensors in a module don't have gradients, for example fixed transformers with static parameters.].
+4. The optimizer defines how parameters are updated from gradients. `optimizer.step()` performs this adjustment, and `optimizer.zero_grad()` resets gradients so they don't accumulate in the next pass.
+
+For each parameter in our network, we also need to store its gradient and relevant optimizer state.
+The popular Adam optimizer tracks **momentum** and **variance**, exponential averages of the first and second moments respectively of each parameter's gradient [@adam2017]. 
+The result is that each parameter can end up needing as much as 16 bytes of memory (assuming fp16/32 mixed precision) [@zero2020]. 
+For larger models such as Meta's Llama 405B that's a 6.5TB memory requirement, which makes distributing model parameters over several GPUs a necessity.
+
+### The Transformer architecture
+[[Further Reading](https://arxiv.org/pdf/1706.03762)]
+
+The largest models trained today are transformers. 
+Naturally, distributed training has evolved around the architecture, making it a valuable mental model.
