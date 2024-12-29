@@ -126,11 +126,33 @@ d-article blockquote {
   font-style: normal;
 }
 
+/* inline code */ 
+p > code, li > code {
+  white-space: pre;
+  background: #FAFAFA;
+  border-radius: 2px;
+  padding: 2px;
+  padding-top: 1px;
+  border: 1px solid #EEE;
+  font-size: 0.96rem;
+}
+
 /* highlighting */
 d-article mark {
     background-color: transparent;
     font-weight: bold;
     color: rgba(202, 34, 94, 0.8);
+}
+
+/* video */
+d-article figure:has(> video) {
+  margin-top: 0em;
+  margin-bottom: 1.5em;
+}
+
+d-article video {
+  display: block;
+  margin: auto;
 }
 
 d-appendix {

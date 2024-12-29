@@ -1,7 +1,8 @@
 ---
 title: "Distributed Machine Learning: How Does it Work?"
 description: |
-  Distribution has become essential to training large ML models. Here we take look at how it works, from top to bottom.
+  Distribution has become essential to training large models.
+  Modern machine learning frameworks provide drop-in distribution, but few understand how these work -- and why they might be slowing down training.
 author:
   - name: Bruce Mauger 
 date: 12-26-2024
@@ -13,6 +14,9 @@ output:
 citation: true
 bibliography: distributed-ml.bib
 csl: cambridge-university-press-numeric.csl
+resources:
+  exclude:
+    "*.ipynb"
 ---
 
 ```{r setup, include=FALSE}
@@ -24,6 +28,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 Motivation: models & clusters are *really* big.
+<!-- alternatively: you've just called torch.distribute(model), and your 100x GPU cluster is only running 50x faster than local, what's happened? --> 
 
 We'll take a look at how parallelisation paradigms have evolved to cope with more data, more parameters and more GPUs.
 
@@ -104,3 +109,60 @@ For larger models such as Meta's Llama 405B that's a 6.5TB memory requirement, w
 
 The largest models trained today are transformers. 
 Naturally, distributed training has evolved around the architecture, making it a valuable mental model.
+
+# 2. Collective Communication Primitives
+Let's start with a very simple model: two GPUs (or **"ranks"**) with a point-to-point (p2p) connection -- this could be a NVLink interconnect if they're within the same host, or a slower InfiniBand or Ethernet network (perhaps with several hops) if they're not (more on this [later]()).
+
+All collectives operate over a single tensor. 
+The simplest thing we can do is to send from one rank and receive on the other:
+
+Now let's suppose we want to synchronise four ranks.
+One way to do this is with an <mark>AllToAll</mark> collective, a complete graph of p2p sends:
+
+This isn't always super efficient: $n$ ranks require $\mathcal O(n^2)$ p2p communications, some of which may share underlying network links and bottleneck one another. 
+Moreover, we often only need an *aggregate* of the distributed tensors -- for example we might want to average some parameters we've replicated across ranks. 
+So how might accomplish this with less bandwidth? 
+Let's start by **reducing** (e.g. taking the sum, min, max, etc.) the received tensor with the local tensor, before passing the result onto the next rank. 
+What we obtain is a **ring-based** <mark>Reduce</mark> collective:
+
+<figure>
+<video width="80%" autoplay loop muted>
+  <source src="jupyter/media/videos/jupyter/1080p60/CollectiveReduce.mp4" type="video/mp4">
+</video>
+<figcaption aria-hidden="true">Four rank broadcast</figcaption>
+</figure>
+
+After completing one loop around the ring, we've reduced the entire tensor -- but the result is only held in the last rank.
+We need to complete another loop so that each rank holds a replica of the complete tensor. 
+This is the <mark>Broadcast</mark> collective:
+
+
+
+Sequencing the two collectives forms an <mark>AllReduce</mark>.
+Notice that only one rank at a time is busy, with the rest idle.
+We can use pipelining to do even better: we split the tensor into chunks, with the $i^\text{th}$ rank at the start (or **root**) of the ring corresponding to the $i^\text{th}$ chunk.
+
+<figure>
+<video width="80%" autoplay loop muted>
+  <source src="jupyter/media/videos/jupyter/1080p60/CollectiveAllReduce.mp4" type="video/mp4">
+</video>
+<figcaption aria-hidden="true">Four rank broadcast</figcaption>
+</figure>
+
+
+
+The pipelined analogs of Reduce and Broadcast (the first and second loops in the above animation) are ReduceScatter and AllGather respectively.
+You can see this is exactly the same as an AllToAll, followed by local reductions at each rank.
+By using a ring, AllReduce improves communication overhead by an order of magnitude to $\mathcal O(n)$.
+
+You may have noticed the ring takes a lot longer, however. In practice we split the tensor so that each rank is always sending, amortising latency penalty (covered [later]()). Though bandwidth optimal, tree-based AllReduce is latency optimal.
+
+```{r, layout="l-body", fig.height=6}
+library(r2d3)
+r2d3(script = "d3/isend.js", d3_version = 6)
+```
+
+<!-- TODO: summary table of each collective, overhead, latency, etc -->
+
+
+

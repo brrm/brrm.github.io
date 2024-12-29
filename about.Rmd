@@ -6,6 +6,7 @@ description: "Bruce Mauger"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
 I like machine learning, distributed systems and trading - and I especially like all of them together.
 
 I'm currently researching congestion control for GPU clusters at [Clockwork Systems](https://clockwork.io), previously I was at [DRW](https://drw.com). I studied CS at the [University of Cambridge](https://www.cst.cam.ac.uk/).
