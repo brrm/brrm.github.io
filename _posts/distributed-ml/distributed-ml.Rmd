@@ -116,10 +116,24 @@ Let's start with a very simple model: two GPUs (or **"ranks"**) with a point-to-
 All collectives operate over a single tensor. 
 The simplest thing we can do is to send from one rank and receive on the other:
 
+<figure>
+<video width="80%" autoplay loop muted>
+  <source src="jupyter/media/videos/jupyter/1080p60/CollectiveP2P.mp4" type="video/mp4">
+</video>
+<figcaption aria-hidden="true">P2P send</figcaption>
+</figure>
+
 Now let's suppose we want to synchronise four ranks.
 One way to do this is with an <mark>AllToAll</mark> collective, a complete graph of p2p sends:
 
-This isn't always super efficient: $n$ ranks require $\mathcal O(n^2)$ p2p communications, some of which may share underlying network links and bottleneck one another. 
+<figure>
+<video width="80%" autoplay loop muted>
+  <source src="jupyter/media/videos/jupyter/1080p60/CollectiveAllToAll.mp4" type="video/mp4">
+</video>
+<figcaption aria-hidden="true">$N=4$ rank alltoall</figcaption>
+</figure>
+
+This isn't always super efficient: $N$ ranks require $\mathcal O(N^2)$ p2p communications, some of which may share underlying network links and bottleneck one another. 
 Moreover, we often only need an *aggregate* of the distributed tensors -- for example we might want to average some parameters we've replicated across ranks. 
 So how might accomplish this with less bandwidth? 
 Let's start by **reducing** (e.g. taking the sum, min, max, etc.) the received tensor with the local tensor, before passing the result onto the next rank. 
@@ -129,24 +143,29 @@ What we obtain is a **ring-based** <mark>Reduce</mark> collective:
 <video width="80%" autoplay loop muted>
   <source src="jupyter/media/videos/jupyter/1080p60/CollectiveReduce.mp4" type="video/mp4">
 </video>
-<figcaption aria-hidden="true">Four rank broadcast</figcaption>
+<figcaption aria-hidden="true">$N=4$ rank reduce</figcaption>
 </figure>
 
 After completing one loop around the ring, we've reduced the entire tensor -- but the result is only held in the last rank.
 We need to complete another loop so that each rank holds a replica of the complete tensor. 
 This is the <mark>Broadcast</mark> collective:
 
-
+<figure>
+<video width="80%" autoplay loop muted>
+  <source src="jupyter/media/videos/jupyter/1080p60/CollectiveBroadcast.mp4" type="video/mp4">
+</video>
+<figcaption aria-hidden="true">$N=$ rank broadcast</figcaption>
+</figure>
 
 Sequencing the two collectives forms an <mark>AllReduce</mark>.
 Notice that only one rank at a time is busy, with the rest idle.
-We can use pipelining to do even better: we split the tensor into chunks, with the $i^\text{th}$ rank at the start (or **root**) of the ring corresponding to the $i^\text{th}$ chunk.
+We can use pipelining to do even better: we split the tensor into $N$ chunks, with the $i^\text{th}$ rank at the start (or **root**) of the ring corresponding to the $i^\text{th}$ chunk.
 
 <figure>
 <video width="80%" autoplay loop muted>
   <source src="jupyter/media/videos/jupyter/1080p60/CollectiveAllReduce.mp4" type="video/mp4">
 </video>
-<figcaption aria-hidden="true">Four rank broadcast</figcaption>
+<figcaption aria-hidden="true">$N=4$ rank allreduce</figcaption>
 </figure>
 
 
