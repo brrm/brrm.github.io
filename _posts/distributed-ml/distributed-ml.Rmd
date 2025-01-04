@@ -48,8 +48,8 @@ Useful for understanding how data flows throughout training.
 [[Further Reading](https://pytorch.org/tutorials/beginner/basics/intro.html)]
 
 PyTorch's fundamental data structure is the `Tensor`, a multi-dimensional matrix (think NumPy's `ndarray`) used to store a model's parameters and encode inputs/outputs. 
-In PyTorch, a neural network is a `Module` composed from other modules (layers). 
-For example, here's a simple network with two linear layers and a ReLU activation in-between:
+In PyTorch, a neural network is a `Module` composed by stitching other modules (layers) and functions together. 
+For example, here's a simple network with two linear layers and a ReLU activation function in-between:
 
 ```{python, eval=FALSE, echo=TRUE}
 from torch import nn
@@ -77,7 +77,7 @@ For that we need a basic training loop:
 model = NeuralNetwork() 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
 X = torch.ones(10, 2) # input batch tensor
-y = torch.zeros(10, 1) # expected output batch tensor
+y = torch.zeros(10, 1) # expected output (target) batch tensor
 
 epochs = 10
 for t in range(epochs): 
@@ -91,17 +91,19 @@ for t in range(epochs):
   optimizer.zero_grad()
 ```
 
-We train our model for 10 epochs (iterations) on a single batch of 10 (identical) datapoints^[In practice an epoch will loop over an entire training set consisting of several batches (each with their own parameter updates), potentially followed by evaluation on separate validation batches.].
+We train our model for 10 epochs (iterations) over a single batch of 10 (identical) datapoints^[In practice an epoch will loop over an entire training set consisting of several batches (each with their own parameter updates), potentially followed by evaluation on separate validation batches.].
 In each epoch:
 
-1. With `model(x)`, we call the `forward` method defined earlier to obtain predictions for the entire input batch.
+1. With `model(x)`, we call the `forward` method defined earlier to obtain predictions for the entire input batch. The outputs of each layer (**"activations"**) are cached for use in the backward pass. 
 2. We compute the (cross entropy) loss for these predictions and store them in the `loss` tensor.
-3. We calculate the derivative of the loss with respect to each parameter with `loss.backward()`. PyTorch's autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation in the backward pass. It accumulates gradients in each tensor's `.grad` attribute^[Some tensors in a module don't have gradients, for example fixed transformers with static parameters.].
+3. We calculate the derivative of the loss with respect to each parameter with `loss.backward()`. PyTorch's autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the innermost (last) layer in the backward pass. It accumulates gradients in each tensor's `.grad` attribute^[Some tensors in a module don't have gradients, for example fixed transformers with static parameters.].
 4. The optimizer defines how parameters are updated from gradients. `optimizer.step()` performs this adjustment, and `optimizer.zero_grad()` resets gradients so they don't accumulate in the next pass.
+
+![Pebble graph for a four layer network illustrating how cached activations are built up in the forward pass, and used to calculate gradients in the backward pass ([graphic inspiration](https://siboehm.com/articles/22/data-parallel-training)).](images/pebble_graph.gif)
 
 For each parameter in our network, we also need to store its gradient and relevant optimizer state.
 The popular Adam optimizer tracks **momentum** and **variance**, exponential averages of the first and second moments respectively of each parameter's gradient [@adam2017]. 
-The result is that each parameter can end up needing as much as 16 bytes of memory (assuming fp16/32 mixed precision) [@zero2020]. 
+The result is that each parameter can end up needing at least 16 bytes of memory (assuming fp16/32 mixed precision) [@zero2020]. 
 For larger models such as Meta's Llama 405B that's a 6.5TB memory requirement, which makes distributing model parameters over several GPUs a necessity.
 
 ### The Transformer architecture
@@ -111,77 +113,103 @@ The largest models trained today are transformers.
 Naturally, distributed training has evolved around the architecture, making it a valuable mental model.
 
 # 2. Collective Communication Primitives
-Let's start with a very simple model: two GPUs (or **"ranks"**) with a point-to-point (p2p) connection -- this could be a NVLink interconnect if they're within the same host, or a slower InfiniBand or Ethernet network (perhaps with several hops) if they're not (more on this [later]()).
+[[Further Reading]](https://marek.ai/allreduce-the-basis-of-multi-device-communication-for-neural-network-training.html)
 
-All collectives operate over a single tensor. 
-The simplest thing we can do is to send from one rank and receive on the other:
+<!-- what are collectives? why are we talking about them? -->
+Before going into distribution strategies, we need to discuss the primitives we have available for communicating data between groups (or **"collectives"**) of GPUs. 
+
+Let's start with a simple model: two GPUs (or **"ranks"**) with a point-to-point (p2p) connection -- this could be a fast NVLink interconnect if they're within the same host, or a slower InfiniBand or Ethernet network (perhaps with several hops) if they're not (more on this [later]()).
+
+All collectives operate over a single tensor at each rank. 
+The simplest thing we can do is to send a tensor from one rank and receive on the other:
 
 <figure>
 <video width="80%" autoplay loop muted>
   <source src="jupyter/media/videos/jupyter/1080p60/CollectiveP2P.mp4" type="video/mp4">
 </video>
-<figcaption aria-hidden="true">P2P send</figcaption>
+<figcaption aria-hidden="true">P2P send, circles correspond to ranks and squares to tensors.</figcaption>
 </figure>
 
-Now let's suppose we want to synchronise four ranks.
+Now let's suppose we want to synchronise tensors distributed over several ranks.
 One way to do this is with an <mark>AllToAll</mark> collective, a complete graph of p2p sends:
 
 <figure>
 <video width="80%" autoplay loop muted>
   <source src="jupyter/media/videos/jupyter/1080p60/CollectiveAllToAll.mp4" type="video/mp4">
 </video>
-<figcaption aria-hidden="true">$N=4$ rank alltoall</figcaption>
+<figcaption aria-hidden="true">$N=4$ rank AllToAll</figcaption>
 </figure>
 
-This isn't always super efficient: $N$ ranks require $\mathcal O(N^2)$ p2p communications, some of which may share underlying network links and bottleneck one another. 
-Moreover, we often only need an *aggregate* of the distributed tensors -- for example we might want to average some parameters we've replicated across ranks. 
-So how might accomplish this with less bandwidth? 
-Let's start by **reducing** (e.g. taking the sum, min, max, etc.) the received tensor with the local tensor, before passing the result onto the next rank. 
-What we obtain is a **ring-based** <mark>Reduce</mark> collective:
+This isn't always super efficient: $N$ ranks require $N(N-1)$ sends, some of which may share underlying network links and bottleneck one another. 
+Moreover, we often only need an *aggregate* of the distributed tensors -- for example we might want to average some parameters we've replicated across the ranks. 
+So how might we accomplish this with less bandwidth? 
+If each rank **reduces** (applying an associative^[Floating point addition is not associative, but in practice the difference is small enough to be safely ignored.] operator e.g. sum, min, max, etc.) the tensor it receives with its own local tensor, before passing the result onto the next rank, we obtain a **ring-based** <mark>Reduce</mark> collective:
 
 <figure>
 <video width="80%" autoplay loop muted>
   <source src="jupyter/media/videos/jupyter/1080p60/CollectiveReduce.mp4" type="video/mp4">
 </video>
-<figcaption aria-hidden="true">$N=4$ rank reduce</figcaption>
+<figcaption aria-hidden="true">$N=4$ rank Reduce</figcaption>
 </figure>
 
-After completing one loop around the ring, we've reduced the entire tensor -- but the result is only held in the last rank.
-We need to complete another loop so that each rank holds a replica of the complete tensor. 
+After completing one loop around the ring, we've reduced all of the tensors into a single tensor -- but this result is only held in the last rank.
+We need to complete another loop so that each rank holds a replica of the resulting tensor. 
 This is the <mark>Broadcast</mark> collective:
 
 <figure>
 <video width="80%" autoplay loop muted>
   <source src="jupyter/media/videos/jupyter/1080p60/CollectiveBroadcast.mp4" type="video/mp4">
 </video>
-<figcaption aria-hidden="true">$N=$ rank broadcast</figcaption>
+<figcaption aria-hidden="true">$N=4$ rank Broadcast</figcaption>
 </figure>
 
-Sequencing the two collectives forms an <mark>AllReduce</mark>.
-Notice that only one rank at a time is busy, with the rest idle.
-We can use pipelining to do even better: we split the tensor into $N$ chunks, with the $i^\text{th}$ rank at the start (or **root**) of the ring corresponding to the $i^\text{th}$ chunk.
+Notice that, in the latter two collectives, only one rank/link at a time is busy, with the rest idle.
+We can use pipelining to get better throughput: we split the tensor into $N$ chunks, with the $i^\text{th}$ rank at the start (or **root**) of the ring corresponding to the $i^\text{th}$ chunk.
+The pipelined analogs of Reduce and Broadcast are <mark>ReduceScatter</mark> and <mark>AllGather</mark> respectively.
+Sequencing the two together results in the composite <mark>AllReduce</mark> collective:
 
 <figure>
 <video width="80%" autoplay loop muted>
   <source src="jupyter/media/videos/jupyter/1080p60/CollectiveAllReduce.mp4" type="video/mp4">
 </video>
-<figcaption aria-hidden="true">$N=4$ rank allreduce</figcaption>
+<figcaption aria-hidden="true">$N=4$ rank AllReduce</figcaption>
 </figure>
 
+The ReduceScatter and AllGather collectives correspond to the first and second loops in the above animation.
+Notice we obtain the same result we would have had with an AllToAll followed by local reductions at each rank.
+However, with its use of a ring, AllReduce improves communication overhead by an order of magnitude to $2(N-1)$ sends.
 
-
-The pipelined analogs of Reduce and Broadcast (the first and second loops in the above animation) are ReduceScatter and AllGather respectively.
-You can see this is exactly the same as an AllToAll, followed by local reductions at each rank.
-By using a ring, AllReduce improves communication overhead by an order of magnitude to $\mathcal O(n)$.
-
-You may have noticed the ring takes a lot longer, however. In practice we split the tensor so that each rank is always sending, amortising latency penalty (covered [later]()). Though bandwidth optimal, tree-based AllReduce is latency optimal.
-
-```{r, layout="l-body", fig.height=6}
-library(r2d3)
-r2d3(script = "d3/isend.js", d3_version = 6)
-```
-
+Though Ring AllReduce is bandwidth optimal, its end-to-end latency scales linearly with the number of ranks. A lower latency, tree-based alternative is discussed in [section X]().
 <!-- TODO: summary table of each collective, overhead, latency, etc -->
 
+# 3. Parallelisation Paradigms
+In order to have some notion of correctness, let's define a distributed algorithm to be **locally consistent** if it is mathematically equivalent to local training.
 
+### Distributed Data Parallel (DDP)
+[[Further Reading]](https://www.vldb.org/pvldb/vol13/p3005-li.pdf)
 
+As its name would imply, DDP splits our *dataset* across ranks (each with a copy of the model), with periodic synchronisation to ensure model replicas are consistent. DDP is useful when our model is still small enough to fit on a single GPU, but we'd like to speed up training by having several GPUs work on a single batch in parallel.
+
+We described local training in [Section 1](#how-do-you-train-a-pytorch-neural-network): at each iteration we load the next batch, perform a forward pass while caching each layer's activations, and calculate the loss. Then we run the backward pass to calculate gradients, before our optimizer updates parameters. 
+
+![Local training example on a batch of 6 MNIST images ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/local_training.png)
+
+DDP duplicates the model across $N$ ranks, splitting batches into $N$ chunks^[In practice we use $N\times$ larger batches, so that the per-GPU batch-size remains the same.] for each rank to process:
+
+![Data parallel training example with 2 ranks ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/ddp_training.png)
+
+Without any communication overhead, this should result in a linear $N\times$ speedup. 
+
+#### DDP in PyTorch
+
+### Fully-Sharded Data Parallel (FSDP)
+#### FSDP in PyTorch
+
+### Pipeline Parallel (PP)
+#### PP in PyTorch
+
+### Tensor Parallel (TP)
+#### TP in PyTorch
+
+### Context Prallel (CP)
+#### CP in PyTorch
