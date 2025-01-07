@@ -37,8 +37,8 @@ I intended this as a light compilation of various sources; for more detail, I pr
 [Outline of sections]
 Though I intend to stay light on implementation specifics, the abstractions provided by PyTorch are nonetheless useful for illustration.
 We'll be using PyTorch to illustrate and discuss implementation details. 
-The first section provides a rough overview of the PyTorch model, particularly for transformers. If you're already familiar, skip to the next section.
-
+The first two sections provide a brief overview of model training with PyTorch, a highly-level overview of transformers and the communication building blocks that are availableto us. 
+Section 3 takes a deep dive into how PyTorch assembles these together into the various parallelisation techniques it offers out-of-the-box.
 
 # 1. PyTorch mental model
 Pytorch is the preeminent framework, though the stuff here also (mostly) applies to other frameworks.
@@ -91,12 +91,12 @@ for t in range(epochs):
   optimizer.zero_grad()
 ```
 
-We train our model for 10 epochs (iterations) over a single batch of 10 (identical) datapoints^[In practice an epoch will loop over an entire training set consisting of several batches (each with their own parameter updates), potentially followed by evaluation on separate validation batches.].
+We train our model for 10 epochs (iterations) over a single batch of 10 (identical) data samples^[In practice an epoch will loop over an entire training set consisting of several batches (each with their own parameter updates), potentially followed by evaluation on separate validation batches.].
 In each epoch:
 
 1. With `model(x)`, we call the `forward` method defined earlier to obtain predictions for the entire input batch. The outputs of each layer (**"activations"**) are cached for use in the backward pass. 
 2. We compute the (cross entropy) loss for these predictions and store them in the `loss` tensor.
-3. We calculate the derivative of the loss with respect to each parameter with `loss.backward()`. PyTorch's autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the innermost (last) layer in the backward pass. It accumulates gradients in each tensor's `.grad` attribute^[Some tensors in a module don't have gradients, for example fixed transformers with static parameters.].
+3. We calculate the derivative of the loss of each sample with respect to each parameter with `loss.backward()`. PyTorch's autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the innermost (last) layer in the backward pass. It accumulates gradients in each tensor's `.grad` attribute^[Some tensors in a module don't have gradients, for example fixed transformers with static parameters.].
 4. The optimizer defines how parameters are updated from gradients. `optimizer.step()` performs this adjustment, and `optimizer.zero_grad()` resets gradients so they don't accumulate in the next pass.
 
 ![Pebble graph for a four layer network illustrating how cached activations are built up in the forward pass, and used to calculate gradients in the backward pass ([graphic inspiration](https://siboehm.com/articles/22/data-parallel-training)).](images/pebble_graph.gif)
@@ -112,16 +112,15 @@ For larger models such as Meta's Llama 405B that's a 6.5TB memory requirement, w
 The largest models trained today are transformers. 
 Naturally, distributed training has evolved around the architecture, making it a valuable mental model.
 
-# 2. Collective Communication Primitives
+# 2.Communication Primitives
 [[Further Reading]](https://marek.ai/allreduce-the-basis-of-multi-device-communication-for-neural-network-training.html)
 
-<!-- what are collectives? why are we talking about them? -->
-Before going into distribution strategies, we need to discuss the primitives we have available for communicating data between groups (or **"collectives"**) of GPUs. 
+Before going into distribution strategies, we need to discuss the primitives we have available for communicating data between GPUs.
 
 Let's start with a simple model: two GPUs (or **"ranks"**) with a point-to-point (p2p) connection -- this could be a fast NVLink interconnect if they're within the same host, or a slower InfiniBand or Ethernet network (perhaps with several hops) if they're not (more on this [later]()).
 
-All collectives operate over a single tensor at each rank. 
-The simplest thing we can do is to send a tensor from one rank and receive on the other:
+All primitives operate over a single tensor at each rank. 
+The simplest thing we can do is to <mark>send</mark> a tensor from one rank and receive on the other:
 
 <figure>
 <video width="80%" autoplay loop muted>
@@ -130,7 +129,7 @@ The simplest thing we can do is to send a tensor from one rank and receive on th
 <figcaption aria-hidden="true">P2P send, circles correspond to ranks and squares to tensors.</figcaption>
 </figure>
 
-Now let's suppose we want to synchronise tensors distributed over several ranks.
+Now let's suppose we want to synchronise tensors distributed over a group (or **"collective"**) of GPUs.
 One way to do this is with an <mark>AllToAll</mark> collective, a complete graph of p2p sends:
 
 <figure>
@@ -185,22 +184,81 @@ Though Ring AllReduce is bandwidth optimal, its end-to-end latency scales linear
 # 3. Parallelisation Paradigms
 In order to have some notion of correctness, let's define a distributed algorithm to be **locally consistent** if it is mathematically equivalent to local training.
 
+<!-- TODO: summary table of parallelisation paradigms, and their compute/communication costs -->
+
 ### Distributed Data Parallel (DDP)
 [[Further Reading]](https://www.vldb.org/pvldb/vol13/p3005-li.pdf)
 
-As its name would imply, DDP splits our *dataset* across ranks (each with a copy of the model), with periodic synchronisation to ensure model replicas are consistent. DDP is useful when our model is still small enough to fit on a single GPU, but we'd like to speed up training by having several GPUs work on a single batch in parallel.
+As its name would imply, DDP splits our *dataset* across ranks (each with an identical copy of the model), with periodic synchronisation to ensure model replicas are consistent. DDP is useful when our model is still small enough to fit on a single GPU, but we'd like to speed up training by having several GPUs work on a single batch in parallel.
 
 We described local training in [Section 1](#how-do-you-train-a-pytorch-neural-network): at each iteration we load the next batch, perform a forward pass while caching each layer's activations, and calculate the loss. Then we run the backward pass to calculate gradients, before our optimizer updates parameters. 
 
-![Local training example on a batch of 6 MNIST images ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/local_training.png)
+![Local training example on a batch of 6 MNIST data samples ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/local_training.png)
 
-DDP duplicates the model across $N$ ranks, splitting batches into $N$ chunks^[In practice we use $N\times$ larger batches, so that the per-GPU batch-size remains the same.] for each rank to process:
+DDP duplicates the model across $N$ ranks, splitting batches into $N$ chunks^[In practice we may use larger batches, so that the per-GPU batch-size remains relatively similar.] for each rank to process:
 
-![Data parallel training example with 2 ranks ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/ddp_training.png)
+![Data parallel training example with $N=2$ ranks ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/ddp_training.png)
 
 Without any communication overhead, this should result in a linear $N\times$ speedup. 
+The forward and backward passes are independent sample-wise calculations^[Except for batch-wise operations like `BatchNorm`, which won't be locally consistent (unless we use their expensive synchronised implementations like `SyncBatchNorm`).], and hence our batches can be independently processed without any communication.
+
+<aside style="margin-bottom: -200%">Why don't we synchronise *parameters* rather than *gradients*?
+If we're using stochasting gradient descent, there wouldn't be any difference:
+$$
+\begin{align*}
+W' ={}& W + \eta \nabla W\\ 
+={}& W+\eta \frac{1}{N} \sum_{i=0}^N \nabla W_i^\text{local}\\
+={}& \frac{1}{N}\sum_{i=0}^N (W+\eta \nabla W_i^\text{local})
+\end{align*}
+$$
+However, state updates for stateful optimizers like Adam are non-linear functions of the gradient, and thus we would lose local consistency as optimizer states diverge.</aside>
+
+To achieve local consistency, we need to synchronise our gradients before the optimizer step so that the weight updates at each rank are the same.
+Conveniently, the most commonly used loss functions are means over the sample-wise losses in the batch:
+
+$$
+\text{loss}(\text{batch}) = \frac{1}{\text{batchsize}} \sum_{j=0}^\text{batchsize} \text{loss}(\text{fwd}(\text{input}_j), \text{target}_j)
+$$
+Because the gradient of a sum is the sum of the gradients of each term, we can calculate gradients for the samples at each rank independently and average them together to obtain the gradients for the entire batch:
+
+$$
+\nabla W = \frac{1}{N}\sum_{i=0}^N \nabla W_i^\text{local}
+$$
+This can be done efficiently using the previously discussed AllReduce collective (along with a single Broadcast from the root rank after model construction, to synchronise initial parameters).
 
 #### DDP in PyTorch
+<!-- TODO: how do we actually write code that uses DDP? -->
+PyTorch's distribution API is designed for non-intrusive scaling out from local training. 
+Applying DDP to a model is as simple as wrapping our local model with the DDP `nn.Module` class: `nn.parallel.DDP(model, device_ids=[rank])`.
+Care should be taken to ensure the batches processed by each rank are different (e.g. with the provided `DistributedSampler` dataloader class).
+
+A naive implementation of DDP would synchronise gradients only after running a full forward and backward pass, and then subsequently calling `optimizer.step()`.
+This is suboptimal as it divides training into two distinct phases: one where we're waiting for backpropagation to finish computing while the network is idle, and another where the network is communicating as fast as possible while our expensive GPUs are doing (almost) nothing:
+
+![Naive DDP implementation with non-overlapping computation and communication ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/ddp_naive.png)
+
+Notice in the above that gradients for inner layers are already available while we're still computing the backward pass of the more outer layers.
+For example, the gradients of Layer3 are ready while we're backpropagating through Layer2. 
+This allows us to overlap computation with (non-blocking) communication, speeding up the complete iteration:
+
+![Faster DDP implementation with overlapping computation and communication ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/ddp_overlap.png)
+
+Collective communications are more efficient on large tensors. Therefore, in practice, rather than launching a dedicated AllReduce immediately as soon as a layer's gradient tensor is ready, we use **Gradient Bucketing**: we wait for a short period and bucket multiple tensors at a time into one AllReduce.
+
+PyTorch implements this by registering one autograd hook with each parameter tensor, which fires after the corresponding gradients are updated.
+Once all hooks in a bucket^[Bucket size is user-configurable. Larger buckets lower communication overhead but reduce overlap with compute. Buckets are allocated heuristically during model construction, by the reverse order of `model.parameters()`.] have fired, an asynchronous AllReduce is triggered. PyTorch's DDP paper [@pytorchddp] shows interleaving brings significant performance gains, particularly when using the recommended NCCL communication backend:
+
+![Per-iteration normalised latency breakdown, comparing non-overlapping vs overlapping communication; training on 32 GPUs across 4 machines  ([image credit](https://www.vldb.org/pvldb/vol13/p3005-li.pdf)).](images/pytorch_ddp_perf.png)
+
+Amortised communication overhead can be considerably reduced with **Gradient Accumulation**: rather than synchronising gradients every iteration, we accumulate (via the `no_sync` context manager) the gradients of $n$ local training iterations before synchronising gradients globally and updating parameters. 
+[@pytorchddp] claims this enables near-linear scaling for smaller GPU clusters, with "negligible accuracy penalty":
+
+![Per-iteration latencies (left), and final training loss (right) for $n$ iterations of gradient accumulation ([image credit](https://www.vldb.org/pvldb/vol13/p3005-li.pdf)).](images/pytorch_ddp_grad_accum.png)
+
+Lastly, it's worth noting that batch-size limits the maximum degree of DP parallelism.
+If we split the same batch over more GPUs, the per-GPU batch-size decreases and so does compute intensity/efficiency.
+We could increase overall batch-size, but training becomes less stable.
+
 
 ### Fully-Sharded Data Parallel (FSDP)
 #### FSDP in PyTorch
@@ -213,3 +271,5 @@ Without any communication overhead, this should result in a linear $N\times$ spe
 
 ### Context Prallel (CP)
 #### CP in PyTorch
+
+<!-- ND parallelism widget, that generates a hypothetical trace of collectives -->
