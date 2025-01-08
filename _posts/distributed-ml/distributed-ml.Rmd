@@ -136,10 +136,10 @@ One way to do this is with an <mark>AllToAll</mark> collective, a complete graph
 <video width="80%" autoplay loop muted>
   <source src="jupyter/media/videos/jupyter/1080p60/CollectiveAllToAll.mp4" type="video/mp4">
 </video>
-<figcaption aria-hidden="true">$N=4$ rank AllToAll</figcaption>
+<figcaption aria-hidden="true">$W=4$ rank AllToAll</figcaption>
 </figure>
 
-This isn't always super efficient: $N$ ranks require $N(N-1)$ sends, some of which may share underlying network links and bottleneck one another. 
+This isn't very bandwidth efficient: a **world-size** of $W$ ranks synchronising $D$-sized tensors results in $D(W-1)$ per-GPU traffic, some of which may be contending for the same underlying network links.
 Moreover, we often only need an *aggregate* of the distributed tensors -- for example we might want to average some parameters we've replicated across the ranks. 
 So how might we accomplish this with less bandwidth? 
 If each rank **reduces** (applying an associative^[Floating point addition is not associative, but in practice the difference is small enough to be safely ignored.] operator e.g. sum, min, max, etc.) the tensor it receives with its own local tensor, before passing the result onto the next rank, we obtain a **ring-based** <mark>Reduce</mark> collective:
@@ -148,7 +148,7 @@ If each rank **reduces** (applying an associative^[Floating point addition is no
 <video width="80%" autoplay loop muted>
   <source src="jupyter/media/videos/jupyter/1080p60/CollectiveReduce.mp4" type="video/mp4">
 </video>
-<figcaption aria-hidden="true">$N=4$ rank Reduce</figcaption>
+<figcaption aria-hidden="true">$W=4$ rank Reduce</figcaption>
 </figure>
 
 After completing one loop around the ring, we've reduced all of the tensors into a single tensor -- but this result is only held in the last rank.
@@ -159,11 +159,11 @@ This is the <mark>Broadcast</mark> collective:
 <video width="80%" autoplay loop muted>
   <source src="jupyter/media/videos/jupyter/1080p60/CollectiveBroadcast.mp4" type="video/mp4">
 </video>
-<figcaption aria-hidden="true">$N=4$ rank Broadcast</figcaption>
+<figcaption aria-hidden="true">$W=4$ rank Broadcast</figcaption>
 </figure>
 
 Notice that, in the latter two collectives, only one rank/link at a time is busy, with the rest idle.
-We can use pipelining to get better throughput: we split the tensor into $N$ chunks, with the $i^\text{th}$ rank at the start (or **root**) of the ring corresponding to the $i^\text{th}$ chunk.
+We can use pipelining to get better throughput: we split the tensor into $W$ chunks, with the $r^\text{th}$ rank at the start (or **root**) of the ring corresponding to the $r^\text{th}$ chunk.
 The pipelined analogs of Reduce and Broadcast are <mark>ReduceScatter</mark> and <mark>AllGather</mark> respectively.
 Sequencing the two together results in the composite <mark>AllReduce</mark> collective:
 
@@ -171,14 +171,15 @@ Sequencing the two together results in the composite <mark>AllReduce</mark> coll
 <video width="80%" autoplay loop muted>
   <source src="jupyter/media/videos/jupyter/1080p60/CollectiveAllReduce.mp4" type="video/mp4">
 </video>
-<figcaption aria-hidden="true">$N=4$ rank AllReduce</figcaption>
+<figcaption aria-hidden="true">$W=4$ rank AllReduce</figcaption>
 </figure>
 
 The ReduceScatter and AllGather collectives correspond to the first and second loops in the above animation.
 Notice we obtain the same result we would have had with an AllToAll followed by local reductions at each rank.
-However, with its use of a ring, AllReduce improves communication overhead by an order of magnitude to $2(N-1)$ sends.
+However, with its use of a ring, AllReduce improves communication overhead by an order of magnitude. 
+Each GPU will send a $\frac{D}{W}$-size datachunk $W-1$ times for the ReduceScatter and $W-1$ times for the AllGather, for a total per-GPU traffic of $2(W-1)\frac{D}{W}$. Crucially, this is independent of the number of GPUs in the collective!
 
-Though Ring AllReduce is bandwidth optimal, its end-to-end latency scales linearly with the number of ranks. A lower latency, tree-based alternative is discussed in [section X]().
+Though Ring AllReduce is bandwidth optimal, its end-to-end latency scales linearly with the number of ranks. A lower latency, tree-based alternative is discussed in [another post]().
 <!-- TODO: summary table of each collective, overhead, latency, etc -->
 
 # 3. Parallelisation Paradigms
@@ -195,20 +196,20 @@ We described local training in [Section 1](#how-do-you-train-a-pytorch-neural-ne
 
 ![Local training example on a batch of 6 MNIST data samples ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/local_training.png)
 
-DDP duplicates the model across $N$ ranks, splitting batches into $N$ chunks^[In practice we may use larger batches, so that the per-GPU batch-size remains relatively similar.] for each rank to process:
+DDP duplicates the model across $W$ ranks, splitting batches into $W$ chunks^[In practice we may use larger batches, so that the per-GPU batch-size remains relatively similar.] for each rank to process:
 
-![Data parallel training example with $N=2$ ranks ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/ddp_training.png)
+![Data parallel training example with $W=2$ ranks ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/ddp_training.png)
 
-Without any communication overhead, this should result in a linear $N\times$ speedup. 
+Without any communication overhead, this should result in a linear $W\times$ speedup. 
 The forward and backward passes are independent sample-wise calculations^[Except for batch-wise operations like `BatchNorm`, which won't be locally consistent (unless we use their expensive synchronised implementations like `SyncBatchNorm`).], and hence our batches can be independently processed without any communication.
 
 <aside style="margin-bottom: -200%">Why don't we synchronise *parameters* rather than *gradients*?
 If we're using stochasting gradient descent, there wouldn't be any difference:
 $$
 \begin{align*}
-W' ={}& W + \eta \nabla W\\ 
-={}& W+\eta \frac{1}{N} \sum_{i=0}^N \nabla W_i^\text{local}\\
-={}& \frac{1}{N}\sum_{i=0}^N (W+\eta \nabla W_i^\text{local})
+\theta' ={}& \theta + \eta \nabla \theta\\ 
+={}& \theta+\eta \frac{1}{W} \sum_{r=0}^W \nabla \theta_r^\text{local}\\
+={}& \frac{1}{W}\sum_{r=0}^W (\theta+\eta \nabla \theta_r^\text{local})
 \end{align*}
 $$
 However, state updates for stateful optimizers like Adam are non-linear functions of the gradient, and thus we would lose local consistency as optimizer states diverge.</aside>
@@ -222,7 +223,7 @@ $$
 Because the gradient of a sum is the sum of the gradients of each term, we can calculate gradients for the samples at each rank independently and average them together to obtain the gradients for the entire batch:
 
 $$
-\nabla W = \frac{1}{N}\sum_{i=0}^N \nabla W_i^\text{local}
+\nabla \theta = \frac{1}{W}\sum_{r=0}^W \nabla \theta_r^\text{local}
 $$
 This can be done efficiently using the previously discussed AllReduce collective (along with a single Broadcast from the root rank after model construction, to synchronise initial parameters).
 
@@ -230,7 +231,7 @@ This can be done efficiently using the previously discussed AllReduce collective
 <!-- TODO: how do we actually write code that uses DDP? -->
 PyTorch's distribution API is designed for non-intrusive scaling out from local training. 
 Applying DDP to a model is as simple as wrapping our local model with the DDP `nn.Module` class: `nn.parallel.DDP(model, device_ids=[rank])`.
-Care should be taken to ensure the batches processed by each rank are different (e.g. with the provided `DistributedSampler` dataloader class).
+Care should be taken to ensure the batches processed by each rank are different (e.g. with the `DistributedSampler` dataloader class).
 
 A naive implementation of DDP would synchronise gradients only after running a full forward and backward pass, and then subsequently calling `optimizer.step()`.
 This is suboptimal as it divides training into two distinct phases: one where we're waiting for backpropagation to finish computing while the network is idle, and another where the network is communicating as fast as possible while our expensive GPUs are doing (almost) nothing:
@@ -250,18 +251,72 @@ Once all hooks in a bucket^[Bucket size is user-configurable. Larger buckets low
 
 ![Per-iteration normalised latency breakdown, comparing non-overlapping vs overlapping communication; training on 32 GPUs across 4 machines  ([image credit](https://www.vldb.org/pvldb/vol13/p3005-li.pdf)).](images/pytorch_ddp_perf.png)
 
-Amortised communication overhead can be considerably reduced with **Gradient Accumulation**: rather than synchronising gradients every iteration, we accumulate (via the `no_sync` context manager) the gradients of $n$ local training iterations before synchronising gradients globally and updating parameters. 
+Amortised communication overhead can be further reduced with **Gradient Accumulation**: rather than synchronising gradients every iteration, we accumulate (via the `no_sync` context manager) the gradients of $n$ local training iterations before synchronising gradients globally and updating parameters. 
 [@pytorchddp] claims this enables near-linear scaling for smaller GPU clusters, with "negligible accuracy penalty":
 
 ![Per-iteration latencies (left), and final training loss (right) for $n$ iterations of gradient accumulation ([image credit](https://www.vldb.org/pvldb/vol13/p3005-li.pdf)).](images/pytorch_ddp_grad_accum.png)
 
-Lastly, it's worth noting that batch-size limits the maximum degree of DP parallelism.
+Lastly, it's worth noting that batch-size limits the maximum degree of DDP parallelism.
 If we split the same batch over more GPUs, the per-GPU batch-size decreases and so does compute intensity/efficiency.
 We could increase overall batch-size, but training becomes less stable.
 
 
 ### Fully-Sharded Data Parallel (FSDP)
+[[Further Reading](https://arxiv.org/pdf/2304.11277)]
+
+DDP speeds up training by distributing our dataset across multiple ranks, but what happens when our model can't fit within a single GPU?
+DDP's younger brother, FSDP, addresses this by also splitting model parameters.
+FSDP is similar to DeepSpeed's ZeRO [@zero2020], but designed to better align with the other components of PyTorch.
+
+FSDP reduces memory footprint by <mark>sharding</mark> model parameters: the model is split *horizontally* so that each rank only holds a subset (**"shard"**) of the parameters (and associated gradients and optimizer state) in a given layer.
+The naive approach to guaranteeing local consistency is to compute the partial activations of a layer corresponding to the local shard, and then to communicate these activations with the other ranks before proceeding onto the next layer:
+
+![Naive FSDP forward pass: activations are data-dependent and therefore appear on the critical path.](images/fsdp_naive.png)
+
+The obvious problem with this approach is that communication appears on the critical path: we can't compute the forward pass for a given layer until we've received the complete activations of the previous layer.
+
+Instead of communicating *activations*, FSDP's approach is to communicate *parameters*. 
+FSDP fully materialises parameters before computations, just as in local training, thus removing any data dependency.
+However, we need to be able to materialise parameters on a single GPU, eliminating our memory savings!
+FSDP's simple solution is to partition the model into groups of layers called **units**, only instantiating one unit at a time on-demand.
+
+<!-- TODO: maybe our own example, with our own (animated?) diagram -->
+A simple six layer model, for example, could be decomposed into three units: `[layer0, layer3]`, `[layer1, layer2]` and `[layer4, layer5]`.
+Consider what happens to `unit1` consisting of `[layer1, layer2]`:
+
+1. Before the forward pass through `layer1`, we materialise the parameters in `unit1` by gathering shards from other peer ranks. We can do this with an AllGather (equivalent to each rank Broadcasting its shard).
+2. After completing local forward computation, we free peer shards (but keep activations).
+3. Before the backward pass through `layer2`, we AllGather the shards again.
+4. After gradients are calculated, we free peer shards and then ReduceScatter to average and shard gradients (equivalent to each rank Reducing the gradients in its shard).
+5. Finally, after completing full forward & backward passes through all units, we update our shard of the parameters in the optimizer step^[Note that because the optimizer step will only operate on the sharded parameters, any optimizer that depends on global state over all parameters won't be locally consistent.].
+
+![FSDP example with three units, fully sharded over two ranks ([image credit](https://arxiv.org/pdf/2304.11277)).](images/pytorch_fsdp_units.png)
+
+In effect, FSDP decomposes DDP's AllReduce into a ReduceScatter and an AllGather in the backward and forward passes respectively -- the only extra communication incurred is when we AllGather parameters again during backpropagation.
+
+### Sharding Strategies
+FSDP enables fine-grained trade-offs between memory footprint and communication overhead via the **sharding factor** $F$: the number of ranks over which parameters are sharded.
+By setting $F=1$, FSDP fully replicates the model (with no memory savings) and simplifies to vanilla DDP using AllReduce for gradient synchronisation.
+By setting $F=W$ (i.e. the global world size), FSDP fully shards the model with each rank only holding $\frac{1}{W}$ of the model (the previous six layer example is fully sharded with $F=W=2$).
+
+**Hybrid sharding** (sharding factors ranging between $1$ and $W$) combines both sharding and replication.
+We end up with *sharding groups* $S_1, \ldots, S_\frac{W}{F}$, each consisting of $F$ ranks over which parameters are sharded, and *replication groups* $R_1, \ldots, R_F$ (directly corresponding to these shards), each consisting of $\frac{W}{F}$ ranks (one from each sharding group) over which shards are replicated. 
+
+The AllGather+AllGather+ReduceScatter collectives, previously over all ranks, are now collectives within each sharding group, followed by an AllReduce within each replication group to synchronise gradient shards (as in DDP). This is effectively the decomposition:
+$$
+\nabla \theta = \frac{1}{W}\sum_{r=1}^W \nabla \theta_r^\text{local} = \frac{1}{W}\sum_{i=1}^{W/F}\sum_{r \in S_i}\nabla \theta_r^\text{local}
+$$
+For example, with $W=16$ ranks and $F=8$ hybrid sharding, the $r=9$ rank would AllGather parameters and ReduceScatter its gradient shard with peers in the $S_2$  sharding group, before AllReducing the gradient shard with its peer in the $R_2$ replication group, rank $r=1$:
+
+![FSDP Hybrid Sharding ($F=8$) example with $W=16$ ranks.](images/fsdp_hybrid_sharding.png)
+
+It's worth noting that with any sharding strategy, ranks will always have distinct input batch chunks (otherwise we'd simply be duplicating gradient calculations). 
+
+Using our traffic calculations from [Section 2](#communication-primitives), the per-GPU communication of an $M$-size model is $2(\frac{W}{F}-1)(\frac{M}{W})$ for the replication group, and $3(F-1)(\frac{M}{F})$ for the sharding group.
+Clearly communication within the sharding group is much more expensive, therefore we often try to minimise the number of hops between the ranks in a sharding group -- sometimes we may even use smaller sharding factors to guarantee they're within the same host.
+
 #### FSDP in PyTorch
+NCCL AllGather even-ness + collective sizes (figure 2), FlatParameter, number of units trades-off memory and comm, Autograd, when we gather shards what's included (params, grads, optimizer states)?
 
 ### Pipeline Parallel (PP)
 #### PP in PyTorch
@@ -269,7 +324,7 @@ We could increase overall batch-size, but training becomes less stable.
 ### Tensor Parallel (TP)
 #### TP in PyTorch
 
-### Context Prallel (CP)
+### Context Parallel (CP)
 #### CP in PyTorch
 
 <!-- ND parallelism widget, that generates a hypothetical trace of collectives -->
