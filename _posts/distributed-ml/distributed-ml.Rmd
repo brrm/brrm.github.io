@@ -289,7 +289,7 @@ So what does this look like in practice?
 Let's look at a simple six layer model (illustrated below), which we've decided to decompose into three units: `[layer0, layer3]`, `[layer1, layer2]` and `[layer4, layer5]`.
 Consider what happens to `unit1` consisting of `[layer1, layer2]`:
 
-1. Before the forward pass through `layer1`, we materialise the parameters in `unit1` by gathering shards from other peer ranks. We can do this with an AllGather (equivalent to each rank Broadcasting its own shard).
+1. Just before the forward pass through `layer1`, we materialise the parameters in `unit1` by gathering shards from peer ranks. We can do this with an AllGather (equivalent to each rank Broadcasting its own shard).
 2. After completing local forward computation, we free peer shards (but keep activations).
 3. Before the backward pass through `layer2`, we AllGather the shards again.
 4. After gradients are calculated, we free peer shards and then ReduceScatter to sum up and shard gradients (equivalent to each rank Reducing the gradients in its shard).
@@ -310,7 +310,7 @@ The AllGather+AllGather+ReduceScatter collectives, previously over all ranks, ar
 $$
 \nabla \theta = \frac{1}{W}\sum_{r=1}^W \nabla \theta_r^\text{local} = \frac{1}{W}\sum_{i=1}^{W/F}\sum_{r \in S_i}\nabla \theta_r^\text{local}
 $$
-For example, with $W=16$ ranks and $F=8$ hybrid sharding, the $r=9$ rank would AllGather parameters and ReduceScatter its gradient shard with peers in the $S_2$  sharding group, before AllReducing the gradient shard with its peer in the $R_2$ replication group, rank $r=1$:
+For example, with $W=16$ ranks and $F=8$ hybrid sharding, the $r=9$ rank would AllGather parameters and ReduceScatter its gradient shard with peers in the $S_2$  sharding group, before AllReducing the gradient shard with its peer in the $R_2$ replication group:
 
 ![FSDP Hybrid Sharding ($F=8$) example with $W=16$ ranks.](images/fsdp_hybrid_sharding.png)
 
@@ -332,23 +332,23 @@ The `FlatParameter` tensor has the exact data layout expected by AllGather and R
 
 ![`FlatParameter` example for a fully sharded ($W=F=16)$ FSDP unit, consisting of one $4 \times 3$ `nn.Linear` layer ([image credit](https://arxiv.org/pdf/2304.11277)).](images/pytorch_fsdp_flatparam.png)
 
-For an $M$-size model split into $N$ units with sizes $M_1, \ldots, M_n$, where $\sum_{i=1}^N M_i=M$, the maximum memory usage is in $O(\frac{M}{F} + \max_{i=1}^N M_i)$. 
+For an $M$-size model split into $K$ units with sizes $M_1, \ldots, M_K$, where $\sum_{i=1}^K M_i=M$, the maximum memory usage is in $O(\frac{M}{F} + \max_{i=1}^K M_i)$. 
 More precisely, it is the sum of the sharded parameters, gradients and optimizer state, combined with the largest unsharded unit's parameters and gradients (but *not* the more expensive optimizer state, which always remains sharded).
-Conversely, even though total communication is not affected by the number of units, the number of collectives over which it is spread is $O(N)$. 
+Conversely, even though total communication is not affected by the number of units, the number of collectives over which it is spread is $O(K)$. 
 Therefore the number of units presents yet another memory-communication tradeoff.
 PyTorch lets the user control this with the `auto_wrap_policy` argument to `FSDP`, or by manually wrapping individual submodules rather than a single wrapper around the entire model^[e.g. for a transformer model we'll usually wrap each transformer block, with a final wrapper around the root module sharding the initial embedding and final linear layers.].
 
 As with DDP's Gradient Bucketing, FSDP tries to overlap communication and computation as much as possible.
 Here's what that looks like for our previous three unit, six layer example:
 
-![Full forward & backward pass for previous 3 unit FSDP example. Compute & communication CUDA streams (below), and broken up by unit (above).](images/fsdp_comm_trace.png)
+![Full forward & backward pass for previous 3 unit, 6 layer FSDP example. Compute & communication CUDA streams (below), and broken up by unit (above).](images/fsdp_comm_trace.png)
 
 In DDP's backward pass, we were able to compute gradients and then asynchronously AllReduce them afterwards.
 This isn't possible for FSDP's forward: we need to AllGather parameters *before* computing, and (because of eager execution) we don't know *which* `FlatParameter` to gather next -- thus we can't reorder the async AllGather of the next unit before the synchronous computation of the current unit.
-The solution, implicit forward prefetching (always enabled), is to use a separate **stream** (queue of device instructions) for communication, bypassing the false dependency on the default compute stream.
+The solution, implicit forward prefetching (always enabled), is to use a separate **stream** (queue of device instructions) for communication, bypassing the false dependency on the main compute stream.
 By default FSDP limits the rate at which prefetch AllGathers are issued to ensure memory usage of at most two consecutive units.
 
-You may have noticed the poor compute-communication overlap in the backward pass: the ReduceScatter for the current unit blocks the AllGather for the next, which in turn blocks the next gradient computation^[We can't get around this with an extra stream, as PyTorch only uses one internal NCCL stream for a given process group.]. 
+You may have noticed the poor compute-communication overlap in the backward pass: the ReduceScatter for the current unit blocks the AllGather for the next, which in turn blocks the next gradient computation^[We can't get around this with an extra stream, PyTorch only uses one internal NCCL stream for a given process group.]. 
 *Explicit* backward prefetching issues the AllGather for the next unit before the ReduceScatter for the current one.
 To know which `FlatParameter` to gather next, FSDP records the reverse forward execution order of modules each iteration.
 Two variants exist: `backward_prefetch=BACKWARD_PRE` which overlaps the next AllGather with the current gradient computation, and `BACKWARD_POST` which waits until the current parameters are freed (using less memory but reducing overlap).
@@ -359,7 +359,7 @@ In our example, it's actually unit 3 that holds the last layer and we end up All
 
 Lastly, we should note that with hybrid sharding there would also be an async AllReduce (on yet another communication stream) for each unit after their ReduceScatter is done.
 
-PyTorch's FSDP experiments [@pytorchfsdp] show close to linear compute scaling, though this regresses substantially for larger clusters where "a near-perfect overlap between communication and computation is no longer attainable":
+PyTorch's FSDP experiments [@pytorchfsdp] show near-linear compute scaling, though this regresses substantially for larger clusters where "a near-perfect overlap between communication and computation is no longer attainable":
 
 ![Fully-sharded training of the T5-11B transformer; TFLOPS per GPU for batch sizes 8 and 16; A100 80GB GPUs with 2Tb/s RoCE interconnects ([image credit](https://arxiv.org/pdf/2304.11277)).](images/pytorch_fsdp_eval.png)
 
@@ -375,3 +375,6 @@ The next few sections only kick in for really really big models (>512 GPUs).
 #### CP in PyTorch
 
 <!-- ND parallelism widget, that generates a hypothetical trace of collectives -->
+
+# 4. Parallelism in Practice
+[WIP] Large models use FSDP, gigantic models use all of the above.

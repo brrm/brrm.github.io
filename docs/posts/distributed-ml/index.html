@@ -1974,7 +1974,7 @@ d-appendix {
 /* This must remain at the top of this file.                 */
 @import url('https://fonts.googleapis.com/css?family=Libre+Baskerville:300, 300i&display=swap');
 @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,400i,700,700i&display=swap');
-@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400,500&display=swap');
 
 html {
   /*-- Main font sizes --*/
@@ -2062,6 +2062,8 @@ h1, h2, h3, h4, h5, h6 {
 
 d-title h1,
 d-article h2,
+d-article h3,
+d-article h4,
 .posts-list .description h2,
 .posts-list > h1 {
     font-weight: 300;
@@ -2089,6 +2091,10 @@ d-article blockquote {
   font-style: normal;
 }
 
+code {
+  font-family: var(--mono-font);
+}
+
 /* inline code */ 
 p > code, li > code {
   white-space: pre;
@@ -2097,7 +2103,11 @@ p > code, li > code {
   padding: 2px;
   padding-top: 1px;
   border: 1px solid #EEE;
-  font-size: 0.96rem;
+  font-size: 0.9rem;
+}
+
+d-appendix code {
+  font-size: 0.7rem;
 }
 
 /* highlighting */
@@ -2121,6 +2131,10 @@ d-article video {
 d-appendix {
   background-color: #fdf7f9;
   border-top: none;
+}
+
+d-appendix .citation-appendix {
+  font-family: var(--mono-font);
 }</style>
 <style type="text/css">
 /* base style */
@@ -2362,6 +2376,7 @@ Modern machine learning frameworks provide drop-in distribution, but few underst
 <li><a href="#tensor-and-sequence-parallel-tp-sp" id="toc-tensor-and-sequence-parallel-tp-sp">Tensor and Sequence Parallel (TP / SP)</a></li>
 <li><a href="#context-parallel-cp" id="toc-context-parallel-cp">Context Parallel (CP)</a></li>
 </ul></li>
+<li><a href="#parallelism-in-practice" id="toc-parallelism-in-practice">4. Parallelism in Practice</a></li>
 </ul>
 </nav>
 </div>
@@ -2602,7 +2617,7 @@ FSDP’s simple solution is to partition the model into groups of layers called 
 Let’s look at a simple six layer model (illustrated below), which we’ve decided to decompose into three units: <code>[layer0, layer3]</code>, <code>[layer1, layer2]</code> and <code>[layer4, layer5]</code>.
 Consider what happens to <code>unit1</code> consisting of <code>[layer1, layer2]</code>:</p>
 <ol type="1">
-<li>Before the forward pass through <code>layer1</code>, we materialise the parameters in <code>unit1</code> by gathering shards from other peer ranks. We can do this with an AllGather (equivalent to each rank Broadcasting its own shard).</li>
+<li>Just before the forward pass through <code>layer1</code>, we materialise the parameters in <code>unit1</code> by gathering shards from peer ranks. We can do this with an AllGather (equivalent to each rank Broadcasting its own shard).</li>
 <li>After completing local forward computation, we free peer shards (but keep activations).</li>
 <li>Before the backward pass through <code>layer2</code>, we AllGather the shards again.</li>
 <li>After gradients are calculated, we free peer shards and then ReduceScatter to sum up and shard gradients (equivalent to each rank Reducing the gradients in its shard).</li>
@@ -2622,7 +2637,7 @@ We end up with <em>sharding groups</em> <span class="math inline">\(S_1, \ldots,
 <span class="math display">\[
 \nabla \theta = \frac{1}{W}\sum_{r=1}^W \nabla \theta_r^\text{local} = \frac{1}{W}\sum_{i=1}^{W/F}\sum_{r \in S_i}\nabla \theta_r^\text{local}
 \]</span>
-For example, with <span class="math inline">\(W=16\)</span> ranks and <span class="math inline">\(F=8\)</span> hybrid sharding, the <span class="math inline">\(r=9\)</span> rank would AllGather parameters and ReduceScatter its gradient shard with peers in the <span class="math inline">\(S_2\)</span> sharding group, before AllReducing the gradient shard with its peer in the <span class="math inline">\(R_2\)</span> replication group, rank <span class="math inline">\(r=1\)</span>:</p>
+For example, with <span class="math inline">\(W=16\)</span> ranks and <span class="math inline">\(F=8\)</span> hybrid sharding, the <span class="math inline">\(r=9\)</span> rank would AllGather parameters and ReduceScatter its gradient shard with peers in the <span class="math inline">\(S_2\)</span> sharding group, before AllReducing the gradient shard with its peer in the <span class="math inline">\(R_2\)</span> replication group:</p>
 <figure>
 <img src="images/fsdp_hybrid_sharding.png" alt="FSDP Hybrid Sharding (F=8) example with W=16 ranks." />
 <figcaption aria-hidden="true">FSDP Hybrid Sharding (<span class="math inline">\(F=8\)</span>) example with <span class="math inline">\(W=16\)</span> ranks.</figcaption>
@@ -2643,20 +2658,20 @@ The <code>FlatParameter</code> tensor has the exact data layout expected by AllG
 <img src="images/pytorch_fsdp_flatparam.png" alt="FlatParameter example for a fully sharded (W=F=16) FSDP unit, consisting of one 4 \times 3 nn.Linear layer (image credit)." />
 <figcaption aria-hidden="true"><code>FlatParameter</code> example for a fully sharded (<span class="math inline">\(W=F=16)\)</span> FSDP unit, consisting of one <span class="math inline">\(4 \times 3\)</span> <code>nn.Linear</code> layer (<a href="https://arxiv.org/pdf/2304.11277">image credit</a>).</figcaption>
 </figure>
-<p>For an <span class="math inline">\(M\)</span>-size model split into <span class="math inline">\(N\)</span> units with sizes <span class="math inline">\(M_1, \ldots, M_n\)</span>, where <span class="math inline">\(\sum_{i=1}^N M_i=M\)</span>, the maximum memory usage is in <span class="math inline">\(O(\frac{M}{F} + \max_{i=1}^N M_i)\)</span>.
+<p>For an <span class="math inline">\(M\)</span>-size model split into <span class="math inline">\(K\)</span> units with sizes <span class="math inline">\(M_1, \ldots, M_K\)</span>, where <span class="math inline">\(\sum_{i=1}^K M_i=M\)</span>, the maximum memory usage is in <span class="math inline">\(O(\frac{M}{F} + \max_{i=1}^K M_i)\)</span>.
 More precisely, it is the sum of the sharded parameters, gradients and optimizer state, combined with the largest unsharded unit’s parameters and gradients (but <em>not</em> the more expensive optimizer state, which always remains sharded).
-Conversely, even though total communication is not affected by the number of units, the number of collectives over which it is spread is <span class="math inline">\(O(N)\)</span>.
+Conversely, even though total communication is not affected by the number of units, the number of collectives over which it is spread is <span class="math inline">\(O(K)\)</span>.
 Therefore the number of units presents yet another memory-communication tradeoff.
 PyTorch lets the user control this with the <code>auto_wrap_policy</code> argument to <code>FSDP</code>, or by manually wrapping individual submodules rather than a single wrapper around the entire model<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a>.</p>
 <p>As with DDP’s Gradient Bucketing, FSDP tries to overlap communication and computation as much as possible.
 Here’s what that looks like for our previous three unit, six layer example:</p>
 <figure>
-<img src="images/fsdp_comm_trace.png" alt="Full forward &amp; backward pass for previous 3 unit FSDP example. Compute &amp; communication CUDA streams (below), and broken up by unit (above)." />
-<figcaption aria-hidden="true">Full forward &amp; backward pass for previous 3 unit FSDP example. Compute &amp; communication CUDA streams (below), and broken up by unit (above).</figcaption>
+<img src="images/fsdp_comm_trace.png" alt="Full forward &amp; backward pass for previous 3 unit, 6 layer FSDP example. Compute &amp; communication CUDA streams (below), and broken up by unit (above)." />
+<figcaption aria-hidden="true">Full forward &amp; backward pass for previous 3 unit, 6 layer FSDP example. Compute &amp; communication CUDA streams (below), and broken up by unit (above).</figcaption>
 </figure>
 <p>In DDP’s backward pass, we were able to compute gradients and then asynchronously AllReduce them afterwards.
 This isn’t possible for FSDP’s forward: we need to AllGather parameters <em>before</em> computing, and (because of eager execution) we don’t know <em>which</em> <code>FlatParameter</code> to gather next – thus we can’t reorder the async AllGather of the next unit before the synchronous computation of the current unit.
-The solution, implicit forward prefetching (always enabled), is to use a separate <strong>stream</strong> (queue of device instructions) for communication, bypassing the false dependency on the default compute stream.
+The solution, implicit forward prefetching (always enabled), is to use a separate <strong>stream</strong> (queue of device instructions) for communication, bypassing the false dependency on the main compute stream.
 By default FSDP limits the rate at which prefetch AllGathers are issued to ensure memory usage of at most two consecutive units.</p>
 <p>You may have noticed the poor compute-communication overlap in the backward pass: the ReduceScatter for the current unit blocks the AllGather for the next, which in turn blocks the next gradient computation<a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a>.
 <em>Explicit</em> backward prefetching issues the AllGather for the next unit before the ReduceScatter for the current one.
@@ -2666,7 +2681,7 @@ Two variants exist: <code>backward_prefetch=BACKWARD_PRE</code> which overlaps t
 Because this naively sidesteps eager execution, it doesn’t always work.
 In our example, it’s actually unit 3 that holds the last layer and we end up AllGathering parameters we already have and are about to free!</p>
 <p>Lastly, we should note that with hybrid sharding there would also be an async AllReduce (on yet another communication stream) for each unit after their ReduceScatter is done.</p>
-<p>PyTorch’s FSDP experiments <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">4</a>]</span> show close to linear compute scaling, though this regresses substantially for larger clusters where “a near-perfect overlap between communication and computation is no longer attainable”:</p>
+<p>PyTorch’s FSDP experiments <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">4</a>]</span> show near-linear compute scaling, though this regresses substantially for larger clusters where “a near-perfect overlap between communication and computation is no longer attainable”:</p>
 <figure>
 <img src="images/pytorch_fsdp_eval.png" alt="Fully-sharded training of the T5-11B transformer; TFLOPS per GPU for batch sizes 8 and 16; A100 80GB GPUs with 2Tb/s RoCE interconnects (image credit)." />
 <figcaption aria-hidden="true">Fully-sharded training of the T5-11B transformer; TFLOPS per GPU for batch sizes 8 and 16; A100 80GB GPUs with 2Tb/s RoCE interconnects (<a href="https://arxiv.org/pdf/2304.11277">image credit</a>).</figcaption>
@@ -2679,6 +2694,8 @@ In our example, it’s actually unit 3 that holds the last layer and we end up A
 <h3 id="context-parallel-cp">Context Parallel (CP)</h3>
 <h4 id="cp-in-pytorch">CP in PyTorch</h4>
 <!-- ND parallelism widget, that generates a hypothetical trace of collectives -->
+<h1 id="parallelism-in-practice">4. Parallelism in Practice</h1>
+<p>[WIP] Large models use FSDP, gigantic models use all of the above.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
 <div id="ref-adam2017" class="csl-entry" role="listitem">
@@ -2708,7 +2725,7 @@ In our example, it’s actually unit 3 that holds the last layer and we end up A
 <li id="fn9"><p>There’s also <code>NO_GRAD_OP</code> which keeps parameters unsharded during the entire forward-backward computation.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn10"><p>Before forward computation, FSDP replaces the original parameters with views into their unsharded <code>FlatParameter</code> so that autograd behaves correctly. Keeping the original parameters registered requires using the recently added <code>use_orig_params</code> flag.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn11"><p>e.g. for a transformer model we’ll usually wrap each transformer block, with a final wrapper around the root module sharding the initial embedding and final linear layers.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn12"><p>We can’t get around this with an extra stream, as PyTorch only uses one internal NCCL stream for a given process group.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p>We can’t get around this with an extra stream, PyTorch only uses one internal NCCL stream for a given process group.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 <!--radix_placeholder_article_footer-->
