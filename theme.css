@@ -79,6 +79,11 @@ ul > li::marker {
   color: #ca225e;
 }
 
+ol > li::marker {
+  color: #ca225e;
+}
+
+
 .distill-site-header { 
   letter-spacing: 2px;
   text-transform: uppercase;

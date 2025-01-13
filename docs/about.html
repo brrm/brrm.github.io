@@ -88,22 +88,22 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
   <!--radix_placeholder_meta_tags-->
-  <title>Bruce's writing: About me</title>
+  <title>Bruce Mauger: About me</title>
 
   <meta property="description" itemprop="description" content="Bruce Mauger"/>
 
 
 
   <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
-  <meta property="og:title" content="Bruce&#39;s writing: About me"/>
+  <meta property="og:title" content="Bruce Mauger: About me"/>
   <meta property="og:type" content="article"/>
   <meta property="og:description" content="Bruce Mauger"/>
   <meta property="og:locale" content="en_US"/>
-  <meta property="og:site_name" content="Bruce&#39;s writing"/>
+  <meta property="og:site_name" content="Bruce Mauger"/>
 
   <!--  https://dev.twitter.com/cards/types/summary -->
   <meta property="twitter:card" content="summary"/>
-  <meta property="twitter:title" content="Bruce&#39;s writing: About me"/>
+  <meta property="twitter:title" content="Bruce Mauger: About me"/>
   <meta property="twitter:description" content="Bruce Mauger"/>
 
   <!--/radix_placeholder_meta_tags-->
@@ -1930,7 +1930,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   /* This must remain at the top of this file.                 */
   @import url('https://fonts.googleapis.com/css?family=Libre+Baskerville:300, 300i&display=swap');
   @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,400i,700,700i&display=swap');
-  @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono&display=swap');
+  @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400,500&display=swap');
 
   html {
     /*-- Main font sizes --*/
@@ -1998,6 +1998,11 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     color: #ca225e;
   }
 
+  ol > li::marker {
+    color: #ca225e;
+  }
+
+
   .distill-site-header { 
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -2018,6 +2023,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
   d-title h1,
   d-article h2,
+  d-article h3,
+  d-article h4,
   .posts-list .description h2,
   .posts-list > h1 {
       font-weight: 300;
@@ -2045,6 +2052,10 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     font-style: normal;
   }
 
+  code {
+    font-family: var(--mono-font);
+  }
+
   /* inline code */ 
   p > code, li > code {
     white-space: pre;
@@ -2053,7 +2064,11 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     padding: 2px;
     padding-top: 1px;
     border: 1px solid #EEE;
-    font-size: 0.96rem;
+    font-size: 0.9rem;
+  }
+
+  d-appendix code {
+    font-size: 0.7rem;
   }
 
   /* highlighting */
@@ -2063,9 +2078,24 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
       color: rgba(202, 34, 94, 0.8);
   }
 
+  /* video */
+  d-article figure:has(> video) {
+    margin-top: 0em;
+    margin-bottom: 1.5em;
+  }
+
+  d-article video {
+    display: block;
+    margin: auto;
+  }
+
   d-appendix {
     background-color: #fdf7f9;
     border-top: none;
+  }
+
+  d-appendix .citation-appendix {
+    font-family: var(--mono-font);
   }</style>
   <style type="text/css">
   /* base style */
@@ -2260,7 +2290,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <header class="header header--fixed" role="banner">
 <nav class="distill-site-nav distill-site-header">
 <div class="nav-left">
-<a href="index.html" class="title">Bruce's writing</a>
+<a href="index.html" class="title">Bruce Mauger</a>
 </div>
 <div class="nav-right">
 <a href="about.html">About</a>

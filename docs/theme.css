@@ -11,7 +11,7 @@
 /* This must remain at the top of this file.                 */
 @import url('https://fonts.googleapis.com/css?family=Libre+Baskerville:300, 300i&display=swap');
 @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,400i,700,700i&display=swap');
-@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400,500&display=swap');
 
 html {
   /*-- Main font sizes --*/
@@ -79,6 +79,11 @@ ul > li::marker {
   color: #ca225e;
 }
 
+ol > li::marker {
+  color: #ca225e;
+}
+
+
 .distill-site-header { 
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -99,6 +104,8 @@ h1, h2, h3, h4, h5, h6 {
 
 d-title h1,
 d-article h2,
+d-article h3,
+d-article h4,
 .posts-list .description h2,
 .posts-list > h1 {
     font-weight: 300;
@@ -126,6 +133,10 @@ d-article blockquote {
   font-style: normal;
 }
 
+code {
+  font-family: var(--mono-font);
+}
+
 /* inline code */ 
 p > code, li > code {
   white-space: pre;
@@ -134,7 +145,11 @@ p > code, li > code {
   padding: 2px;
   padding-top: 1px;
   border: 1px solid #EEE;
-  font-size: 0.96rem;
+  font-size: 0.9rem;
+}
+
+d-appendix code {
+  font-size: 0.7rem;
 }
 
 /* highlighting */
@@ -144,7 +159,22 @@ d-article mark {
     color: rgba(202, 34, 94, 0.8);
 }
 
+/* video */
+d-article figure:has(> video) {
+  margin-top: 0em;
+  margin-bottom: 1.5em;
+}
+
+d-article video {
+  display: block;
+  margin: auto;
+}
+
 d-appendix {
   background-color: #fdf7f9;
   border-top: none;
+}
+
+d-appendix .citation-appendix {
+  font-family: var(--mono-font);
 }

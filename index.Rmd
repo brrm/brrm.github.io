@@ -1,5 +1,5 @@
 ---
-title: "Bruce's writing"
+title: "Bruce Mauger"
 site: distill::distill_website
 listing: posts
 ---
