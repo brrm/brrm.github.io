@@ -1,0 +1,3001 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+  <meta name="generator" content="distill" />
+
+  <style type="text/css">
+  /* Hide doc at startup (prevent jankiness while JS renders/transforms) */
+  body {
+    visibility: hidden;
+  }
+  </style>
+
+ <!--radix_placeholder_import_source-->
+ <!--/radix_placeholder_import_source-->
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  { color: #00769e; background-color: #f1f3f5; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span { color: #00769e; } /* Normal */
+code span.al { color: #ad0000; } /* Alert */
+code span.an { color: #5e5e5e; } /* Annotation */
+code span.at { color: #657422; } /* Attribute */
+code span.bn { color: #ad0000; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #00769e; } /* ControlFlow */
+code span.ch { color: #20794d; } /* Char */
+code span.cn { color: #8f5902; } /* Constant */
+code span.co { color: #5e5e5e; } /* Comment */
+code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+code span.dt { color: #ad0000; } /* DataType */
+code span.dv { color: #ad0000; } /* DecVal */
+code span.er { color: #ad0000; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #ad0000; } /* Float */
+code span.fu { color: #4758ab; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #5e5e5e; } /* Information */
+code span.kw { color: #00769e; } /* Keyword */
+code span.op { color: #5e5e5e; } /* Operator */
+code span.ot { color: #00769e; } /* Other */
+code span.pp { color: #ad0000; } /* Preprocessor */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
+code span.ss { color: #20794d; } /* SpecialString */
+code span.st { color: #20794d; } /* String */
+code span.va { color: #111111; } /* Variable */
+code span.vs { color: #20794d; } /* VerbatimString */
+code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+</style>
+
+<style>
+  div.csl-bib-body { }
+  div.csl-entry {
+    clear: both;
+      margin-bottom: 0em;
+    }
+  .hanging div.csl-entry {
+    margin-left:2em;
+    text-indent:-2em;
+  }
+  div.csl-left-margin {
+    min-width:2em;
+    float:left;
+  }
+  div.csl-right-inline {
+    margin-left:2em;
+    padding-left:1em;
+  }
+  div.csl-indent {
+    margin-left: 2em;
+  }
+</style>
+
+  <!--radix_placeholder_meta_tags-->
+<title>Bruce Mauger: Distributed Machine Learning: How Does it Work?</title>
+
+<meta property="description" itemprop="description" content="State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. &#10;How does this orchestration work? And how can it be done without incurring expensive communication overheads?"/>
+
+<link rel="canonical" href="brrm.io/posts/distributed-ml/"/>
+
+<!--  https://schema.org/Article -->
+<meta property="article:published" itemprop="datePublished" content="2025-01-01"/>
+<meta property="article:created" itemprop="dateCreated" content="2025-01-01"/>
+<meta name="article:author" content="Bruce Mauger"/>
+
+<!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
+<meta property="og:title" content="Bruce Mauger: Distributed Machine Learning: How Does it Work?"/>
+<meta property="og:type" content="article"/>
+<meta property="og:description" content="State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. &#10;How does this orchestration work? And how can it be done without incurring expensive communication overheads?"/>
+<meta property="og:url" content="brrm.io/posts/distributed-ml/"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:site_name" content="Bruce Mauger"/>
+
+<!--  https://dev.twitter.com/cards/types/summary -->
+<meta property="twitter:card" content="summary"/>
+<meta property="twitter:title" content="Bruce Mauger: Distributed Machine Learning: How Does it Work?"/>
+<meta property="twitter:description" content="State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. &#10;How does this orchestration work? And how can it be done without incurring expensive communication overheads?"/>
+<meta property="twitter:url" content="brrm.io/posts/distributed-ml/"/>
+
+<!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
+<meta name="citation_title" content="Bruce Mauger: Distributed Machine Learning: How Does it Work?"/>
+<meta name="citation_fulltext_html_url" content="brrm.io/posts/distributed-ml/"/>
+<meta name="citation_online_date" content="2025/01/01"/>
+<meta name="citation_publication_date" content="2025/01/01"/>
+<meta name="citation_author" content="Bruce Mauger"/>
+<!--/radix_placeholder_meta_tags-->
+  
+  <meta name="citation_reference" content="citation_title=Adam: A method for stochastic optimization;citation_author=Diederik P. Kingma;citation_author=Jimmy Ba"/>
+  <meta name="citation_reference" content="citation_title=ZeRO: Memory optimizations toward training trillion parameter models;citation_author=Samyam Rajbhandari;citation_author=Jeff Rasley;citation_author=Olatunji Ruwase;citation_author=Yuxiong He"/>
+  <meta name="citation_reference" content="citation_title=PyTorch distributed: Experiences on accelerating data parallel training;citation_author=Shen Li;citation_author=Yanli Zhao;citation_author=Rohan Varma;citation_author=Omkar Salpekar;citation_author=Pieter Noordhuis;citation_author=Teng Li;citation_author=Adam Paszke;citation_author=Jeff Smith;citation_author=Brian Vaughan;citation_author=Pritam Damania;citation_author=Soumith Chintala"/>
+  <meta name="citation_reference" content="citation_title=PyTorch FSDP: Experiences on scaling fully sharded data parallel;citation_author=Yanli Zhao;citation_author=Andrew Gu;citation_author=Rohan Varma;citation_author=Liang Luo;citation_author=Chien-Chin Huang;citation_author=Min Xu;citation_author=Less Wright;citation_author=Hamid Shojanazeri;citation_author=Myle Ott;citation_author=Sam Shleifer;citation_author=Alban Desmaison;citation_author=Can Balioglu;citation_author=Pritam Damania;citation_author=Bernard Nguyen;citation_author=Geeta Chauhan;citation_author=Yuchen Hao;citation_author=Ajit Mathews;citation_author=Shen Li"/>
+  <meta name="citation_reference" content="citation_title=GPipe: Efficient training of giant neural networks using pipeline parallelism;citation_author=Yanping Huang;citation_author=Youlong Cheng;citation_author=Ankur Bapna;citation_author=Orhan Firat;citation_author=Mia Xu Chen;citation_author=Dehao Chen;citation_author=HyoukJoong Lee;citation_author=Jiquan Ngiam;citation_author=Quoc V. Le;citation_author=Yonghui Wu;citation_author=Zhifeng Chen"/>
+  <meta name="citation_reference" content="citation_title=Training deep nets with sublinear memory cost;citation_author=Tianqi Chen;citation_author=Bing Xu;citation_author=Chiyuan Zhang;citation_author=Carlos Guestrin"/>
+  <meta name="citation_reference" content="citation_title=Mixed precision training;citation_author=Paulius Micikevicius;citation_author=Sharan Narang;citation_author=Jonah Alben;citation_author=Gregory Diamos;citation_author=Erich Elsen;citation_author=David Garcia;citation_author=Boris Ginsburg;citation_author=Michael Houston;citation_author=Oleksii Kuchaiev;citation_author=Ganesh Venkatesh;citation_author=Hao Wu"/>
+  <meta name="citation_reference" content="citation_title=PipeDream: Fast and efficient pipeline parallel DNN training;citation_author=Aaron Harlap;citation_author=Deepak Narayanan;citation_author=Amar Phanishayee;citation_author=Vivek Seshadri;citation_author=Nikhil Devanur;citation_author=Greg Ganger;citation_author=Phil Gibbons"/>
+  <meta name="citation_reference" content="citation_title=Reducing activation recomputation in large transformer models;citation_publisher=Curan;citation_volume=5;citation_author=Vijay Anand Korthikanti;citation_author=Jared Casper;citation_author=Sangkug Lym;citation_author=Lawrence McAfee;citation_author=Michael Andersch;citation_author=Mohammad Shoeybi;citation_author=Bryan Catanzaro"/>
+  <meta name="citation_reference" content="citation_title=An empirical model of large-batch training;citation_author=Sam McCandlish;citation_author=Jared Kaplan;citation_author=Dario Amodei;citation_author=OpenAI Dota Team"/>
+  <meta name="citation_reference" content="citation_title=Efficient large-scale language model training on GPU clusters using megatron-LM;citation_author=Deepak Narayanan;citation_author=Mohammad Shoeybi;citation_author=Jared Casper;citation_author=Patrick LeGresley;citation_author=Mostofa Patwary;citation_author=Vijay Anand Korthikanti;citation_author=Dmitri Vainbrand;citation_author=Prethvi Kashinkunti;citation_author=Julie Bernauer;citation_author=Bryan Catanzaro;citation_author=Amar Phanishayee;citation_author=Matei Zaharia"/>
+  <meta name="citation_reference" content="citation_title=Megatron-LM: Training multi-billion parameter language models using model parallelism;citation_author=Mohammad Shoeybi;citation_author=Mostofa Patwary;citation_author=Raul Puri;citation_author=Patrick LeGresley;citation_author=Jared Casper;citation_author=Bryan Catanzaro"/>
+  <meta name="citation_reference" content="citation_title=Breadth-first pipeline parallelism;citation_author=Joel Lamy-Poirier"/>
+  <meta name="citation_reference" content="citation_title=The llama 3 herd of models;citation_author=AI @ Meta Llama Team"/>
+  <!--radix_placeholder_rmarkdown_metadata-->
+
+<script type="text/json" id="radix-rmarkdown-metadata">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","date","output","citation","bibliography","csl","resources","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Distributed Machine Learning: How Does it Work?"]},{"type":"character","attributes":{},"value":["State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. \nHow does this orchestration work? And how can it be done without incurring expensive communication overheads?"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Bruce Mauger"]}]}]},{"type":"character","attributes":{},"value":["01-01-2025"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["mathjax","self_contained","toc"]}},"value":[{"type":"character","attributes":{},"value":["https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"]},{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]}]}]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["distributed-ml.bib"]},{"type":"character","attributes":{},"value":["cambridge-university-press-numeric.csl"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["exclude"]}},"value":[{"type":"character","attributes":{},"value":["excalidraw","jupyter"]}]},{"type":"character","attributes":{},"value":["brrm.io/posts/distributed-ml/"]},{"type":"character","attributes":{},"value":["brrm.io/posts/distributed-ml/"]}]}
+</script>
+<!--/radix_placeholder_rmarkdown_metadata-->
+  
+  <script type="text/json" id="radix-resource-manifest">
+  {"type":"character","attributes":{},"value":["cambridge-university-press-numeric.csl","distributed-ml_files/anchor-4.2.2/anchor.min.js","distributed-ml_files/bowser-1.9.3/bowser.min.js","distributed-ml_files/d3v4-4.13.0/API.md","distributed-ml_files/d3v4-4.13.0/CHANGES.md","distributed-ml_files/d3v4-4.13.0/d3.min.js","distributed-ml_files/d3v4-4.13.0/LICENSE","distributed-ml_files/d3v4-4.13.0/README.md","distributed-ml_files/d3v6-6.2.0/API.md","distributed-ml_files/d3v6-6.2.0/CHANGES.md","distributed-ml_files/d3v6-6.2.0/d3.min.js","distributed-ml_files/d3v6-6.2.0/LICENSE","distributed-ml_files/d3v6-6.2.0/README.md","distributed-ml_files/distill-2.2.21/template.v2.js","distributed-ml_files/header-attrs-2.29/header-attrs.js","distributed-ml_files/htmltools-fill-0.5.8.1/fill.css","distributed-ml_files/htmlwidgets-1.6.4/htmlwidgets.js","distributed-ml_files/jquery-3.6.0/jquery-3.6.0.js","distributed-ml_files/jquery-3.6.0/jquery-3.6.0.min.js","distributed-ml_files/jquery-3.6.0/jquery-3.6.0.min.map","distributed-ml_files/popper-2.6.0/popper.min.js","distributed-ml_files/r2d3-binding-0.2.6/r2d3.js","distributed-ml_files/r2d3-render-0.1.0/r2d3-render.js","distributed-ml_files/tippy-6.2.7/tippy-bundle.umd.min.js","distributed-ml_files/tippy-6.2.7/tippy-light-border.css","distributed-ml_files/tippy-6.2.7/tippy.css","distributed-ml_files/tippy-6.2.7/tippy.umd.min.js","distributed-ml_files/webcomponents-2.0.0/webcomponents.js","distributed-ml.bib","images/bfs_pipeline.png","images/ddp_naive.png","images/ddp_overlap.png","images/ddp_training.png","images/dfs_pipeline.png","images/fsdp_comm_trace.png","images/fsdp_hybrid_sharding.png","images/fsdp_naive.png","images/local_training.png","images/pebble_graph.gif","images/pipedream_tile.png","images/pp_dp_2d.png","images/pp_gpipe_bubbles.png","images/pp_gpipe_comm.png","images/pp_naive_bubbles.png","images/pp_pebble_graph.gif","images/pytorch_ddp_grad_accum.png","images/pytorch_ddp_perf.png","images/pytorch_fsdp_eval.png","images/pytorch_fsdp_flatparam.png","images/pytorch_fsdp_units.png","images/tp_mlp.png","videos/CollectiveAllReduce.mp4","videos/CollectiveAllToAll.mp4","videos/CollectiveBroadcast.mp4","videos/CollectiveP2P.mp4","videos/CollectiveReduce.mp4","videos/CollectiveReduceScatter.mp4"]}
+  </script>
+  <!--radix_placeholder_navigation_in_header-->
+<meta name="distill:offset" content="../.."/>
+
+<script type="application/javascript">
+
+  window.headroom_prevent_pin = false;
+
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+
+    // initialize headroom for banner
+    var header = $('header').get(0);
+    var headerHeight = header.offsetHeight;
+    var headroom = new Headroom(header, {
+      tolerance: 5,
+      onPin : function() {
+        if (window.headroom_prevent_pin) {
+          window.headroom_prevent_pin = false;
+          headroom.unpin();
+        }
+      }
+    });
+    headroom.init();
+    if(window.location.hash)
+      headroom.unpin();
+    $(header).addClass('headroom--transition');
+
+    // offset scroll location for banner on hash change
+    // (see: https://github.com/WickyNilliams/headroom.js/issues/38)
+    window.addEventListener("hashchange", function(event) {
+      window.scrollTo(0, window.pageYOffset - (headerHeight + 25));
+    });
+
+    // responsive menu
+    $('.distill-site-header').each(function(i, val) {
+      var topnav = $(this);
+      var toggle = topnav.find('.nav-toggle');
+      toggle.on('click', function() {
+        topnav.toggleClass('responsive');
+      });
+    });
+
+    // nav dropdowns
+    $('.nav-dropbtn').click(function(e) {
+      $(this).next('.nav-dropdown-content').toggleClass('nav-dropdown-active');
+      $(this).parent().siblings('.nav-dropdown')
+         .children('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $("body").click(function(e){
+      $('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $(".nav-dropdown").click(function(e){
+      e.stopPropagation();
+    });
+  });
+</script>
+
+<style type="text/css">
+
+/* Theme (user-documented overrideables for nav appearance) */
+
+.distill-site-nav {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: #0F2E3D;
+  font-size: 15px;
+  font-weight: 300;
+}
+
+.distill-site-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.distill-site-nav a:hover {
+  color: white;
+}
+
+@media print {
+  .distill-site-nav {
+    display: none;
+  }
+}
+
+.distill-site-header {
+
+}
+
+.distill-site-footer {
+
+}
+
+
+/* Site Header */
+
+.distill-site-header {
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 3;
+}
+
+.distill-site-header .nav-left {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header .nav-left {
+    margin-left: 0;
+  }
+}
+
+
+.distill-site-header .nav-right {
+  float: right;
+  margin-right: 8px;
+}
+
+.distill-site-header a,
+.distill-site-header .title {
+  display: inline-block;
+  text-align: center;
+  padding: 14px 10px 14px 10px;
+}
+
+.distill-site-header .title {
+  font-size: 18px;
+  min-width: 150px;
+}
+
+.distill-site-header .logo {
+  padding: 0;
+}
+
+.distill-site-header .logo img {
+  display: none;
+  max-height: 20px;
+  width: auto;
+  margin-bottom: -4px;
+}
+
+.distill-site-header .nav-image img {
+  max-height: 18px;
+  width: auto;
+  display: inline-block;
+  margin-bottom: -3px;
+}
+
+
+
+@media screen and (min-width: 1000px) {
+  .distill-site-header .logo img {
+    display: inline-block;
+  }
+  .distill-site-header .nav-left {
+    margin-left: 20px;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 20px;
+  }
+  .distill-site-header .title {
+    padding-left: 12px;
+  }
+}
+
+
+.distill-site-header .nav-toggle {
+  display: none;
+}
+
+.nav-dropdown {
+  display: inline-block;
+  position: relative;
+}
+
+.nav-dropdown .nav-dropbtn {
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 16px 10px;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+  margin-top: 1px;
+  z-index: 2;
+}
+
+.nav-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 200px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+  z-index: 1;
+  margin-top: 2px;
+  white-space: nowrap;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.nav-dropdown-content hr {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.nav-dropdown-active {
+  display: block;
+}
+
+.nav-dropdown-content a, .nav-dropdown-content .nav-dropdown-header {
+  color: black;
+  padding: 6px 24px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.nav-dropdown-content .nav-dropdown-header {
+  display: block;
+  padding: 5px 24px;
+  padding-bottom: 0;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #999999;
+  white-space: nowrap;
+}
+
+.nav-dropdown:hover .nav-dropbtn {
+  color: white;
+}
+
+.nav-dropdown-content a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.nav-right .nav-dropdown-content {
+  margin-left: -45%;
+  right: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header a, .distill-site-header .nav-dropdown  {display: none;}
+  .distill-site-header a.nav-toggle {
+    float: right;
+    display: block;
+  }
+  .distill-site-header .title {
+    margin-left: 0;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 0;
+  }
+  .distill-site-header {
+    overflow: hidden;
+  }
+  .nav-right .nav-dropdown-content {
+    margin-left: 0;
+  }
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-header.responsive {position: relative; min-height: 500px; }
+  .distill-site-header.responsive a.nav-toggle {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .distill-site-header.responsive a,
+  .distill-site-header.responsive .nav-dropdown {
+    display: block;
+    text-align: left;
+  }
+  .distill-site-header.responsive .nav-left,
+  .distill-site-header.responsive .nav-right {
+    width: 100%;
+  }
+  .distill-site-header.responsive .nav-dropdown {float: none;}
+  .distill-site-header.responsive .nav-dropdown-content {position: relative;}
+  .distill-site-header.responsive .nav-dropdown .nav-dropbtn {
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Site Footer */
+
+.distill-site-footer {
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  z-index: 3;
+  margin-top: 30px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  text-align: center;
+}
+
+/* Headroom */
+
+d-title {
+  padding-top: 6rem;
+}
+
+@media print {
+  d-title {
+    padding-top: 4rem;
+  }
+}
+
+.headroom {
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.headroom--transition {
+  transition: all .4s ease-in-out;
+}
+
+.headroom--unpinned {
+  top: -100px;
+}
+
+.headroom--pinned {
+  top: 0;
+}
+
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
+</style>
+
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="../../site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"/>
+<link href="../../site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"/>
+<script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
+<!--/radix_placeholder_navigation_in_header-->
+  <!--radix_placeholder_distill-->
+
+<style type="text/css">
+
+body {
+  background-color: white;
+}
+
+.pandoc-table {
+  width: 100%;
+}
+
+.pandoc-table>caption {
+  margin-bottom: 10px;
+}
+
+.pandoc-table th:not([align]) {
+  text-align: left;
+}
+
+.pagedtable-footer {
+  font-size: 15px;
+}
+
+d-byline .byline {
+  grid-template-columns: 2fr 2fr;
+}
+
+d-byline .byline h3 {
+  margin-block-start: 1.5em;
+}
+
+d-byline .byline .authors-affiliations h3 {
+  margin-block-start: 0.5em;
+}
+
+.authors-affiliations .orcid-id {
+  width: 16px;
+  height:16px;
+  margin-left: 4px;
+  margin-right: 4px;
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
+
+d-title .dt-tags {
+  margin-top: 1em;
+  grid-column: text;
+}
+
+.dt-tags .dt-tag {
+  text-decoration: none;
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0em 0.4em;
+  margin-right: 0.5em;
+  margin-bottom: 0.4em;
+  font-size: 70%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+d-article table.gt_table td,
+d-article table.gt_table th {
+  border-bottom: none;
+  font-size: 100%;
+}
+
+.html-widget {
+  margin-bottom: 2.0em;
+}
+
+.l-screen-inset {
+  padding-right: 16px;
+}
+
+.l-screen .caption {
+  margin-left: 10px;
+}
+
+.shaded {
+  background: rgb(247, 247, 247);
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .html-widget {
+  margin-bottom: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .shaded-content {
+  background: white;
+}
+
+.text-output {
+  margin-top: 0;
+  line-height: 1.5em;
+}
+
+.hidden {
+  display: none !important;
+}
+
+hr.section-separator {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 0px;
+}
+
+
+d-byline {
+  border-top: none;
+}
+
+d-article {
+  padding-top: 2.5rem;
+  padding-bottom: 30px;
+  border-top: none;
+}
+
+d-appendix {
+  padding-top: 30px;
+}
+
+d-article>p>img {
+  width: 100%;
+}
+
+d-article h2 {
+  margin: 1rem 0 1.5rem 0;
+}
+
+d-article h3 {
+  margin-top: 1.5rem;
+}
+
+d-article iframe {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 2.0em;
+  width: 100%;
+}
+
+/* Tweak code blocks */
+
+d-article div.sourceCode code,
+d-article pre code {
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+}
+
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: auto;
+}
+
+d-article div.sourceCode {
+  background-color: white;
+}
+
+d-article div.sourceCode pre {
+  padding-left: 10px;
+  font-size: 12px;
+  border-left: 2px solid rgba(0,0,0,0.1);
+}
+
+d-article pre {
+  font-size: 12px;
+  color: black;
+  background: none;
+  margin-top: 0;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+d-article pre a {
+  border-bottom: none;
+}
+
+d-article pre a:hover {
+  border-bottom: none;
+  text-decoration: underline;
+}
+
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
+@media(min-width: 768px) {
+
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: visible !important;
+}
+
+d-article div.sourceCode pre {
+  padding-left: 18px;
+  font-size: 14px;
+}
+
+/* tweak for Pandoc numbered line within distill */
+d-article pre.numberSource code > span {
+    left: -2em;
+}
+
+d-article pre {
+  font-size: 14px;
+}
+
+}
+
+figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* CSS for d-contents */
+
+.d-contents {
+  grid-column: text;
+  color: rgba(0,0,0,0.8);
+  font-size: 0.9em;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  padding-left: 0.25em;
+  justify-self: start;
+}
+
+@media(min-width: 1000px) {
+  .d-contents.d-contents-float {
+    height: 0;
+    grid-column-start: 1;
+    grid-column-end: 4;
+    justify-self: center;
+    padding-right: 3em;
+    padding-left: 2em;
+  }
+}
+
+.d-contents nav h3 {
+  font-size: 18px;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.d-contents li {
+  list-style-type: none
+}
+
+.d-contents nav > ul {
+  padding-left: 0;
+}
+
+.d-contents ul {
+  padding-left: 1em
+}
+
+.d-contents nav ul li {
+  margin-top: 0.6em;
+  margin-bottom: 0.2em;
+}
+
+.d-contents nav a {
+  font-size: 13px;
+  border-bottom: none;
+  text-decoration: none
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.d-contents nav a:hover {
+  text-decoration: underline solid rgba(0, 0, 0, 0.6)
+}
+
+.d-contents nav > ul > li > a {
+  font-weight: 600;
+}
+
+.d-contents nav > ul > li > ul {
+  font-weight: inherit;
+}
+
+.d-contents nav > ul > li > ul > li {
+  margin-top: 0.2em;
+}
+
+
+.d-contents nav ul {
+  margin-top: 0;
+  margin-bottom: 0.25em;
+}
+
+.d-article-with-toc h2:nth-child(2) {
+  margin-top: 0;
+}
+
+
+/* Figure */
+
+.figure {
+  position: relative;
+  margin-bottom: 2.5em;
+  margin-top: 1.5em;
+}
+
+.figure .caption {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  line-height: 1.5em;
+}
+
+.figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.figure .caption a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.figure .caption b,
+.figure .caption strong, {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 1.0);
+}
+
+/* Citations */
+
+d-article .citation {
+  color: inherit;
+  cursor: inherit;
+}
+
+div.hanging-indent{
+  margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
+}
+
+
+/* Tweak 1000px media break to show more text */
+
+@media(min-width: 1000px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 80px [middle-start] 50px [text-start kicker-end] 65px 65px 65px 65px 65px 65px 65px 65px [text-end gutter-start] 65px [middle-end] 65px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 16px;
+  }
+
+  .grid {
+    grid-column-gap: 16px;
+  }
+
+  d-article {
+    font-size: 1.06rem;
+    line-height: 1.7em;
+  }
+  figure .caption, .figure .caption, figure figcaption {
+    font-size: 13px;
+  }
+}
+
+@media(min-width: 1180px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 60px [middle-start] 60px [text-start kicker-end] 60px 60px 60px 60px 60px 60px 60px 60px [text-end gutter-start] 60px [middle-end] 60px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 32px;
+  }
+
+  .grid {
+    grid-column-gap: 32px;
+  }
+}
+
+
+/* Get the citation styles for the appendix (not auto-injected on render since
+   we do our own rendering of the citation appendix) */
+
+d-appendix .citation-appendix,
+.d-appendix .citation-appendix {
+  font-size: 11px;
+  line-height: 15px;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  padding-left: 18px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(0, 0, 0, 0.02);
+  padding: 10px 18px;
+  border-radius: 3px;
+  color: rgba(150, 150, 150, 1);
+  overflow: hidden;
+  margin-top: -12px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Include appendix styles here so they can be overridden */
+
+d-appendix {
+  contain: layout style;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-top: 60px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0,0,0,0.5);
+  padding-top: 60px;
+  padding-bottom: 48px;
+}
+
+d-appendix h3 {
+  grid-column: page-start / text-start;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 1em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.65);
+}
+
+d-appendix h3 + * {
+  margin-top: 1em;
+}
+
+d-appendix ol {
+  padding: 0 0 0 15px;
+}
+
+@media (min-width: 768px) {
+  d-appendix ol {
+    padding: 0 0 0 30px;
+    margin-left: -30px;
+  }
+}
+
+d-appendix li {
+  margin-bottom: 1em;
+}
+
+d-appendix a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+d-appendix > * {
+  grid-column: text;
+}
+
+d-appendix > d-footnote-list,
+d-appendix > d-citation-list,
+d-appendix > distill-appendix {
+  grid-column: screen;
+}
+
+/* Include footnote styles here so they can be overridden */
+
+d-footnote-list {
+  contain: layout style;
+}
+
+d-footnote-list > * {
+  grid-column: text;
+}
+
+d-footnote-list a.footnote-backlink {
+  color: rgba(0,0,0,0.3);
+  padding-left: 0.5em;
+}
+
+
+
+/* Anchor.js */
+
+.anchorjs-link {
+  /*transition: all .25s linear; */
+  text-decoration: none;
+  border-bottom: none;
+}
+*:hover > .anchorjs-link {
+  margin-left: -1.125em !important;
+  text-decoration: none;
+  border-bottom: none;
+}
+
+/* Social footer */
+
+.social_footer {
+  margin-top: 30px;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.67);
+}
+
+.disqus-comments {
+  margin-right: 30px;
+}
+
+.disqus-comment-count {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+#disqus_thread {
+  margin-top: 30px;
+}
+
+.article-sharing a {
+  border-bottom: none;
+  margin-right: 8px;
+}
+
+.article-sharing a:hover {
+  border-bottom: none;
+}
+
+.sidebar-section.subscribe {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.subscribe p {
+  margin-bottom: 0.5em;
+}
+
+
+.article-footer .subscribe {
+  font-size: 15px;
+  margin-top: 45px;
+}
+
+
+.sidebar-section.custom {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.custom p {
+  margin-bottom: 0.5em;
+}
+
+/* Styles for listing layout (hide title) */
+.layout-listing d-title, .layout-listing .d-title {
+  display: none;
+}
+
+/* Styles for posts lists (not auto-injected) */
+
+
+.posts-with-sidebar {
+  padding-left: 45px;
+  padding-right: 45px;
+}
+
+.posts-list .description h2,
+.posts-list .description p {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.posts-list .description h2 {
+  font-weight: 700;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.posts-list h2.post-tag {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 12px;
+}
+.posts-list {
+  margin-top: 60px;
+  margin-bottom: 24px;
+}
+
+.posts-list .post-preview {
+  text-decoration: none;
+  overflow: hidden;
+  display: block;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 24px 0;
+}
+
+.post-preview-last {
+  border-bottom: none !important;
+}
+
+.posts-list .posts-list-caption {
+  grid-column: screen;
+  font-weight: 400;
+}
+
+.posts-list .post-preview h2 {
+  margin: 0 0 6px 0;
+  line-height: 1.2em;
+  font-style: normal;
+  font-size: 24px;
+}
+
+.posts-list .post-preview p {
+  margin: 0 0 12px 0;
+  line-height: 1.4em;
+  font-size: 16px;
+}
+
+.posts-list .post-preview .thumbnail {
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  position: relative;
+  max-width: 500px;
+}
+.posts-list .post-preview img {
+  width: 100%;
+  display: block;
+}
+
+.posts-list .metadata {
+  font-size: 12px;
+  line-height: 1.4em;
+  margin-bottom: 18px;
+}
+
+.posts-list .metadata > * {
+  display: inline-block;
+}
+
+.posts-list .metadata .publishedDate {
+  margin-right: 2em;
+}
+
+.posts-list .metadata .dt-authors {
+  display: block;
+  margin-top: 0.3em;
+  margin-right: 2em;
+}
+
+.posts-list .dt-tags {
+  display: block;
+  line-height: 1em;
+}
+
+.posts-list .dt-tags .dt-tag {
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0.3em 0.4em;
+  margin-right: 0.2em;
+  margin-bottom: 0.4em;
+  font-size: 60%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.posts-list img {
+  opacity: 1;
+}
+
+.posts-list img[data-src] {
+  opacity: 0;
+}
+
+.posts-more {
+  clear: both;
+}
+
+
+.posts-sidebar {
+  font-size: 16px;
+}
+
+.posts-sidebar h3 {
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  margin-bottom: 30px;
+}
+
+.categories ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.categories li {
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 0;
+}
+
+.categories li>a {
+  border-bottom: none;
+}
+
+.categories li>a:hover {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.categories .active {
+  font-weight: 600;
+}
+
+.categories .category-count {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+
+@media(min-width: 768px) {
+  .posts-list .post-preview h2 {
+    font-size: 26px;
+  }
+  .posts-list .post-preview .thumbnail {
+    float: right;
+    width: 30%;
+    margin-bottom: 0;
+  }
+  .posts-list .post-preview .description {
+    float: left;
+    width: 45%;
+  }
+  .posts-list .post-preview .metadata {
+    float: left;
+    width: 20%;
+    margin-top: 8px;
+  }
+  .posts-list .post-preview p {
+    margin: 0 0 12px 0;
+    line-height: 1.5em;
+    font-size: 16px;
+  }
+  .posts-with-sidebar .posts-list {
+    float: left;
+    width: 75%;
+  }
+  .posts-with-sidebar .posts-sidebar {
+    float: right;
+    width: 20%;
+    margin-top: 60px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+}
+
+
+/* Improve display for browsers without grid (IE/Edge <= 15) */
+
+.downlevel {
+  line-height: 1.6em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+}
+
+.downlevel .d-title {
+  padding-top: 6rem;
+  padding-bottom: 1.5rem;
+}
+
+.downlevel .d-title h1 {
+  font-size: 50px;
+  font-weight: 700;
+  line-height: 1.1em;
+  margin: 0 0 0.5rem;
+}
+
+.downlevel .d-title p {
+  font-weight: 300;
+  font-size: 1.2rem;
+  line-height: 1.55em;
+  margin-top: 0;
+}
+
+.downlevel .d-byline {
+  padding-top: 0.8em;
+  padding-bottom: 0.8em;
+  font-size: 0.8rem;
+  line-height: 1.8em;
+}
+
+.downlevel .section-separator {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.downlevel .d-article {
+  font-size: 1.06rem;
+  line-height: 1.7em;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+
+.downlevel .d-appendix {
+  padding-left: 0;
+  padding-right: 0;
+  max-width: none;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.5);
+  padding-top: 40px;
+  padding-bottom: 48px;
+}
+
+.downlevel .footnotes ol {
+  padding-left: 13px;
+}
+
+.downlevel .base-grid,
+.downlevel .distill-header,
+.downlevel .d-title,
+.downlevel .d-abstract,
+.downlevel .d-article,
+.downlevel .d-appendix,
+.downlevel .distill-appendix,
+.downlevel .d-byline,
+.downlevel .d-footnote-list,
+.downlevel .d-citation-list,
+.downlevel .distill-footer,
+.downlevel .appendix-bottom,
+.downlevel .posts-container {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+@media(min-width: 768px) {
+  .downlevel .base-grid,
+  .downlevel .distill-header,
+  .downlevel .d-title,
+  .downlevel .d-abstract,
+  .downlevel .d-article,
+  .downlevel .d-appendix,
+  .downlevel .distill-appendix,
+  .downlevel .d-byline,
+  .downlevel .d-footnote-list,
+  .downlevel .d-citation-list,
+  .downlevel .distill-footer,
+  .downlevel .appendix-bottom,
+  .downlevel .posts-container {
+  padding-left: 150px;
+  padding-right: 150px;
+  max-width: 900px;
+}
+}
+
+.downlevel pre code {
+  display: block;
+  border-left: 2px solid rgba(0, 0, 0, .1);
+  padding: 0 0 0 20px;
+  font-size: 14px;
+}
+
+.downlevel code, .downlevel pre {
+  color: black;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+.downlevel .posts-list .post-preview {
+  color: inherit;
+}
+
+
+
+</style>
+
+<script type="application/javascript">
+
+function is_downlevel_browser() {
+  if (bowser.isUnsupportedBrowser({ msie: "12", msedge: "16"},
+                                 window.navigator.userAgent)) {
+    return true;
+  } else {
+    return window.load_distill_framework === undefined;
+  }
+}
+
+// show body when load is complete
+function on_load_complete() {
+
+  // add anchors
+  if (window.anchors) {
+    window.anchors.options.placement = 'left';
+    window.anchors.add('d-article > h2, d-article > h3, d-article > h4, d-article > h5');
+  }
+
+
+  // set body to visible
+  document.body.style.visibility = 'visible';
+
+  // force redraw for leaflet widgets
+  if (window.HTMLWidgets) {
+    var maps = window.HTMLWidgets.findAll(".leaflet");
+    $.each(maps, function(i, el) {
+      var map = this.getMap();
+      map.invalidateSize();
+      map.eachLayer(function(layer) {
+        if (layer instanceof L.TileLayer)
+          layer.redraw();
+      });
+    });
+  }
+
+  // trigger 'shown' so htmlwidgets resize
+  $('d-article').trigger('shown');
+}
+
+function init_distill() {
+
+  init_common();
+
+  // create front matter
+  var front_matter = $('<d-front-matter></d-front-matter>');
+  $('#distill-front-matter').wrap(front_matter);
+
+  // create d-title
+  $('.d-title').changeElementType('d-title');
+
+  // separator
+  var separator = '<hr class="section-separator" style="clear: both"/>';
+  // prepend separator above appendix
+  $('.d-byline').before(separator);
+  $('.d-article').before(separator);
+
+  // create d-byline
+  var byline = $('<d-byline></d-byline>');
+  $('.d-byline').replaceWith(byline);
+
+  // create d-article
+  var article = $('<d-article></d-article>');
+  $('.d-article').wrap(article).children().unwrap();
+
+  // move posts container into article
+  $('.posts-container').appendTo($('d-article'));
+
+  // create d-appendix
+  $('.d-appendix').changeElementType('d-appendix');
+
+  // flag indicating that we have appendix items
+  var appendix = $('.appendix-bottom').children('h3').length > 0;
+
+  // replace footnotes with <d-footnote>
+  $('.footnote-ref').each(function(i, val) {
+    appendix = true;
+    var href = $(this).attr('href');
+    var id = href.replace('#', '');
+    var fn = $('#' + id);
+    var fn_p = $('#' + id + '>p');
+    fn_p.find('.footnote-back').remove();
+    var text = fn_p.html();
+    var dtfn = $('<d-footnote></d-footnote>');
+    dtfn.html(text);
+    $(this).replaceWith(dtfn);
+  });
+  // remove footnotes
+  $('.footnotes').remove();
+
+  // move refs into #references-listing
+  $('#references-listing').replaceWith($('#refs'));
+
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    var id = $(this).attr('id');
+    $('.d-contents a[href="#' + id + '"]').parent().remove();
+    appendix = true;
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
+  });
+
+  // show d-appendix if we have appendix content
+  $("d-appendix").css('display', appendix ? 'grid' : 'none');
+
+  // localize layout chunks to just output
+  $('.layout-chunk').each(function(i, val) {
+
+    // capture layout
+    var layout = $(this).attr('data-layout');
+
+    // apply layout to markdown level block elements
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
+    elements.each(function(i, el) {
+      var layout_div = $('<div class="' + layout + '"></div>');
+      if (layout_div.hasClass('shaded')) {
+        var shaded_content = $('<div class="shaded-content"></div>');
+        $(this).wrap(shaded_content);
+        $(this).parent().wrap(layout_div);
+      } else {
+        $(this).wrap(layout_div);
+      }
+    });
+
+
+    // unwrap the layout-chunk div
+    $(this).children().unwrap();
+  });
+
+  // remove code block used to force  highlighting css
+  $('.distill-force-highlighting-css').parent().remove();
+
+  // remove empty line numbers inserted by pandoc when using a
+  // custom syntax highlighting theme, except when numbering line
+  // in code chunk
+  $('pre:not(.numberLines) code.sourceCode a:empty').remove();
+
+  // load distill framework
+  load_distill_framework();
+
+  // wait for window.distillRunlevel == 4 to do post processing
+  function distill_post_process() {
+
+    if (!window.distillRunlevel || window.distillRunlevel < 4)
+      return;
+
+    // hide author/affiliations entirely if we have no authors
+    var front_matter = JSON.parse($("#distill-front-matter").html());
+    var have_authors = front_matter.authors && front_matter.authors.length > 0;
+    if (!have_authors)
+      $('d-byline').addClass('hidden');
+
+    // article with toc class
+    $('.d-contents').parent().addClass('d-article-with-toc');
+
+    // strip links that point to #
+    $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+    // add orcid ids
+    $('.authors-affiliations').find('.author').each(function(i, el) {
+      var orcid_id = front_matter.authors[i].orcidID;
+      var author_name = front_matter.authors[i].author
+      if (orcid_id) {
+        var a = $('<a></a>');
+        a.attr('href', 'https://orcid.org/' + orcid_id);
+        var img = $('<img></img>');
+        img.addClass('orcid-id');
+        img.attr('alt', author_name ? 'ORCID ID for ' + author_name : 'ORCID ID');
+        img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
+        a.append(img);
+        $(this).append(a);
+      }
+    });
+
+    // hide elements of author/affiliations grid that have no value
+    function hide_byline_column(caption) {
+      $('d-byline').find('h3:contains("' + caption + '")').parent().css('visibility', 'hidden');
+    }
+
+    // affiliations
+    var have_affiliations = false;
+    for (var i = 0; i<front_matter.authors.length; ++i) {
+      var author = front_matter.authors[i];
+      if (author.affiliation !== "&nbsp;") {
+        have_affiliations = true;
+        break;
+      }
+    }
+    if (!have_affiliations)
+      $('d-byline').find('h3:contains("Affiliations")').css('visibility', 'hidden');
+
+    // published date
+    if (!front_matter.publishedDate)
+      hide_byline_column("Published");
+
+    // document object identifier
+    var doi = $('d-byline').find('h3:contains("DOI")');
+    var doi_p = doi.next().empty();
+    if (!front_matter.doi) {
+      // if we have a citation and valid citationText then link to that
+      if ($('#citation').length > 0 && front_matter.citationText) {
+        doi.html('Citation');
+        $('<a href="#citation"></a>')
+          .text(front_matter.citationText)
+          .appendTo(doi_p);
+      } else {
+        hide_byline_column("DOI");
+      }
+    } else {
+      $('<a></a>')
+         .attr('href', "https://doi.org/" + front_matter.doi)
+         .html(front_matter.doi)
+         .appendTo(doi_p);
+    }
+
+     // change plural form of authors/affiliations
+    if (front_matter.authors.length === 1) {
+      var grid = $('.authors-affiliations');
+      grid.children('h3:contains("Authors")').text('Author');
+      grid.children('h3:contains("Affiliations")').text('Affiliation');
+    }
+
+    // remove d-appendix and d-footnote-list local styles
+    $('d-appendix > style:first-child').remove();
+    $('d-footnote-list > style:first-child').remove();
+
+    // move appendix-bottom entries to the bottom
+    $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
+    $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      const citeChild = $(this).children()[0]
+      // Do not process if @xyz has been used without escaping and without bibliography activated
+      // https://github.com/rstudio/distill/issues/466
+      if (citeChild === undefined) return true
+
+      if (citeChild.nodeName == "D-FOOTNOTE") {
+        var fn = citeChild
+        $(this).html(fn.shadowRoot.querySelector("sup"))
+        $(this).id = fn.id
+        fn.remove()
+      }
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        // Could use CSS.escape too here, we insure backward compatibility in navigator
+        return "<p>" + $('div[id="ref-' + ref + '"]').html() + "</p>";
+      }).join("\n");
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
+
+    // fix footnotes in tables (#411)
+    // replacing broken distill.pub feature
+    $('table d-footnote').each(function() {
+      // we replace internal showAtNode methode which is triggered when hovering a footnote
+      this.hoverBox.showAtNode = function(node) {
+        // ported from https://github.com/distillpub/template/pull/105/files
+        calcOffset = function(elem) {
+            let x = elem.offsetLeft;
+            let y = elem.offsetTop;
+            // Traverse upwards until an `absolute` element is found or `elem`
+            // becomes null.
+            while (elem = elem.offsetParent && elem.style.position != 'absolute') {
+                x += elem.offsetLeft;
+                y += elem.offsetTop;
+            }
+
+            return { left: x, top: y };
+        }
+        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetTop
+        const bbox = node.getBoundingClientRect();
+        const offset = calcOffset(node);
+        this.show([offset.left + bbox.width, offset.top + bbox.height]);
+      }
+    })
+
+    // clear polling timer
+    clearInterval(tid);
+
+    // show body now that everything is ready
+    on_load_complete();
+  }
+
+  var tid = setInterval(distill_post_process, 50);
+  distill_post_process();
+
+}
+
+function init_downlevel() {
+
+  init_common();
+
+   // insert hr after d-title
+  $('.d-title').after($('<hr class="section-separator"/>'));
+
+  // check if we have authors
+  var front_matter = JSON.parse($("#distill-front-matter").html());
+  var have_authors = front_matter.authors && front_matter.authors.length > 0;
+
+  // manage byline/border
+  if (!have_authors)
+    $('.d-byline').remove();
+  $('.d-byline').after($('<hr class="section-separator"/>'));
+  $('.d-byline a').remove();
+
+  // remove toc
+  $('.d-contents').remove();
+
+  // move appendix elements
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('.d-appendix'));
+  });
+
+
+  // inject headers into references and footnotes
+  var refs_header = $('<h3></h3>');
+  refs_header.text('References');
+  $('#refs').prepend(refs_header);
+
+  var footnotes_header = $('<h3></h3');
+  footnotes_header.text('Footnotes');
+  $('.footnotes').children('hr').first().replaceWith(footnotes_header);
+
+  // move appendix-bottom entries to the bottom
+  $('.appendix-bottom').appendTo('.d-appendix').children().unwrap();
+  $('.appendix-bottom').remove();
+
+  // remove appendix if it's empty
+  if ($('.d-appendix').children().length === 0)
+    $('.d-appendix').remove();
+
+  // prepend separator above appendix
+  $('.d-appendix').before($('<hr class="section-separator" style="clear: both"/>'));
+
+  // trim code
+  $('pre>code').each(function(i, val) {
+    $(this).html($.trim($(this).html()));
+  });
+
+  // move posts-container right before article
+  $('.posts-container').insertBefore($('.d-article'));
+
+  $('body').addClass('downlevel');
+
+  on_load_complete();
+}
+
+
+function init_common() {
+
+  // jquery plugin to change element types
+  (function($) {
+    $.fn.changeElementType = function(newType) {
+      var attrs = {};
+
+      $.each(this[0].attributes, function(idx, attr) {
+        attrs[attr.nodeName] = attr.nodeValue;
+      });
+
+      this.replaceWith(function() {
+        return $("<" + newType + "/>", attrs).append($(this).contents());
+      });
+    };
+  })(jQuery);
+
+  // prevent underline for linked images
+  $('a > img').parent().css({'border-bottom' : 'none'});
+
+  // mark non-body figures created by knitr chunks as 100% width
+  $('.layout-chunk').each(function(i, val) {
+    var figures = $(this).find('img, .html-widget');
+    // ignore leaflet img layers (#106)
+    figures = figures.filter(':not(img[class*="leaflet"])')
+    if ($(this).attr('data-layout') !== "l-body") {
+      figures.css('width', '100%');
+    } else {
+      figures.css('max-width', '100%');
+      figures.filter("[width]").each(function(i, val) {
+        var fig = $(this);
+        fig.css('width', fig.attr('width') + 'px');
+      });
+
+    }
+  });
+
+  // auto-append index.html to post-preview links in file: protocol
+  // and in rstudio ide preview
+  $('.post-preview').each(function(i, val) {
+    if (window.location.protocol === "file:")
+      $(this).attr('href', $(this).attr('href') + "index.html");
+  });
+
+  // get rid of index.html references in header
+  if (window.location.protocol !== "file:") {
+    $('.distill-site-header a[href]').each(function(i,val) {
+      $(this).attr('href', $(this).attr('href').replace(/^index[.]html/, "./"));
+    });
+  }
+
+  // add class to pandoc style tables
+  $('tr.header').parent('thead').parent('table').addClass('pandoc-table');
+  $('.kable-table').children('table').addClass('pandoc-table');
+
+  // add figcaption style to table captions
+  $('caption').parent('table').addClass("figcaption");
+
+  // initialize posts list
+  if (window.init_posts_list)
+    window.init_posts_list();
+
+  // implmement disqus comment link
+  $('.disqus-comment-count').click(function() {
+    window.headroom_prevent_pin = true;
+    $('#disqus_thread').toggleClass('hidden');
+    if (!$('#disqus_thread').hasClass('hidden')) {
+      var offset = $(this).offset();
+      $(window).resize();
+      $('html, body').animate({
+        scrollTop: offset.top - 35
+      });
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (is_downlevel_browser())
+    init_downlevel();
+  else
+    window.addEventListener('WebComponentsReady', init_distill);
+});
+
+</script>
+
+<style type="text/css">
+/* base variables */
+
+/* Edit the CSS properties in this file to create a custom
+   Distill theme. Only edit values in the right column
+   for each row; values shown are the CSS defaults.
+   To return any property to the default,
+   you may set its value to: unset
+   All rows must end with a semi-colon.                      */
+
+/* Optional: embed custom fonts here with `@import`          */
+/* This must remain at the top of this file.                 */
+
+
+
+html {
+  /*-- Main font sizes --*/
+  --title-size:      50px;
+  --body-size:       1.06rem;
+  --code-size:       14px;
+  --aside-size:      12px;
+  --fig-cap-size:    13px;
+  /*-- Main font colors --*/
+  --title-color:     #000000;
+  --header-color:    rgba(0, 0, 0, 0.8);
+  --body-color:      rgba(0, 0, 0, 0.8);
+  --aside-color:     rgba(0, 0, 0, 0.6);
+  --fig-cap-color:   rgba(0, 0, 0, 0.6);
+  /*-- Specify custom fonts ~~~ must be imported above   --*/
+  --heading-font:    sans-serif;
+  --mono-font:       monospace;
+  --body-font:       sans-serif;
+  --navbar-font:     sans-serif;  /* websites + blogs only */
+}
+
+/*-- ARTICLE METADATA --*/
+d-byline {
+  --heading-size:    0.6rem;
+  --heading-color:   rgba(0, 0, 0, 0.5);
+  --body-size:       0.8rem;
+  --body-color:      rgba(0, 0, 0, 0.8);
+}
+
+/*-- ARTICLE TABLE OF CONTENTS --*/
+.d-contents {
+  --heading-size:    18px;
+  --contents-size:   13px;
+}
+
+/*-- ARTICLE APPENDIX --*/
+d-appendix {
+  --heading-size:    15px;
+  --heading-color:   rgba(0, 0, 0, 0.65);
+  --text-size:       0.8em;
+  --text-color:      rgba(0, 0, 0, 0.5);
+}
+
+/*-- WEBSITE HEADER + FOOTER --*/
+/* These properties only apply to Distill sites and blogs  */
+
+.distill-site-header {
+  --title-size:       18px;
+  --text-color:       rgba(255, 255, 255, 0.8);
+  --text-size:        15px;
+  --hover-color:      white;
+  --bkgd-color:       #0F2E3D;
+}
+
+.distill-site-footer {
+  --text-color:       rgba(255, 255, 255, 0.8);
+  --text-size:        15px;
+  --hover-color:      white;
+  --bkgd-color:       #0F2E3D;
+}
+
+/*-- Additional custom styles --*/
+/* Add any additional CSS rules below                      */
+</style>
+<style type="text/css">/* base variables */
+
+/* Edit the CSS properties in this file to create a custom
+   Distill theme. Only edit values in the right column
+   for each row; values shown are the CSS defaults.
+   To return any property to the default,
+   you may set its value to: unset
+   All rows must end with a semi-colon.                      */
+
+/* Optional: embed custom fonts here with `@import`          */
+/* This must remain at the top of this file.                 */
+@import url('https://fonts.googleapis.com/css?family=Libre+Baskerville:300, 300i&display=swap');
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,400i,700,700i&display=swap');
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400,500&display=swap');
+
+html {
+  /*-- Main font sizes --*/
+  --title-size:      50px;
+  --body-size:       1.06rem;
+  --code-size:       14px;
+  --aside-size:      12px;
+  --fig-cap-size:    13px;
+  /*-- Main font colors --*/
+  --title-color:     #ca225e;
+  --header-color:    #ca225e;                    /* edited */
+  --body-color:      #404040;                    /* edited */
+  --aside-color:     rgba(0, 0, 0, 0.6);
+  --fig-cap-color:   rgba(0, 0, 0, 0.6);
+  /*-- Specify custom fonts ~~~ must be imported above   --*/
+  --heading-font:    "Libre Baskerville", serif; /* edited */
+  --mono-font:       "IBM Plex Mono", monospace;  /* edited */
+  --body-font:       "IBM Plex Sans", sans-serif;          /* edited */
+  --navbar-font:     "Libre Baskerville", serif;          /* edited */
+}
+
+/*-- ARTICLE METADATA --*/
+d-byline {
+  --heading-size:    0.5rem;                      /* edited */
+  --heading-color:   rgba(0, 0, 0, 0.5);
+  --body-size:       0.95em;                     /* edited */
+  --body-color:      rgba(0, 0, 0, 0.8);
+}
+
+/*-- ARTICLE TABLE OF CONTENTS --*/
+.d-contents {
+  --heading-size:    18px;
+  --contents-size:   13px;
+}
+
+/*-- ARTICLE APPENDIX --*/
+d-appendix {
+  --heading-size:    13px;
+  --heading-color:   rgba(0, 0, 0, 0.65);      
+  --text-size:       0.8rem;                    /* edited */
+  --text-color:      #1a162d;                   /* edited */
+}
+
+/*-- WEBSITE HEADER + FOOTER --*/
+/* These properties only apply to Distill sites and blogs  */
+
+.distill-site-header {
+  --title-size:       18px;
+  --text-color:       #1f1f1f;                   /* edited */
+  --text-size:        13px;
+  --hover-color:      #787878;                   /* edited */
+  --bkgd-color:       #fff;                      /* edited */
+}
+
+.distill-site-footer {
+  --text-color:       #7e7b88;                   /* edited */
+  --text-size:        15px;
+  --hover-color:      white;
+  --bkgd-color:       #ca225e3d;                 /* edited */
+}
+
+/*-- Additional custom styles --*/
+
+ul > li::marker {
+  color: #ca225e;
+}
+
+ol > li::marker {
+  color: #ca225e;
+}
+
+
+.distill-site-header { 
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: 2px;
+  font-weight: 300;
+}
+
+.distill-site-header .logo img{
+  max-height: 40px; /* Makes logo bigger, default was 20px */
+}
+
+.distill-site-header {
+  padding-top: 1rem;
+}
+
+d-title h1,
+d-article h2,
+d-article h3,
+d-article h4,
+.posts-list .description h2,
+.posts-list > h1 {
+    font-weight: 300;
+}
+
+d-title p { 
+    color: rgba(0, 0, 0, 0.55); /* grey subtitle */ 
+}
+
+/* inline citation style */
+d-article .citation {
+  font-size: 80%;
+  color: #b3c1cc;
+  top: -1px;
+  position: relative;
+  margin: 0 1px;
+}
+
+d-article .citation > a {
+  border-bottom: none;
+}
+
+/* blockquotes */
+d-article blockquote {
+  font-style: normal;
+}
+
+code {
+  font-family: var(--mono-font);
+}
+
+/* inline code */ 
+p > code, li > code {
+  white-space: pre;
+  background: #FAFAFA;
+  border-radius: 2px;
+  padding: 2px;
+  padding-top: 1px;
+  border: 1px solid #EEE;
+  font-size: 0.9rem;
+}
+
+d-appendix code {
+  font-size: 0.7rem;
+}
+
+/* highlighting */
+d-article mark {
+    background-color: transparent;
+    font-weight: bold;
+    color: rgba(202, 34, 94, 0.8);
+}
+
+/* video */
+d-article figure:has(> video) {
+  margin-top: 0em;
+  margin-bottom: 1.5em;
+}
+
+d-article video {
+  display: block;
+  margin: auto;
+}
+
+d-appendix {
+  background-color: #fdf7f9;
+  border-top: none;
+}
+
+d-appendix .citation-appendix {
+  font-family: var(--mono-font);
+}</style>
+<style type="text/css">
+/* base style */
+
+/* FONT FAMILIES */
+
+:root {
+  --heading-default: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono-default: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  --body-default: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+body,
+.posts-list .post-preview p,
+.posts-list .description p {
+  font-family: var(--body-font), var(--body-default);
+}
+
+h1, h2, h3, h4, h5, h6,
+.posts-list .post-preview h2,
+.posts-list .description h2 {
+  font-family: var(--heading-font), var(--heading-default);
+}
+
+d-article div.sourceCode code,
+d-article pre code {
+  font-family: var(--mono-font), var(--mono-default);
+}
+
+
+/*-- TITLE --*/
+d-title h1,
+.posts-list > h1 {
+  color: var(--title-color, black);
+}
+
+d-title h1 {
+  font-size: var(--title-size, 50px);
+}
+
+/*-- HEADERS --*/
+d-article h1,
+d-article h2,
+d-article h3,
+d-article h4,
+d-article h5,
+d-article h6 {
+  color: var(--header-color, rgba(0, 0, 0, 0.8));
+}
+
+/*-- BODY --*/
+d-article > p,  /* only text inside of <p> tags */
+d-article > ul, /* lists */
+d-article > ol {
+  color: var(--body-color, rgba(0, 0, 0, 0.8));
+  font-size: var(--body-size, 1.06rem);
+}
+
+
+/*-- CODE --*/
+d-article div.sourceCode code,
+d-article pre code {
+  font-size: var(--code-size, 14px);
+}
+
+/*-- ASIDE --*/
+d-article aside {
+  font-size: var(--aside-size, 12px);
+  color: var(--aside-color, rgba(0, 0, 0, 0.6));
+}
+
+/*-- FIGURE CAPTIONS --*/
+figure .caption,
+figure figcaption,
+.figure .caption {
+  font-size: var(--fig-cap-size, 13px);
+  color: var(--fig-cap-color, rgba(0, 0, 0, 0.6));
+}
+
+/*-- METADATA --*/
+d-byline h3 {
+  font-size: var(--heading-size, 0.6rem);
+  color: var(--heading-color, rgba(0, 0, 0, 0.5));
+}
+
+d-byline {
+  font-size: var(--body-size, 0.8rem);
+  color: var(--body-color, rgba(0, 0, 0, 0.8));
+}
+
+d-byline a,
+d-article d-byline a {
+  color: var(--body-color, rgba(0, 0, 0, 0.8));
+}
+
+/*-- TABLE OF CONTENTS --*/
+.d-contents nav h3 {
+  font-size: var(--heading-size, 18px);
+}
+
+.d-contents nav a {
+  font-size: var(--contents-size, 13px);
+}
+
+/*-- APPENDIX --*/
+d-appendix h3 {
+  font-size: var(--heading-size, 15px);
+  color: var(--heading-color, rgba(0, 0, 0, 0.65));
+}
+
+d-appendix {
+  font-size: var(--text-size, 0.8em);
+  color: var(--text-color, rgba(0, 0, 0, 0.5));
+}
+
+d-appendix d-footnote-list a.footnote-backlink {
+  color: var(--text-color, rgba(0, 0, 0, 0.5));
+}
+
+/*-- WEBSITE HEADER + FOOTER --*/
+.distill-site-header .title {
+  font-size: var(--title-size, 18px);
+  font-family: var(--navbar-font), var(--heading-default);
+}
+
+.distill-site-header a,
+.nav-dropdown .nav-dropbtn {
+  font-family: var(--navbar-font), var(--heading-default);
+}
+
+.nav-dropdown .nav-dropbtn {
+  color: var(--text-color, rgba(255, 255, 255, 0.8));
+  font-size: var(--text-size, 15px);
+}
+
+.distill-site-header a:hover,
+.nav-dropdown:hover .nav-dropbtn {
+  color: var(--hover-color, white);
+}
+
+.distill-site-header {
+  font-size: var(--text-size, 15px);
+  color: var(--text-color, rgba(255, 255, 255, 0.8));
+  background-color: var(--bkgd-color, #0F2E3D);
+}
+
+.distill-site-footer {
+  font-size: var(--text-size, 15px);
+  color: var(--text-color, rgba(255, 255, 255, 0.8));
+  background-color: var(--bkgd-color, #0F2E3D);
+}
+
+.distill-site-footer a:hover {
+  color: var(--hover-color, white);
+}</style>
+<!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.29/header-attrs.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
+  <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
+  <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
+  <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
+  <script src="../../site_libs/distill-2.2.21/template.v2.js"></script>
+  <!--radix_placeholder_site_in_header-->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: {
+    equationNumbers: {
+      autoNumber: "AMS"
+    }
+  }
+});
+</script>
+
+<!--/radix_placeholder_site_in_header-->
+
+
+</head>
+
+<body>
+
+<!--radix_placeholder_front_matter-->
+
+<script id="distill-front-matter" type="text/json">
+{"title":"Distributed Machine Learning: How Does it Work?","description":"State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. \nHow does this orchestration work? And how can it be done without incurring expensive communication overheads?","authors":[{"author":"Bruce Mauger","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2025-01-01T00:00:00.000+01:00","citationText":"Mauger, 2025"}
+</script>
+
+<!--/radix_placeholder_front_matter-->
+<!--radix_placeholder_navigation_before_body-->
+<header class="header header--fixed" role="banner">
+<nav class="distill-site-nav distill-site-header">
+<div class="nav-left">
+<a href="../../index.html" class="title">Bruce Mauger</a>
+</div>
+<div class="nav-right">
+<a href="../../about.html">About</a>
+<a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
+</div>
+</nav>
+</header>
+<!--/radix_placeholder_navigation_before_body-->
+<!--radix_placeholder_site_before_body-->
+<!--/radix_placeholder_site_before_body-->
+
+<div class="d-title">
+<h1>Distributed Machine Learning: How Does it Work?</h1>
+
+<!--radix_placeholder_categories-->
+<!--/radix_placeholder_categories-->
+<p><p>State of the art AI requires orchestrating large clusters to perform a single synchronised calculation.
+How does this orchestration work? And how can it be done without incurring expensive communication overheads?</p></p>
+</div>
+
+<div class="d-byline">
+  Bruce Mauger  
+  
+<br/>01-01-2025
+</div>
+
+<div class="d-article">
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#pytorch-mental-model" id="toc-pytorch-mental-model">1. PyTorch mental model</a>
+<ul>
+<li><a href="#how-do-you-train-a-pytorch-neural-network" id="toc-how-do-you-train-a-pytorch-neural-network">How do you train a PyTorch neural network?</a></li>
+<li><a href="#the-transformer-architecture" id="toc-the-transformer-architecture">The Transformer architecture</a></li>
+</ul></li>
+<li><a href="#communication-primitives" id="toc-communication-primitives">2.Communication Primitives</a></li>
+<li><a href="#parallelism-paradigms" id="toc-parallelism-paradigms">3. Parallelism Paradigms</a>
+<ul>
+<li><a href="#distributed-data-parallel-ddp" id="toc-distributed-data-parallel-ddp">Distributed Data Parallel (DDP)</a></li>
+<li><a href="#fully-sharded-data-parallel-fsdp" id="toc-fully-sharded-data-parallel-fsdp">Fully-Sharded Data Parallel (FSDP)</a></li>
+<li><a href="#pipeline-parallel-pp" id="toc-pipeline-parallel-pp">Pipeline Parallel (PP)</a></li>
+<li><a href="#tensor-parallel-tp" id="toc-tensor-parallel-tp">Tensor Parallel (TP)</a></li>
+<li><a href="#context-parallel-cp" id="toc-context-parallel-cp">Context Parallel (CP)</a></li>
+</ul></li>
+<li><a href="#parallelism-in-practice" id="toc-parallelism-in-practice">4. Parallelism in Practice</a></li>
+</ul>
+</nav>
+</div>
+<p>Many recent advances in AI are owed to training of larger and larger models.
+These neural networks are too big fit in and take too long to train with a single GPU.
+State of the art AI therefore requires orchestrating vast clusters of GPUs to perform a single synchronised calculation, with the objective of:</p>
+<ol type="1">
+<li><strong>Reducing memory impact</strong>, so we can fit larger models.</li>
+<li><strong>Increasing degree of parallelism</strong>, so we can use lots of compute in parallel to speed up training.</li>
+</ol>
+<p>There’s no such thing as a free lunch: by distributing training we incur a <em>communication</em> overhead when GPUs have to talk to each other.
+Meta’s breakthrough Llama 3 model was trained<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> on a cluster of 24K GPUs, but with a per-GPU utilisation well below 50% <span class="citation" data-cites="llama3">[<a href="#ref-llama3" role="doc-biblioref">1</a>]</span>.</p>
+<p>We’ll be taking an in-depth look at the wide variety of parallelism paradigms that have enabled training of gigantic models.
+As we’ll see, it’s relatively easy to design parallelism techniques that achieve both of the previous objectives; doing so without incurring prohibitive communication overheads, however, is a very difficult engineering and research challenge.
+The communication aspects of these designs will be focus of this post.</p>
+<p>We assume only basic prior knowledge of neural networks and gradient descent.
+The first two sections provide background on the PyTorch framework (as well as the transformer model that underpins modern LLMs), and collective communication primitives respectively.
+The next section presents a deep-dive into all of the major parallelism techniques, including how PyTorch non-intrusively integrates these into its inherently local execution model.
+We’ll conclude with how the parallelisms are composed together in practice by looking at Llama 3.</p>
+<h1 id="pytorch-mental-model">1. PyTorch mental model</h1>
+<p>We’ll be using PyTorch to illustrate model distribution throughout (though everything remains largely applicable to other frameworks).
+It’s useful to first get an understanding of how data flows during the PyTorch model training process, in order to see the opportunities for parallelisation.</p>
+<h3 id="how-do-you-train-a-pytorch-neural-network">How do you train a PyTorch neural network?</h3>
+<p>[<a href="https://pytorch.org/tutorials/beginner/basics/intro.html">Further Reading</a>]</p>
+<p>PyTorch’s fundamental data structure is the <code>Tensor</code>, a multi-dimensional matrix (think NumPy’s <code>ndarray</code>) used to store a model’s parameters and encode inputs/outputs.
+In PyTorch, a neural network is a <code>Module</code> composed by stitching other modules (layers) and functions together.
+For example, here’s a simple network with two linear layers and a ReLU activation function in-between:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch <span class="im">import</span> nn</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NeuralNetwork(nn.Module):</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.linear1 <span class="op">=</span> nn.Linear(<span class="dv">2</span>, <span class="dv">4</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.activation_fn <span class="op">=</span> nn.ReLU()</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.linear2 <span class="op">=</span> nn.Linear(<span class="dv">4</span>, <span class="dv">1</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="va">self</span>.linear1(x)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="va">self</span>.activation_fn(x)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="va">self</span>.linear2(x)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x</span></code></pre></div>
+</div>
+<p>Unsurprisingly, <code>forward</code> defines the network’s forward pass: how inputs are mapped to outputs. Here a 2D input is mapped to a 1D output, with a 4D “hidden” layer. Taking the first <code>Linear</code> submodule as an example, it holds weight and bias tensors of shapes <code>[4,2]</code> and <code>[4]</code> respectively. Adding the second linear layer’s parameters (the activation function doesn’t have any), we can see the network has a total of 17 trainable parameters.
+<!-- TODO: illustration of this network? e.g. https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/tutorial2/Introduction_to_PyTorch.html ---></p>
+<p>This is all well and good, but we can’t actually train the network yet!
+For that we need a basic training loop:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> NeuralNetwork() </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> torch.ones(<span class="dv">10</span>, <span class="dv">2</span>) <span class="co"># input batch tensor</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.zeros(<span class="dv">10</span>, <span class="dv">1</span>) <span class="co"># expected output (target) batch tensor</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(epochs): </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Compute prediction and loss</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  pred <span class="op">=</span> model(x)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  loss <span class="op">=</span> torch.nn.functional.cross_entropy(pred, y)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Update parameters</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  loss.backward()</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  optimizer.step()</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  optimizer.zero_grad()</span></code></pre></div>
+</div>
+<p>We train our model for 10 epochs (iterations) over a single batch of <span class="math inline">\(B=10\)</span> (identical) data samples<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.
+In each epoch:</p>
+<ol type="1">
+<li>With <code>model(x)</code>, we call the <code>forward</code> method defined earlier to obtain predictions for the entire input batch. The outputs of each layer (<strong>“activations”</strong>) are cached for use in the backward pass.</li>
+<li>We compute the (cross entropy) loss for these predictions and store them in the <code>loss</code> tensor.</li>
+<li>We calculate the derivative of the loss of each sample with respect to each parameter (<strong>“gradients”</strong>) with <code>loss.backward()</code>. PyTorch’s autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the outer layer in the backward pass. It accumulates gradients in each tensor’s <code>.grad</code> attribute<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</li>
+<li>The optimizer defines how parameters are updated from gradients. <code>optimizer.step()</code> performs this adjustment, and <code>optimizer.zero_grad()</code> resets gradients so they don’t accumulate in the next pass.</li>
+</ol>
+<figure>
+<img src="images/pebble_graph.gif" alt="Pebble graph for a four layer network illustrating how cached activations are built up in the forward pass, and used to calculate gradients in the backward pass (graphic inspiration)." />
+<figcaption aria-hidden="true">Pebble graph for a four layer network illustrating how cached activations are built up in the forward pass, and used to calculate gradients in the backward pass (<a href="https://siboehm.com/articles/22/data-parallel-training">graphic inspiration</a>).</figcaption>
+</figure>
+<p>This process is known as <strong>stochastic gradient descent</strong>: we <em>iteratively</em> update parameters using <em>gradients</em> calculated over a <em>random</em> subset (batch) of the entire dataset.</p>
+<p>For each parameter in our network, we also need to store its gradient and relevant optimizer state.
+The popular Adam optimizer tracks <strong>momentum</strong> and <strong>variance</strong>, exponential averages of the first and second moments respectively of each parameter’s gradient <span class="citation" data-cites="adam2017">[<a href="#ref-adam2017" role="doc-biblioref">2</a>]</span>.
+The result is that each parameter can end up needing at least 16 bytes of memory, mostly attributable to high-precision optimizer state (assuming fp16/32 mixed precision<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>) <span class="citation" data-cites="mixedprecision2018">[<a href="#ref-mixedprecision2018" role="doc-biblioref">3</a>]</span>.
+For larger models such as Meta’s Llama 405B that’s a 6.5TB memory requirement, which makes distributing model parameters over several GPUs a necessity.</p>
+<p>PyTorch offers two execution models: <strong>eager</strong> mode and <strong>graph</strong> mode.
+In eager mode (the default), operators are immediately executed as they are encountered – effectively, we can’t “look ahead”.
+Graph mode synthesises operators into a graph, which is then compiled and executed as a whole.
+As of PyTorch 2.5, most of the parallelisms offered only exists in eager mode – which, as we’ll see, can often lead to suboptimal sequences of operations.</p>
+<h3 id="the-transformer-architecture">The Transformer architecture</h3>
+<p>[<a href="https://arxiv.org/pdf/1706.03762">Further Reading</a>]</p>
+<p>[WIP]
+As the largest models trained today are transformers, most of the distributed training literature has evolved around this architecture.
+Transformers are usually made of several equal-size transformer blocks, which are very convenient for splitting/parallelisms.</p>
+<h1 id="communication-primitives">2.Communication Primitives</h1>
+<p><a href="https://marek.ai/allreduce-the-basis-of-multi-device-communication-for-neural-network-training.html">[Further Reading]</a></p>
+<p>Before going into distribution strategies, we need to discuss the primitives we have available for communicating data between GPUs.</p>
+<p>Let’s start with a simple model: two GPUs (or <strong>“ranks”</strong>) with a point-to-point (p2p) connection – this could be a fast NVLink interconnect if they’re within the same host, or a slower InfiniBand or Ethernet network (perhaps with several hops) if they’re not.</p>
+<p>All primitives operate over a single tensor at each rank.
+The simplest thing we can do is to <mark>send</mark> a tensor from one rank and receive on the other:</p>
+<figure>
+<video width="80%" autoplay loop muted>
+<source src="videos/CollectiveP2P.mp4" type="video/mp4">
+</video>
+<figcaption aria-hidden="true">
+P2P send, circles correspond to ranks and squares to tensors.
+</figcaption>
+</figure>
+<p>Now let’s suppose we want to synchronise tensors distributed over a group (or <strong>“collective”</strong>) of GPUs.
+One way to do this is with an <mark>AllToAll</mark> collective, a complete graph of p2p sends:</p>
+<figure>
+<video width="80%" autoplay loop muted>
+<source src="videos/CollectiveAllToAll.mp4" type="video/mp4">
+</video>
+<figcaption aria-hidden="true">
+<span class="math inline">\(W=4\)</span> rank AllToAll
+</figcaption>
+</figure>
+<p>This isn’t very bandwidth efficient: a <strong>world-size</strong> of <span class="math inline">\(W\)</span> ranks synchronising <span class="math inline">\(D\)</span>-sized tensors results in <span class="math inline">\(D(W-1)\)</span> per-GPU traffic, some of which may be contending for the same underlying network links.
+Moreover, we often only need an <em>aggregate</em> of the distributed tensors – for example we might want to average some parameters we’ve replicated across the ranks.
+So how might we accomplish this with less bandwidth?
+If each rank <strong>reduces</strong> (applying an associative<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> operator e.g. sum, min, max, etc.) the tensor it receives with its own local tensor, before passing the result onto the next rank, we obtain a <strong>ring-based</strong> <mark>Reduce</mark> collective:</p>
+<figure>
+<video width="80%" autoplay loop muted>
+<source src="videos/CollectiveReduce.mp4" type="video/mp4">
+</video>
+<figcaption aria-hidden="true">
+<span class="math inline">\(W=4\)</span> rank Reduce
+</figcaption>
+</figure>
+<p>After completing one loop around the ring, we’ve reduced all of the tensors into a single tensor – but this result is only held in the last rank.
+We need to complete another loop so that each rank holds a replica of the resulting tensor.
+This is the <mark>Broadcast</mark> collective:</p>
+<figure>
+<video width="80%" autoplay loop muted>
+<source src="videos/CollectiveBroadcast.mp4" type="video/mp4">
+</video>
+<figcaption aria-hidden="true">
+<span class="math inline">\(W=4\)</span> rank Broadcast
+</figcaption>
+</figure>
+<p>Notice that, in the latter two collectives, only one rank/link at a time is busy, with the rest idle.
+We can use pipelining to get better throughput: we split the tensor into <span class="math inline">\(W\)</span> chunks, with the <span class="math inline">\(r^\text{th}\)</span> rank at the start (or <strong>root</strong>) of the ring corresponding to the <span class="math inline">\(r^\text{th}\)</span> chunk.
+The pipelined analogs of Reduce and Broadcast are <mark>ReduceScatter</mark> and <mark>AllGather</mark> respectively.
+Sequencing the two together results in the composite <mark>AllReduce</mark> collective:</p>
+<figure>
+<video width="80%" autoplay loop muted>
+<source src="videos/CollectiveAllReduce.mp4" type="video/mp4">
+</video>
+<figcaption aria-hidden="true">
+<span class="math inline">\(W=4\)</span> rank AllReduce
+</figcaption>
+</figure>
+<p>The ReduceScatter and AllGather collectives correspond to the first and second loops in the above animation.
+Notice we obtain the same result we would have had with an AllToAll followed by local reductions at each rank.
+However, with its use of a ring, AllReduce improves communication overhead by an order of magnitude.
+Each GPU will send a <span class="math inline">\(\frac{D}{W}\)</span>-size datachunk <span class="math inline">\(W-1\)</span> times for the ReduceScatter and <span class="math inline">\(W-1\)</span> times for the AllGather, for a total per-GPU traffic of <span class="math inline">\(2(W-1)\frac{D}{W}\)</span>. Crucially, this is independent of the number of GPUs in the collective!</p>
+<p>Though Ring AllReduce is bandwidth optimal, its end-to-end latency scales <em>linearly</em> with the number of ranks. A lower latency, tree-based alternative will be discussed in another post.
+<!-- TODO: summary table of each collective, overhead, latency, etc --></p>
+<h1 id="parallelism-paradigms">3. Parallelism Paradigms</h1>
+<p>Now that we have an understanding of how data flows during the PyTorch model training process and the primitives we have available for communicating this data between GPUs, let’s look at the various techniques that have emerged for distributing training.
+In order to have some notion of correctness for these techniques, we’ll define a distributed algorithm to be <strong>locally consistent</strong> if it is mathematically equivalent to local training.
+<!-- TODO: summary table of parallelisation paradigms, and their compute/communication costs --></p>
+<h3 id="distributed-data-parallel-ddp">Distributed Data Parallel (DDP)</h3>
+<p><a href="https://www.vldb.org/pvldb/vol13/p3005-li.pdf">[Further Reading]</a></p>
+<p>As its name would imply, DDP splits our <em>dataset</em> across ranks (each with an identical copy of the model), with periodic synchronisation to ensure model replicas are consistent. DDP is useful when our model is still small enough to fit on a single GPU, but we’d like to speed up training by having several GPUs work on a single batch in parallel.</p>
+<p>We described local training in <a href="#how-do-you-train-a-pytorch-neural-network">Section 1</a>: at each iteration we load the next batch, perform a forward pass while caching each layer’s activations, and calculate the loss. Then we run the backward pass to calculate gradients, before our optimizer updates parameters.</p>
+<figure>
+<img src="images/local_training.png" alt="Local training example on a batch of 6 MNIST data samples (image credit)." />
+<figcaption aria-hidden="true">Local training example on a batch of 6 MNIST data samples (<a href="https://siboehm.com/articles/22/data-parallel-training">image credit</a>).</figcaption>
+</figure>
+<p>DDP duplicates the model across <span class="math inline">\(W\)</span> ranks, splitting batches into <span class="math inline">\(W\)</span> different <span class="math inline">\(\beta=\frac{B}{W}\)</span>-size chunks for each rank to process:</p>
+<figure>
+<img src="images/ddp_training.png" alt="Data parallel training example with W=2 ranks (image credit)." />
+<figcaption aria-hidden="true">Data parallel training example with <span class="math inline">\(W=2\)</span> ranks (<a href="https://siboehm.com/articles/22/data-parallel-training">image credit</a>).</figcaption>
+</figure>
+<p>Without any communication overhead, this should result in a linear <span class="math inline">\(W\times\)</span> speedup.
+The forward and backward passes are independent sample-wise calculations<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>, and hence our batches can be independently processed without any communication.</p>
+<aside style="margin-bottom: -200%">
+Why don’t we synchronise <em>parameters</em> rather than <em>gradients</em>?
+If we’re using stochasting gradient descent, there wouldn’t be any difference:
+<span class="math display">\[
+\begin{align*}
+\theta&#39; ={}&amp; \theta + \eta \nabla \theta\\
+={}&amp; \theta+\eta \frac{1}{W} \sum_{r=0}^W \nabla \theta_r^\text{local}\\
+={}&amp; \frac{1}{W}\sum_{r=0}^W (\theta+\eta \nabla \theta_r^\text{local})
+\end{align*}
+\]</span>
+However, state updates for stateful optimizers like Adam are non-linear functions of the gradient, and thus we would lose local consistency as optimizer states diverge.
+</aside>
+<p>To achieve local consistency, we need to synchronise our gradients before the optimizer step so that the weight updates at each rank are the same.
+Conveniently, the most commonly used loss functions are means over the sample-wise losses in the batch:</p>
+<p><span class="math display">\[
+\text{loss}(\text{batch}) = \frac{1}{B} \sum_{j=0}^B \text{loss}(\text{fwd}(\text{input}_j), \text{target}_j)
+\]</span>
+Because the gradient of a sum is the sum of the gradients of each term, we can calculate gradients for the chunks at each rank independently and average them together to obtain the gradient over the entire batch:</p>
+<p><span class="math display">\[
+\nabla \theta = \frac{1}{W}\sum_{r=0}^W \nabla \theta_r^\text{local}
+\]</span>
+This can be done efficiently using the previously discussed AllReduce collective (along with a single Broadcast from the root rank after model construction, to synchronise initial parameters).</p>
+<p>Lastly, it’s worth noting that batchsize limits the maximum degree of DDP parallelism.
+We need to maintain chunk sizes bigger than a <em>minimum batchsize per GPU</em> (<span class="math inline">\(\beta_\text{min}\)</span>), below which compute intensity/utilisation decreases substantially.
+On the other hand, stochastic gradient descent is maximally efficient when overall batchsize is well-below an empirical value known as the <em>critical batch size</em><a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>, <span class="math inline">\(B \ll B_\text{crit}\)</span> <span class="citation" data-cites="empiricallargebatchtraining">[<a href="#ref-empiricallargebatchtraining" role="doc-biblioref">4</a>]</span>.
+This small batchsize regime is unattainable for larger clusters since <span class="math inline">\(B \geq W\beta_\text{min} &gt; B_\text{crit}\)</span>.</p>
+<h4 id="ddp-in-pytorch">DDP in PyTorch</h4>
+<p>PyTorch’s distribution API is designed for non-intrusive scaling out from local training.
+Applying DDP to a model is as simple as wrapping our local model with the DDP <code>nn.Module</code> class: <code>nn.parallel.DDP(model, process_group=...)</code>.
+The <strong>process group</strong> (PyTorch’s abstraction for a group of processes that run collectives together) allows us to specify what communication backend to use, and which ranks to distribute over.
+Care should be taken to ensure the batches processed by each rank are different (e.g. with the <code>DistributedSampler</code> dataloader class).</p>
+<p>A naive implementation of DDP would synchronise gradients only after running a full forward and backward pass, and then subsequently calling <code>optimizer.step()</code>.
+This is suboptimal as it divides training into two distinct phases: one where we’re waiting for backpropagation to finish computing while the network is idle, and another where the network is communicating as fast as possible while our expensive GPUs are doing (almost) nothing:</p>
+<figure>
+<img src="images/ddp_naive.png" alt="Naive DDP implementation with non-overlapping computation and communication (image credit)." />
+<figcaption aria-hidden="true">Naive DDP implementation with non-overlapping computation and communication (<a href="https://siboehm.com/articles/22/data-parallel-training">image credit</a>).</figcaption>
+</figure>
+<p>Notice in the above that gradients for later layers are already available while we’re still computing the backward pass of earlier layers.
+For example, the gradients of Layer3 are ready while we’re backpropagating through Layer2.
+This allows us to overlap computation with (non-blocking) communication, speeding up the complete iteration:</p>
+<figure>
+<img src="images/ddp_overlap.png" alt="Faster DDP implementation with overlapping computation and communication (image credit)." />
+<figcaption aria-hidden="true">Faster DDP implementation with overlapping computation and communication (<a href="https://siboehm.com/articles/22/data-parallel-training">image credit</a>).</figcaption>
+</figure>
+<p>Collective communications are more efficient on large tensors. Therefore, in practice, rather than launching a dedicated AllReduce immediately as soon as a layer’s gradient tensor is ready, we use <strong>Gradient Bucketing</strong>: we wait for a short period and bucket multiple tensors at a time into one AllReduce.</p>
+<p>To non-intrusively integrate with its eager execution model, PyTorch implements DDP by registering one autograd <strong>hook</strong> (a callback) with each parameter tensor, which fires after the corresponding gradients are updated (during the <code>loss.backward()</code> call).
+Once all hooks in a bucket<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> have fired, an asynchronous AllReduce is triggered. PyTorch’s DDP paper <span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">5</a>]</span> shows interleaving brings significant performance gains, particularly when using the recommended NCCL communication backend:</p>
+<figure>
+<img src="images/pytorch_ddp_perf.png" alt="Per-iteration normalised latency breakdown, comparing non-overlapping vs overlapping communication; training on 32 GPUs across 4 machines. Figure from [5]." />
+<figcaption aria-hidden="true">Per-iteration normalised latency breakdown, comparing non-overlapping vs overlapping communication; training on 32 GPUs across 4 machines. Figure from <span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">5</a>]</span>.</figcaption>
+</figure>
+<p>Amortised communication overhead can be further reduced with <strong>Gradient Accumulation</strong>: rather than synchronising gradients every iteration, we accumulate (via the <code>no_sync</code> context manager) the gradients of <span class="math inline">\(n\)</span> local training iterations before synchronising gradients globally and updating parameters.
+<span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">5</a>]</span> claims this enables near-linear scaling for smaller GPU clusters, with “negligible accuracy penalty”:</p>
+<figure>
+<img src="images/pytorch_ddp_grad_accum.png" alt="Per-iteration latencies (left), and final training loss (right) for n iterations of gradient accumulation. Figure from [5]." />
+<figcaption aria-hidden="true">Per-iteration latencies (left), and final training loss (right) for <span class="math inline">\(n\)</span> iterations of gradient accumulation. Figure from <span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">5</a>]</span>.</figcaption>
+</figure>
+<h3 id="fully-sharded-data-parallel-fsdp">Fully-Sharded Data Parallel (FSDP)</h3>
+<p>[<a href="https://arxiv.org/pdf/2304.11277">Further Reading</a>]</p>
+<p>DDP speeds up training by distributing our dataset across multiple ranks, but what happens when our model can’t fit within a single GPU?
+DDP’s newer alternative, FSDP, addresses this by also splitting model parameters.
+FSDP is a PyTorch native implementation of DeepSpeed’s ZeRO <span class="citation" data-cites="zero2020">[<a href="#ref-zero2020" role="doc-biblioref">6</a>]</span>, with some further optimisations.</p>
+<p>FSDP reduces memory footprint by <mark>sharding</mark> model parameters: the model is split <em>horizontally</em> so that each rank only holds a subset (<strong>“shard”</strong>) of the parameters (and associated gradients and optimizer state) in any given layer.
+The naive approach to guaranteeing local consistency is to compute the partial activations of a layer corresponding to the local shard, and then to communicate these activations with the other ranks before proceeding onto the next layer:</p>
+<figure>
+<img src="images/fsdp_naive.png" alt="Naive FSDP forward pass: activations are data-dependent and therefore appear on the critical path." />
+<figcaption aria-hidden="true">Naive FSDP forward pass: activations are data-dependent and therefore appear on the critical path.</figcaption>
+</figure>
+<p>The obvious problem with this approach is that communication appears on the critical path: we can’t compute the forward pass for a given layer until we’ve received the complete activations of the previous layer.</p>
+<p>Instead of communicating <em>activations</em>, FSDP’s approach is to communicate <em>parameters</em>.
+FSDP fully materialises parameters before computations, just as in local training, thus removing any data dependency.
+However, we would need to be able to materialise parameters on a single GPU, eliminating our memory savings!
+FSDP’s simple solution is to partition the model into groups of layers called <strong>units</strong>, only instantiating one unit at a time on-demand.</p>
+<p>So what does this look like in practice?
+Let’s look at a simple six layer model (illustrated below), which we’ve decided to decompose into three units: <code>[layer0, layer3]</code>, <code>[layer1, layer2]</code> and <code>[layer4, layer5]</code>.
+Consider what happens to <code>unit1</code> consisting of <code>[layer1, layer2]</code>:</p>
+<ol type="1">
+<li>Just before the forward pass through <code>layer1</code>, we materialise the parameters in <code>unit1</code> by gathering shards from peer ranks. We can do this with an AllGather (equivalent to each rank Broadcasting its own shard).</li>
+<li>After completing local forward computation, we free peer shards (but keep activations).</li>
+<li>Before the backward pass through <code>layer2</code>, we AllGather the shards again.</li>
+<li>After gradients are calculated, we free peer shards and then ReduceScatter to sum up and shard gradients (equivalent to each rank Reducing the gradients in its shard).</li>
+<li>Finally, after completing full forward &amp; backward passes through all units, we update our shard of the parameters in the optimizer step<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>.</li>
+</ol>
+<figure>
+<img src="images/pytorch_fsdp_units.png" alt="FSDP example with three units, fully sharded over two ranks. Figure from [7]." />
+<figcaption aria-hidden="true">FSDP example with three units, fully sharded over two ranks. Figure from <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">7</a>]</span>.</figcaption>
+</figure>
+<p>In effect, FSDP decomposes DDP’s AllReduce into a ReduceScatter and an AllGather in the backward and forward passes respectively – the only extra communication incurred is when we AllGather parameters again during backpropagation.</p>
+<h4 id="sharding-strategies">Sharding Strategies</h4>
+<p>FSDP enables fine-grained trade-offs between memory footprint and communication overhead via the <strong>sharding factor</strong> <span class="math inline">\(F\)</span>: the number of ranks over which parameters are sharded.
+By setting <span class="math inline">\(F=W\)</span> (i.e. the global world size), FSDP <em>fully shards</em> the model with each rank holding only <span class="math inline">\(\frac{1}{W}\)</span> of the model (as in the above example, with <span class="math inline">\(F=W=2\)</span>).</p>
+<p><strong>Hybrid sharding</strong>, sharding factors ranging between <span class="math inline">\(1\)</span> and <span class="math inline">\(W\)</span>, combines both sharding and replication.
+We end up with <em>sharding groups</em> <span class="math inline">\(S_1, \ldots, S_\frac{W}{F}\)</span>, each consisting of <span class="math inline">\(F\)</span> ranks over which parameters are sharded, and <em>replication groups</em> <span class="math inline">\(R_1, \ldots, R_F\)</span> (directly corresponding to these shards), each consisting of <span class="math inline">\(\frac{W}{F}\)</span> ranks (one from each sharding group) over which shards are replicated.</p>
+<p>The AllGather+AllGather+ReduceScatter collectives, previously over all ranks, are now collectives within each sharding group, followed by an AllReduce within each replication group to synchronise gradient shards (as in DDP). This is effectively the decomposition:
+<span class="math display">\[
+\nabla \theta = \frac{1}{W}\sum_{r=1}^W \nabla \theta_r^\text{local} = \frac{1}{W}\sum_{i=1}^{W/F}\sum_{r \in S_i}\nabla \theta_r^\text{local}
+\]</span>
+For example, with <span class="math inline">\(W=16\)</span> ranks and <span class="math inline">\(F=8\)</span> hybrid sharding, the <span class="math inline">\(r=9\)</span> rank would AllGather parameters and ReduceScatter its gradient shard with peers in the <span class="math inline">\(S_2\)</span> sharding group, before AllReducing the gradient shard with its peer in the <span class="math inline">\(R_2\)</span> replication group:</p>
+<figure>
+<img src="images/fsdp_hybrid_sharding.png" alt="FSDP Hybrid Sharding (F=8) example with W=16 ranks." />
+<figcaption aria-hidden="true">FSDP Hybrid Sharding (<span class="math inline">\(F=8\)</span>) example with <span class="math inline">\(W=16\)</span> ranks.</figcaption>
+</figure>
+<p>You might’ve spotted that setting <span class="math inline">\(F=1\)</span> results in a single replication group (with no memory savings) – this simplifies to vanilla DDP using AllReduce for gradient synchronisation.
+It’s worth noting that with any sharding strategy, ranks are expected to have distinct input batch chunks (otherwise we’d simply be duplicating gradient calculations).
+Though we can keep reducing memory overhead with larger sharding groups, our degree of compute parallelism will encounter the same batchsize limitations as DDP.</p>
+<p>Using our traffic calculations from <a href="#communication-primitives">Section 2</a>, the per-GPU communication of an <span class="math inline">\(M\)</span>-size model is <span class="math inline">\(2(\frac{W}{F}-1)(\frac{M}{W})\)</span> for the replication group, and <span class="math inline">\(3(F-1)(\frac{M}{F})\)</span> for the sharding group.
+Clearly communication within the sharding group is much more expensive, therefore we often try to minimise the number of hops between the ranks in a sharding group – sometimes we may even use smaller sharding factors to ensure they’re within the same host.</p>
+<h4 id="fsdp-in-pytorch">FSDP in PyTorch</h4>
+<p>Just like DDP, the FSDP API is designed as a thin <code>nn.Module</code> wrapper class: <code>sharded_model = FSDP(model, process_group=...)</code><a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>.
+Sharding strategy is set with the <code>sharding_strategy</code> arg: <code>FULL_SHARD</code>, <code>NO_SHARD</code> and <code>HYBRID_SHARD</code> correspond to aforementioned fully sharded, fully replicated and hybrid strategies respectively<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a>.
+Before going into all the other levers that FSDP exposes to the user, let’s first get a quick understanding of how it’s implemented under the hood.</p>
+<p>The communication backends (e.g. NCCL) that provide collective implementations usually require AllGather and ReduceScatter to have the same input tensor size at each rank.
+Moreover, for a fixed communication volume issuing fewer, larger collectives reduces communication overheads (as discussed in DDP’s Gradient Bucketing).
+Thus, during construction FSDP concatenates all parameters (and gradients) within a unit into a single flattened 1-D <code>FlatParameter</code> tensor, along with the padding necessary to ensure equal-sized shards at each rank in the sharding group<a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a>.
+The <code>FlatParameter</code> tensor has the exact data layout expected by AllGather and ReduceScatter, allowing us to call the collectives directly without copying any tensors.</p>
+<figure>
+<img src="images/pytorch_fsdp_flatparam.png" alt="FlatParameter example for a fully sharded (W=F=16) FSDP unit, consisting of one 4 \times 3 nn.Linear layer. Figure from [7]." />
+<figcaption aria-hidden="true"><code>FlatParameter</code> example for a fully sharded (<span class="math inline">\(W=F=16)\)</span> FSDP unit, consisting of one <span class="math inline">\(4 \times 3\)</span> <code>nn.Linear</code> layer. Figure from <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">7</a>]</span>.</figcaption>
+</figure>
+<p>For an <span class="math inline">\(M\)</span>-size model split into <span class="math inline">\(K\)</span> units with sizes <span class="math inline">\(M_1, \ldots, M_K\)</span>, where <span class="math inline">\(\sum_{i=1}^K M_i=M\)</span>, the maximum memory usage is in <span class="math inline">\(O(\frac{M}{F} + \max_{i=1}^K M_i)\)</span>.
+More precisely, it is the sum of the sharded parameters, gradients and optimizer state, combined with the largest unsharded unit’s parameters and gradients (but <em>not</em> the more expensive optimizer state, which always remains sharded).
+Conversely, even though total communication is not affected by the number of units, the number of collectives over which it is spread is <span class="math inline">\(O(K)\)</span>.
+Therefore the number of units presents yet another memory-communication tradeoff.
+PyTorch lets the user control this with the <code>auto_wrap_policy</code> argument to <code>FSDP</code>, or by manually wrapping individual submodules rather than a single wrapper around the entire model<a href="#fn13" class="footnote-ref" id="fnref13" role="doc-noteref"><sup>13</sup></a>.</p>
+<p>As with DDP’s Gradient Bucketing, FSDP tries to overlap communication and computation as much as possible.
+Here’s what that looks like for our previous three unit, six layer example:</p>
+<aside style="margin-bottom: -200%">
+FSDP, like DDP, is implemented by registering forward/backward hooks as well as overriding the <code>forward()</code> method.
+</aside>
+<figure>
+<img src="images/fsdp_comm_trace.png" alt="Full forward &amp; backward pass for previous 3 unit, 6 layer FSDP example. Compute &amp; communication CUDA streams (below), and broken up by unit (above)." />
+<figcaption aria-hidden="true">Full forward &amp; backward pass for previous 3 unit, 6 layer FSDP example. Compute &amp; communication CUDA streams (below), and broken up by unit (above).</figcaption>
+</figure>
+<p>In DDP’s backward pass, we were able to compute gradients and then asynchronously AllReduce them afterwards.
+This isn’t possible for FSDP’s forward: we need to AllGather parameters <em>before</em> computing, and (because of eager execution) we don’t know <em>which</em> <code>FlatParameter</code> to gather next – thus we can’t reorder the async AllGather of the next unit before the synchronous computation of the current unit.
+The solution, implicit forward prefetching (always enabled), is to use a separate <strong>stream</strong> (queue of device instructions) for communication, bypassing the false dependency on the default compute stream.</p>
+<p>You may have noticed the poor compute-communication overlap in the backward pass: the ReduceScatter for the current unit blocks the AllGather for the next, which in turn blocks the next gradient computation<a href="#fn14" class="footnote-ref" id="fnref14" role="doc-noteref"><sup>14</sup></a>.
+<em>Explicit</em> backward prefetching issues the AllGather for the next unit before the ReduceScatter for the current one.
+To know which <code>FlatParameter</code> to gather next, FSDP records the reverse forward execution order of modules each iteration.
+Two variants exist: <code>backward_prefetch=BACKWARD_PRE</code> which overlaps the next AllGather with the current gradient computation, and <code>BACKWARD_POST</code> which waits until the current parameters are freed (using less memory but reducing overlap).
+By default FSDP limits the rate at which prefetch AllGathers are issued to ensure memory usage of at most two consecutive units.</p>
+<p>FSDP makes one final optimisation: it assumes the root unit (wrapping the outermost module) holds the last layer’s parameters, and does not free the root unit’s parameters after the forward pass (with the intention that they are immediately re-used for backward).
+Because this naively sidesteps eager execution, it doesn’t always work.
+In our example, it’s actually unit 3 that holds the last layer and we end up AllGathering parameters we already have and are about to free!</p>
+<p>Lastly, we should note that with hybrid sharding there would also be an async AllReduce (on yet another communication stream) for each unit after their ReduceScatter is done.</p>
+<p>PyTorch’s FSDP experiments <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">7</a>]</span> show near-linear compute scaling, though this regresses substantially for larger clusters where “a near-perfect overlap between communication and computation is no longer attainable”:</p>
+<figure>
+<img src="images/pytorch_fsdp_eval.png" alt="Fully-sharded training of the T5-11B transformer; TFLOPS per GPU for batchsizes 8 and 16; A100 80GB GPUs with 2Tb/s RoCE interconnects. Figure from [7]." />
+<figcaption aria-hidden="true">Fully-sharded training of the T5-11B transformer; TFLOPS per GPU for batchsizes 8 and 16; A100 80GB GPUs with 2Tb/s RoCE interconnects. Figure from <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">7</a>]</span>.</figcaption>
+</figure>
+<!-- Hypothesis: contention of network resources should depend on % network utilisation rather than absolute number of GPUs. So on e.g. a network designed for only 8 GPUs, we should see the subtantial dip at 8 GPUs rather than 512 like in the figure. -->
+<h3 id="pipeline-parallel-pp">Pipeline Parallel (PP)</h3>
+<p>[<a href="https://arxiv.org/pdf/1811.06965">Further Reading</a>]</p>
+<p>Like FSDP, pipeline parallelism aims to train models too large to fit within a single GPU.
+However, rather than <em>sharding</em> the model horizontally, we <strong><em>partition</em></strong> it vertically along its depth.
+Each partition of consecutive layers is referred to as a <strong>stage</strong>.
+Returning to our four layer network from <a href="#how-do-you-train-a-pytorch-neural-network">Section 1</a>, we could partition it evenly across two ranks and send intermediate activations/gradients at partition boundaries between stages:</p>
+<figure>
+<img src="images/pp_pebble_graph.gif" alt="Pebble graph of a four layer network, partitioned across two ranks into two stages of two layers each (image credit)." />
+<figcaption aria-hidden="true">Pebble graph of a four layer network, partitioned across two ranks into two stages of two layers each (<a href="https://siboehm.com/articles/22/pipeline-parallel-training">image credit</a>).</figcaption>
+</figure>
+<p>This naive approach of passing a single batch from rank to rank (often referred to as <strong>“model parallelism”</strong>), results in severe GPU under-utilisation: only one GPU works on the batch at any given moment, so each rank is busy at most <span class="math inline">\(\frac{1}{W}\)</span> of the time.
+To illustrate, here’s what the same naive schedule would look like with a pipeline <strong>depth</strong> of four stages:</p>
+<figure>
+<img src="images/pp_naive_bubbles.png" alt="Naive model parallelism with d=4 stages; FWD/BWD are over entire stages rather than only a single layer." />
+<figcaption aria-hidden="true">Naive model parallelism with d=4 stages; FWD/BWD are over entire <em>stages</em> rather than only a single layer.</figcaption>
+</figure>
+<p>These dead zones in our schedule where GPUs are idle are called pipeline <strong>bubbles</strong>.
+They are caused by dependencies between operations: for example, rank 2 cannot start the 2nd forward stage until it has received 1st stage intermediate outputs from rank 1.</p>
+<p><mark>GPipe</mark> <span class="citation" data-cites="gpipe">[<a href="#ref-gpipe" role="doc-biblioref">8</a>]</span> reduces bubbles by splitting a batch into <strong>microbatches</strong> and adding up each of their gradients to get back the gradient over the entire batch (the same as DDP gradient accumulation), thus allowing more than one rank to do useful work at the same time.
+Here’s the same four stage example, with 4-way batch-splitting:</p>
+<figure>
+<img src="images/pp_gpipe_bubbles.png" alt="GPipe schedule with d=4 stages, m=4 microbatches; Fi(j) denotes the i^\text{th} stage forward computation over the j^\text{th} microbatch." />
+<figcaption aria-hidden="true">GPipe schedule with <span class="math inline">\(d=4\)</span> stages, <span class="math inline">\(m=4\)</span> microbatches; <span class="math inline">\(Fi(j)\)</span> denotes the <span class="math inline">\(i^\text{th}\)</span> stage forward computation over the <span class="math inline">\(j^\text{th}\)</span> microbatch.</figcaption>
+</figure>
+<p>We can show empirically that, in this example, GPipe reduces relative bubble time by more than two thirds.
+For a pipeline with <span class="math inline">\(d\)</span> evenly-partitioned stages and <span class="math inline">\(m\)</span> evenly-divided microbatches, a given stage spends <span class="math inline">\(m\)</span> forward timesteps doing useful work and <span class="math inline">\(d-1\)</span> forward timesteps waiting for new work to arrive during the forward pass.
+The same applies to the backward pass, therefore the overall fraction of ideal computation time spent in bubbles is:</p>
+<p><span class="math display">\[
+\text{Bubble}(d,m)=\frac{d-1}{m}
+\]</span>
+For the bubble time fraction to be small we need <span class="math inline">\(m \gg d\)</span>.
+Our naive model parallelism example (<span class="math inline">\(m=1, d=4\)</span>) has a bubble ratio of <span class="math inline">\(3\)</span>, compared to <span class="math inline">\(0.75\)</span> for GPipe (<span class="math inline">\(m=4, d=4\)</span>).</p>
+<p>So far we’ve ignored communication overheads.
+Unlike other parallelisation paradigms, pipelining does not require any collective communication primitives; we simply asynchronously send (p2p) intermediates as soon as they’re ready.
+Here’s what our GPipe example looks like once we include communication:</p>
+<figure>
+<img src="images/pp_gpipe_comm.png" alt="GPipe schedule with d=4 stages and m=4 microbatches, communication included." />
+<figcaption aria-hidden="true">GPipe schedule with <span class="math inline">\(d=4\)</span> stages and <span class="math inline">\(m=4\)</span> microbatches, communication included.</figcaption>
+</figure>
+<p>For illustration purposes, here sending a microbatch takes longer than computing a stage (pipelining is typically internode so this is not uncommon), reducing our compute efficiency.
+Perfect compute-communication overlap is impossible for pipeline parallelism because necessarily we can’t start working on the first microbatch until the previous stage has finished processing and then sent the same microbatch.</p>
+<p>Notably, pipeline parallelism is orthogonal to DDP and both can be combined to obtain a 2D parallelism similar to hybrid FSDP.
+In practice, this is implemented with the pipeline as the inner dimension and with bucketed AllReduces in the outer dimension (interleaved with the backward pass of the final microbatch).</p>
+<figure>
+<img src="images/pp_dp_2d.png" alt="DDP and pipeline 2D parallelism example over W=4 ranks, d=2 stages (image credit)." />
+<figcaption aria-hidden="true">DDP and pipeline 2D parallelism example over <span class="math inline">\(W=4\)</span> ranks, <span class="math inline">\(d=2\)</span> stages (<a href="https://siboehm.com/articles/22/pipeline-parallel-training">image credit</a>).</figcaption>
+</figure>
+<h4 id="activation-checkpointing">Activation Checkpointing</h4>
+<p>[<a href="https://arxiv.org/pdf/1604.06174">Further Reading</a>]</p>
+<p>While we’ve discussed ways of reducing memory demand, you may have spotted another easy target: activations.
+With GPipe, stages need to cache activations for each microbatch from the start of its forward to the end of its corresponding backward.
+For an <span class="math inline">\(\ell\)</span> layer network (assuming each layer is roughly equal size) with batchsize <span class="math inline">\(B\)</span>, the peak per-stage memory demand for caching activations is<a href="#fn15" class="footnote-ref" id="fnref15" role="doc-noteref"><sup>15</sup></a>:
+<span class="math display">\[
+O\left(B \frac{\ell}{d}\right)
+\]</span>
+With <mark>activation checkpointing</mark><a href="#fn16" class="footnote-ref" id="fnref16" role="doc-noteref"><sup>16</sup></a> (aka gradient checkpointing) <span class="citation" data-cites="chen2016">[<a href="#ref-chen2016" role="doc-biblioref">9</a>]</span>, we only store boundary activations and recompute the forward for each microbatch when it’s time to do its backward.
+Boundary activations take <span class="math inline">\(O(B)\)</span> space and we only need to cache activations for a single microbatch at any given moment (while computing its gradient), reducing peak memory demand to:
+<span class="math display">\[
+O\left(B+\frac{B}{m}\frac{l}{d}\right)
+\]</span>
+Why can we get away with recomputing the forward without significantly impacting overall compute efficiency<a href="#fn17" class="footnote-ref" id="fnref17" role="doc-noteref"><sup>17</sup></a>?</p>
+<ul>
+<li>In practice the backward is actually much more expensive (usually twice as much) than the forward.</li>
+<li>As we saw earlier pipeline parallelism can’t achieve perfect compute-communication overlap. When used in conjunction with pipelining, forward recomputation can be scheduled earlier (during bubbles) as we don’t need to wait for the gradients from later layers.</li>
+</ul>
+<p>The original GPipe paper <span class="citation" data-cites="gpipe">[<a href="#ref-gpipe" role="doc-biblioref">8</a>]</span> claims that, with activation checkpointing, using <span class="math inline">\(m \geq 4d\)</span> microbatches results in “negligible” bubble overhead.</p>
+<h4 id="other-schedules">Other Schedules</h4>
+<p>[<a href="https://arxiv.org/pdf/2211.05953">Further Reading</a>]</p>
+<p>We can further decrease memory demand by reducing the number of “in-flight” microbatches for which we need to cache activations (or checkpoints).
+If you look at the original GPipe schedule, after completing the forward for the first microbatch, the last stage could instead start the backward pass right away and then discard its activation.
+<mark>PipeDream</mark> <span class="citation" data-cites="pipedream">[<a href="#ref-pipedream" role="doc-biblioref">11</a>]</span> schedules the last stage backward immediately after the corresponding forward, reducing memory demand compared to GPipe:</p>
+<figure>
+<img src="images/pipedream_tile.png" alt="1F1B PipeDream-flush schedule, ignoring communication with d=4, m=8. Based on figure from [12]." />
+<figcaption aria-hidden="true">1F1B PipeDream-flush schedule, ignoring communication with <span class="math inline">\(d=4, m=8\)</span>. Based on figure from <span class="citation" data-cites="megatron2021">[<a href="#ref-megatron2021" role="doc-biblioref">12</a>]</span>.</figcaption>
+</figure>
+<p>The schedule consists of three phases:</p>
+<ol type="1">
+<li>The <em>warmup</em> where deeper stages are waiting on activations from earlier stages. We limit the number of contiguous microbatches over which we compute a forward pass to the pipeline depth, thus also limiting the number of in-flight microbatches.</li>
+<li>The <em>steady state</em> where ranks perform one forward pass followed by one backward pass (known as “1F1B”).</li>
+<li>Lastly we <em>flush</em> the pipeline by completing the backward passes for remaining microbatches without scheduling any new ones.</li>
+</ol>
+<p>Unlike GPipe, where all microbatches are in-flight at some point during the schedule, with PipeDream that number never exceeds the pipeline depth.
+Since reducing bubble time requires <span class="math inline">\(m \gg d\)</span>, PipeDream can do so without affecting memory footprint.
+However, for fixed <span class="math inline">\(m\)</span>, the bubble fraction is no different between PipeDream and GPipe (you can see this by shifting all the blue forwarded passes left).
+So how can we do better, without prohibitively increasing <span class="math inline">\(m\)</span> and thus the overall batchsize?</p>
+<p>Rather than each rank only having a single stage (of consecutive layers), we can <em>loop</em> our pipeline by performing the computation for <span class="math inline">\(v\)</span> (non-consecutive) stages at each rank and connecting the last rank to the first, forming a coil.
+For example, if rank 0 previously had 4 layers (e.g. layers 0-4), with <span class="math inline">\(v=2\)</span> loops it would now have 2 stages of 2 layers each (e.g. layers 0-1 and 8-9).
+<mark>Interleaved 1F1B</mark> <span class="citation" data-cites="megatron2021">[<a href="#ref-megatron2021" role="doc-biblioref">12</a>]</span> is the looped version of the PipeDream schedule:</p>
+<figure>
+<img src="images/dfs_pipeline.png" alt="Interleaved 1F1B (DFS) schedule; W=4 ranks, d=16 stages, v=4 loops, m=8 microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from [13]." />
+<figcaption aria-hidden="true">Interleaved 1F1B (DFS) schedule; <span class="math inline">\(W=4\)</span> ranks, <span class="math inline">\(d=16\)</span> stages, <span class="math inline">\(v=4\)</span> loops, <span class="math inline">\(m=8\)</span> microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from <span class="citation" data-cites="bfspipeline">[<a href="#ref-bfspipeline" role="doc-biblioref">13</a>]</span>.</figcaption>
+</figure>
+<p>Forward and backward passes for a stage are now shorter by a factor of <span class="math inline">\(v\)</span>, so the bubble time at each rank is also reduced by <span class="math inline">\(v\)</span> to <span class="math inline">\((d-1)/v\)</span>.
+The overall bubble fraction becomes:
+<span class="math display">\[ \text{Bubble}_\text{looped}(d,m,v) = \frac{d-1}{vm} \]</span>
+This reduced bubble size does not, however, come for free: the total communication volume is increased by the same factor of <span class="math inline">\(v\)</span>.
+Another caveat is that Interleaved 1F1B requires <span class="math inline">\(m\)</span> be a multiple of <span class="math inline">\(W\)</span>.</p>
+<p>You can imagine that 1F1B schedules like PipeDream and Interleaved 1F1B are <em>depth-first</em>: when deciding between computing the same (forward) stage for the next microbatch or the next (backward) stage for the same microbatch, a rank will choose the latter – sending earlier microbatches as deep as possible down the pipeline.
+“All-forward all-backward” schedules like GPipe are <em>breadth-first</em>: a rank will prioritise completing all microbatches in the earliest unfinished stage.
+Naturally, you might ask what the looped anolog of GPipe looks like.
+This is the <mark>breadth-first pipeline schedule</mark> (BFS) <span class="citation" data-cites="bfspipeline">[<a href="#ref-bfspipeline" role="doc-biblioref">13</a>]</span>:</p>
+<figure>
+<img src="images/bfs_pipeline.png" alt="Breadth-first pipeline schedule; W=4 ranks, d=16 stages, v=4 loops, m=8 microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Notice that a complete iteration finishes faster than Interleaved 1F1B. Figure from [13]." />
+<figcaption aria-hidden="true">Breadth-first pipeline schedule; <span class="math inline">\(W=4\)</span> ranks, <span class="math inline">\(d=16\)</span> stages, <span class="math inline">\(v=4\)</span> loops, <span class="math inline">\(m=8\)</span> microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Notice that a complete iteration finishes faster than Interleaved 1F1B. Figure from <span class="citation" data-cites="bfspipeline">[<a href="#ref-bfspipeline" role="doc-biblioref">13</a>]</span>.</figcaption>
+</figure>
+<p>The bubble time fraction is exactly the same as Interleaved 1F1B (“DFS” from now on), though (like GPipe) peak memory consumption is increased as all microbatches are in-flight at some point.
+However, BFS achieves much better communication overlap:</p>
+<ul>
+<li>A DFS rank will compute the forward over <span class="math inline">\(d\)</span> contiguous microbatches at a time; the first microbatch must complete the rest of the loop before the sequence is finished (i.e. in <span class="math inline">\(&lt;d-1\)</span> fwd timesteps) to avoid starving the rank (impossible with non-zero communication delay). BFS, on the other hands, has <span class="math inline">\(m-d\)</span> extra microbatches to absorb communication overheads because it forwards the entire batch.</li>
+<li>The backward for the first stages finishes earlier, allowing us to start reducing gradients along the DP dimension earlier.</li>
+</ul>
+<p>More importantly, BFS can make use of FSDP.
+In a non-looping pipeline, a rank only has a single stage. To achieve any memory savings, FSDP units would have to be intra-stage thus requiring a complete FSDP iteration for each microbatch.
+With a looping pipeline, ranks hold several stages each of which can be used as a unit; we can keep a stage unsharded and accumulate gradeints for contiguous microbatches, only resharding/reducing at the end of the microbatch sequence.
+A BFS stage completes the forward (or backward) pass for all microbatches in one go, avoiding the repeated FSDP iterations that arise from alternating between stages in DFS.</p>
+<p>The benefits of combining BFS and FSDP are two-fold: first, FSDP compensates for BFS’ larger memory footprint by sharding stages; second, BFS reduces the size of FSDP sharding groups (and their expensive collectives) while maintaining the same overall degree of parallelism.</p>
+<p>Like DDP, FSDP is typically the outermost parallelism when combined with pipelining.
+Outer dimensions may spread across a multi-hop network with higher communication latency and lower bandwidth; FSDP has fewer, larger asynchronous collectives that can better absorb these communication delays.
+<!-- TODO: there's also some batchsize stuff (see BFS paper) that I don't quite understand yet -->
+<!-- TODO: Diagram? --></p>
+<p>There are a lot other pipeline schedules we haven’t covered here, a good reference is the <a href="https://pytorch.org/docs/stable/distributed.pipelining.html#module-torch.distributed.pipelining.schedules">PyTorch documentation</a>.
+More advanced scheduling strategies, such as those used to train Llama 3 <span class="citation" data-cites="llama3">[<a href="#ref-llama3" role="doc-biblioref">1</a>]</span>, include hybrid schedules that combine the memory savings of DFS with the communication efficiency of BFS.</p>
+<!-- TODO: empirical performance? -->
+<h4 id="pp-in-pytorch">PP in PyTorch</h4>
+<p>[WIP]
+<!-- How is the model staged? We rely on balanced pipelines (even partitions). This is non-trivial in the general case; luckily it's pretty easy for transformers because they're made of equal-sized blocks. -->
+<!-- How do we specify schedule? How do we combine with FSDP? --></p>
+<h3 id="tensor-parallel-tp">Tensor Parallel (TP)</h3>
+<p>[<a href="https://arxiv.org/pdf/1909.08053">Further Reading</a>]</p>
+<p>Tensor parallelism is similar to FSDP: we split our model <em>horizontally</em> to reduce memory footprint and increase our degree of parallelism.
+However, TP shards are much more granular, with splits within a single layer rather than across units of several layers.</p>
+<p>The computational bottleneck for most modern models (such as the transformer) is the <strong>general matrix multiply</strong> (GEMM): multiplying an activation batch matrix <span class="math inline">\(X\)</span> with a large weight matrix <span class="math inline">\(A\)</span>.
+The example we used in <a href="#how-do-you-train-a-pytorch-neural-network">Section 1</a>, a <strong>multi-layer perceptron</strong> (MLP), consists of a GEMM followed by a pointwise pointwise nonlinear activation function <span class="math inline">\(\sigma(\cdot)\)</span>:
+<span class="math display">\[
+Y = \sigma(XA)
+\]</span>
+One way to paralellise the GEMM would be to split the weight matrix <span class="math inline">\(A\)</span> along its rows, and input <span class="math inline">\(X\)</span> along its columns:
+<span class="math display">\[
+X = \begin{bmatrix} X_1 &amp; X_2 \end{bmatrix}, A= \begin{bmatrix} A_1 \\ A_2 \end{bmatrix}
+\]</span>
+Matrix multiplication can be thought of as a dot product between pairs of rows (on the left) and columns (on the right).
+It’s therefore possible to compute independent dot products on different ranks and sum up the results:
+<span class="math display">\[
+Y=X_1A_1+X_2A_2
+\]</span>
+However, because <span class="math inline">\(\sigma\)</span> is a nonlinear, in general <span class="math inline">\(\sigma(X_1 A_1 + X_2A_2) \neq \sigma(X_1 A_1) + \sigma(X_2 A_2)\)</span>.
+This approach would therefore require a synchronisation point before the activation function.
+If instead we only split weights along their columns <span class="math inline">\(A=\begin{bmatrix} A_1 &amp; A_2 \end{bmatrix}\)</span>, we end up concatenating rather than adding the outputs:
+<span class="math display">\[
+Y=\begin{bmatrix} Y_1 &amp; Y_2 \end{bmatrix}=\begin{bmatrix} \sigma(X A_1) &amp; \sigma(X A_2) \end{bmatrix}
+\]</span>
+By removing the pre-activation synchronisation, we can stack a second MLP layer before we have to synchronise again:
+<span class="math display">\[
+Z = \sigma_1(YB)=\sigma_1(Y_1B_1 + Y_2B_2)
+\]</span>
+The second layer weights are split column-wise, <span class="math inline">\(B= [B_1; B_2]\)</span>, and we synchronise <em>before</em> the second activation function <span class="math inline">\(\sigma_1\)</span> (as in our original attempt).
+We end up sharding our two MLP layers with a single AllReduce synchronisation before the final activation:</p>
+<figure>
+<img src="images/tp_mlp.png" alt="Tensor parallelism over W=2 rank applied to two consecutive MLP layers. Here \sigma_0 and \sigma_1 are GeLU and dropout functions respectively. f is the identify and g is an AllReduce. Figure from [14]" />
+<figcaption aria-hidden="true">Tensor parallelism over <span class="math inline">\(W=2\)</span> rank applied to two consecutive MLP layers. Here <span class="math inline">\(\sigma_0\)</span> and <span class="math inline">\(\sigma_1\)</span> are GeLU and dropout functions respectively. <span class="math inline">\(f\)</span> is the identify and <span class="math inline">\(g\)</span> is an AllReduce. Figure from <span class="citation" data-cites="megatron2019">[<a href="#ref-megatron2019" role="doc-biblioref">14</a>]</span></figcaption>
+</figure>
+<p>Because TP requires an AllReduce <em>per layer</em> (or every two layers), it is almost exclusively used intranode.
+You can think of it as agglomerating the ranks in a node into a single, much larger rank (over which we can apply other parallelisms).</p>
+<!-- TODO: TP for attention layers -->
+<h4 id="tp-in-pytorch">TP in PyTorch</h4>
+<p>[WIP]</p>
+<h3 id="context-parallel-cp">Context Parallel (CP)</h3>
+<p>[WIP]
+<!-- aka sequence parallel (?) --></p>
+<h4 id="cp-in-pytorch">CP in PyTorch</h4>
+<!-- N-D parallelism widget, that generates a hypothetical trace of collectives -->
+<h1 id="parallelism-in-practice">4. Parallelism in Practice</h1>
+<p>[WIP] Large models use FSDP, gigantic models use all of the above.
+<!-- TODO: How do we choose batchsize, microbatchsize and other parameters? ---></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="ref-llama3" class="csl-entry" role="listitem">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">A. @. M. Llama Team, <a href="https://arxiv.org/abs/2407.21783">The llama 3 herd of models</a>. (2024).</div>
+</div>
+<div id="ref-adam2017" class="csl-entry" role="listitem">
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">D. P. Kingma &amp; J. Ba, <a href="https://arxiv.org/abs/1412.6980">Adam: A method for stochastic optimization</a>. (2017).</div>
+</div>
+<div id="ref-mixedprecision2018" class="csl-entry" role="listitem">
+<div class="csl-left-margin">3. </div><div class="csl-right-inline">P. Micikevicius, S. Narang, J. Alben, G. Diamos, E. Elsen, D. Garcia, B. Ginsburg, M. Houston, O. Kuchaiev, G. Venkatesh, &amp; H. Wu, <a href="https://arxiv.org/abs/1710.03740">Mixed precision training</a>. (2018).</div>
+</div>
+<div id="ref-empiricallargebatchtraining" class="csl-entry" role="listitem">
+<div class="csl-left-margin">4. </div><div class="csl-right-inline">S. McCandlish, J. Kaplan, D. Amodei, &amp; O. D. Team, <a href="https://arxiv.org/abs/1812.06162">An empirical model of large-batch training</a>. (2018).</div>
+</div>
+<div id="ref-pytorchddp" class="csl-entry" role="listitem">
+<div class="csl-left-margin">5. </div><div class="csl-right-inline">S. Li, Y. Zhao, R. Varma, O. Salpekar, P. Noordhuis, T. Li, A. Paszke, J. Smith, B. Vaughan, P. Damania, &amp; S. Chintala, <a href="https://arxiv.org/abs/2006.15704">PyTorch distributed: Experiences on accelerating data parallel training</a>. (2020).</div>
+</div>
+<div id="ref-zero2020" class="csl-entry" role="listitem">
+<div class="csl-left-margin">6. </div><div class="csl-right-inline">S. Rajbhandari, J. Rasley, O. Ruwase, &amp; Y. He, <a href="https://arxiv.org/abs/1910.02054">ZeRO: Memory optimizations toward training trillion parameter models</a>. (2020).</div>
+</div>
+<div id="ref-pytorchfsdp" class="csl-entry" role="listitem">
+<div class="csl-left-margin">7. </div><div class="csl-right-inline">Y. Zhao, A. Gu, R. Varma, L. Luo, C.-C. Huang, M. Xu, L. Wright, H. Shojanazeri, M. Ott, S. Shleifer, A. Desmaison, C. Balioglu, P. Damania, B. Nguyen, G. Chauhan, Y. Hao, A. Mathews, &amp; S. Li, <a href="https://arxiv.org/abs/2304.11277">PyTorch FSDP: Experiences on scaling fully sharded data parallel</a>. (2023).</div>
+</div>
+<div id="ref-gpipe" class="csl-entry" role="listitem">
+<div class="csl-left-margin">8. </div><div class="csl-right-inline">Y. Huang, Y. Cheng, A. Bapna, O. Firat, M. X. Chen, D. Chen, H. Lee, J. Ngiam, Q. V. Le, Y. Wu, &amp; Z. Chen, <a href="https://arxiv.org/abs/1811.06965">GPipe: Efficient training of giant neural networks using pipeline parallelism</a>. (2019).</div>
+</div>
+<div id="ref-chen2016" class="csl-entry" role="listitem">
+<div class="csl-left-margin">9. </div><div class="csl-right-inline">T. Chen, B. Xu, C. Zhang, &amp; C. Guestrin, <a href="https://arxiv.org/abs/1604.06174">Training deep nets with sublinear memory cost</a>. (2016).</div>
+</div>
+<div id="ref-selectiveactivations" class="csl-entry" role="listitem">
+<div class="csl-left-margin">10. </div><div class="csl-right-inline">V. A. Korthikanti, J. Casper, S. Lym, L. McAfee, M. Andersch, M. Shoeybi, &amp; B. Catanzaro, <a href="https://proceedings.mlsys.org/paper_files/paper/2023/file/80083951326cf5b35e5100260d64ed81-Paper-mlsys2023.pdf">Reducing activation recomputation in large transformer models</a>. In D. Song, M. Carbin, &amp; T. Chen,eds., <em>Proceedings of machine learning and systems</em> (Curan, 2023), pp. 341–353.</div>
+</div>
+<div id="ref-pipedream" class="csl-entry" role="listitem">
+<div class="csl-left-margin">11. </div><div class="csl-right-inline">A. Harlap, D. Narayanan, A. Phanishayee, V. Seshadri, N. Devanur, G. Ganger, &amp; P. Gibbons, <a href="https://arxiv.org/abs/1806.03377">PipeDream: Fast and efficient pipeline parallel DNN training</a>. (2018).</div>
+</div>
+<div id="ref-megatron2021" class="csl-entry" role="listitem">
+<div class="csl-left-margin">12. </div><div class="csl-right-inline">D. Narayanan, M. Shoeybi, J. Casper, P. LeGresley, M. Patwary, V. A. Korthikanti, D. Vainbrand, P. Kashinkunti, J. Bernauer, B. Catanzaro, A. Phanishayee, &amp; M. Zaharia, <a href="https://arxiv.org/abs/2104.04473">Efficient large-scale language model training on GPU clusters using megatron-LM</a>. (2021).</div>
+</div>
+<div id="ref-bfspipeline" class="csl-entry" role="listitem">
+<div class="csl-left-margin">13. </div><div class="csl-right-inline">J. Lamy-Poirier, <a href="https://arxiv.org/abs/2211.05953">Breadth-first pipeline parallelism</a>. (2023).</div>
+</div>
+<div id="ref-megatron2019" class="csl-entry" role="listitem">
+<div class="csl-left-margin">14. </div><div class="csl-right-inline">M. Shoeybi, M. Patwary, R. Puri, P. LeGresley, J. Casper, &amp; B. Catanzaro, <a href="https://arxiv.org/abs/1909.08053">Megatron-LM: Training multi-billion parameter language models using model parallelism</a>. (2020).</div>
+</div>
+</div>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>In particular we’re referring to the <em>pre-training</em> phase for LLMs.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>In practice an epoch will loop over an entire training set consisting of several batches (each with their own parameter updates), potentially followed by evaluation on separate validation batches.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Some tensors in a module don’t have gradients, for example fixed transforms with static parameters.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>FP16 weights and gradients + FP32 master copy of weights + FP32 momentum and variance.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Floating point addition is not associative, but in practice the difference is small enough to be safely ignored.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Except for batch-wise operations like <code>BatchNorm</code>, which won’t be locally consistent (unless we use their expensive synchronised implementations like <code>SyncBatchNorm</code>).<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>A batch is used to approximate the gradient over the entire training set; for large batches the approximation is already very good, and further increasing batchsize provides negligible improvement (i.e. no longer reducing number of training steps), wasting compute. Moreover, large batchsizes can harm out-of-sample performance by reducing stochasticity.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>Bucket size is user-configurable. Larger buckets lower communication overhead but reduce overlap with compute. Buckets are allocated heuristically during model construction, by the reverse order of <code>model.parameters()</code>.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>Note that because the optimizer step will only operate on the sharded parameters, any optimizer that depends on global state over all parameters won’t be locally consistent.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>The actual class is <code>distributed.fsdp.FullyShardedDataParallel</code>. Note that the optimizer should be initialised <em>afterwards</em>, using the sharded module.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>There’s also <code>NO_GRAD_OP</code> which keeps parameters unsharded during the entire forward-backward computation.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p>Before forward computation, FSDP replaces the original parameters with views into their unsharded <code>FlatParameter</code> so that autograd behaves correctly. Keeping the original parameters registered requires using the recently added <code>use_orig_params</code> flag.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p>e.g. for a transformer model we’ll usually wrap each transformer block, with a final wrapper around the root module sharding the initial embedding and final linear layers.<a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn14"><p>We can’t get around this with an extra stream, PyTorch only uses one internal NCCL stream for a given process group.<a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn15"><p>A stage has <span class="math inline">\(\frac{l}{d}\)</span> layers, each of which caches <span class="math inline">\(O(B)\)</span> of activations.<a href="#fnref15" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn16"><p>Not to be confused with <em>model</em> checkpointing, where we periodically save the entire model to disk, usually at the end of an epoch.<a href="#fnref16" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn17"><p>Recomputing activations will still slow training speed; instead the SoTA is to <em>selectively</em> recompute only some activations <span class="citation" data-cites="selectiveactivations">[<a href="#ref-selectiveactivations" role="doc-biblioref">10</a>]</span>.<a href="#fnref17" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+<!--radix_placeholder_article_footer-->
+<!--/radix_placeholder_article_footer-->
+</div>
+
+<div class="d-appendix">
+</div>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!--radix_placeholder_site_after_body-->
+<!--/radix_placeholder_site_after_body-->
+<!--radix_placeholder_appendices-->
+<div class="appendix-bottom">
+  <h3 id="references">References</h3>
+  <div id="references-listing"></div>
+  <h3 id="citation">Citation</h3>
+  <p>For attribution, please cite this work as</p>
+  <pre class="citation-appendix short">Mauger (2025, Jan. 1). Bruce Mauger: Distributed Machine Learning: How Does it Work?. Retrieved from brrm.io/posts/distributed-ml/</pre>
+  <p>BibTeX citation</p>
+  <pre class="citation-appendix long">@misc{mauger2025distributed,
+  author = {Mauger, Bruce},
+  title = {Bruce Mauger: Distributed Machine Learning: How Does it Work?},
+  url = {brrm.io/posts/distributed-ml/},
+  year = {2025}
+}</pre>
+</div>
+<!--/radix_placeholder_appendices-->
+<!--radix_placeholder_navigation_after_body-->
+<!--/radix_placeholder_navigation_after_body-->
+
+</body>
+
+</html>

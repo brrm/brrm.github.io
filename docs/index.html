@@ -89,26 +89,26 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
   <!--radix_placeholder_meta_tags-->
-  <title>Bruce's writing</title>
+  <title>Bruce Mauger</title>
 
 
 
 
   <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
-  <meta property="og:title" content="Bruce&#39;s writing"/>
+  <meta property="og:title" content="Bruce Mauger"/>
   <meta property="og:type" content="article"/>
   <meta property="og:locale" content="en_US"/>
-  <meta property="og:site_name" content="Bruce&#39;s writing"/>
+  <meta property="og:site_name" content="Bruce Mauger"/>
 
   <!--  https://dev.twitter.com/cards/types/summary -->
   <meta property="twitter:card" content="summary"/>
-  <meta property="twitter:title" content="Bruce&#39;s writing"/>
+  <meta property="twitter:title" content="Bruce Mauger"/>
 
   <!--/radix_placeholder_meta_tags-->
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","site","listing"]}},"value":[{"type":"character","attributes":{},"value":["Bruce's writing"]},{"type":"character","attributes":{},"value":["distill::distill_website"]},{"type":"character","attributes":{},"value":["posts"]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","site","listing"]}},"value":[{"type":"character","attributes":{},"value":["Bruce Mauger"]},{"type":"character","attributes":{},"value":["distill::distill_website"]},{"type":"character","attributes":{},"value":["posts"]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   <!--radix_placeholder_navigation_in_header-->
@@ -1928,7 +1928,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   /* This must remain at the top of this file.                 */
   @import url('https://fonts.googleapis.com/css?family=Libre+Baskerville:300, 300i&display=swap');
   @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,400i,700,700i&display=swap');
-  @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono&display=swap');
+  @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400,500&display=swap');
 
   html {
     /*-- Main font sizes --*/
@@ -1996,6 +1996,11 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     color: #ca225e;
   }
 
+  ol > li::marker {
+    color: #ca225e;
+  }
+
+
   .distill-site-header { 
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -2016,6 +2021,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
   d-title h1,
   d-article h2,
+  d-article h3,
+  d-article h4,
   .posts-list .description h2,
   .posts-list > h1 {
       font-weight: 300;
@@ -2043,6 +2050,25 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     font-style: normal;
   }
 
+  code {
+    font-family: var(--mono-font);
+  }
+
+  /* inline code */ 
+  p > code, li > code {
+    white-space: pre;
+    background: #FAFAFA;
+    border-radius: 2px;
+    padding: 2px;
+    padding-top: 1px;
+    border: 1px solid #EEE;
+    font-size: 0.9rem;
+  }
+
+  d-appendix code {
+    font-size: 0.7rem;
+  }
+
   /* highlighting */
   d-article mark {
       background-color: transparent;
@@ -2050,9 +2076,24 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
       color: rgba(202, 34, 94, 0.8);
   }
 
+  /* video */
+  d-article figure:has(> video) {
+    margin-top: 0em;
+    margin-bottom: 1.5em;
+  }
+
+  d-article video {
+    display: block;
+    margin: auto;
+  }
+
   d-appendix {
     background-color: #fdf7f9;
     border-top: none;
+  }
+
+  d-appendix .citation-appendix {
+    font-family: var(--mono-font);
   }</style>
   <style type="text/css">
   /* base style */
@@ -2239,7 +2280,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Bruce's writing","authors":[]}
+{"title":"Bruce Mauger","authors":[]}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -2247,7 +2288,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <header class="header header--fixed" role="banner">
 <nav class="distill-site-nav distill-site-header">
 <div class="nav-left">
-<a href="index.html" class="title">Bruce's writing</a>
+<a href="index.html" class="title">Bruce Mauger</a>
 </div>
 <div class="nav-right">
 <a href="about.html">About</a>
@@ -2393,7 +2434,21 @@ function init_posts_list() {
 
 <div class="posts-container posts-apply-limit l-page">
 <div class="posts-list">
-<h1 class="posts-list-caption" data-caption="Bruce&#39;s writing">Bruce's writing</h1>
+<h1 class="posts-list-caption" data-caption="Bruce Mauger">Bruce Mauger</h1>
+<a href="posts/distributed-ml/" class="post-preview">
+<script class="post-metadata" type="text/json">{"categories":[]}</script>
+<div class="metadata">
+<div class="publishedDate">Jan. 1, 2025</div>
+</div>
+<div class="thumbnail">
+<img/>
+</div>
+<div class="description">
+<h2>Distributed Machine Learning: How Does it Work?</h2>
+<p>State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. 
+How does this orchestration work? And how can it be done without incurring expensive communication overheads?</p>
+</div>
+</a>
 <a href="posts/boosting-for-causal-effect-estimation/" class="post-preview">
 <script class="post-metadata" type="text/json">{"categories":[]}</script>
 <div class="metadata">
@@ -2415,7 +2470,7 @@ function init_posts_list() {
 <!--/radix_placeholder_article_listing-->
 
 <div class="d-title">
-<h1>Bruce’s writing</h1>
+<h1>Bruce Mauger</h1>
 
 <!--radix_placeholder_categories-->
 <!--/radix_placeholder_categories-->
