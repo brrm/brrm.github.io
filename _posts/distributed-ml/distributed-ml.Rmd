@@ -1,11 +1,11 @@
 ---
 title: "Distributed Machine Learning: How Does it Work?"
 description: |
-  Distribution has become essential to training large models.
-  Modern machine learning frameworks provide drop-in distribution, but few understand how these work -- and why they might be slowing down training.
+  State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. 
+  How does this orchestration work? And how can it be done without incurring expensive communication overheads?
 author:
   - name: Bruce Mauger 
-date: 12-26-2024
+date: 01-01-2025
 output:
   distill::distill_article:
     mathjax: "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"
@@ -28,33 +28,28 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```
 
-Motivation: models & clusters are *really* big.
-<!-- alternatively: you've just called torch.distribute(model), and your 100x GPU cluster is only running 50x faster than local, what's happened? --> 
+Many recent advances in AI are owed to training of larger and larger models.
+These neural networks are too big fit in and take too long to train with a single GPU.
+State of the art AI therefore requires orchestrating vast clusters of GPUs to perform a single synchronised calculation, with the objective of:
 
-The objectives of distributed ML are two-fold:
+1. **Reducing memory impact**, so we can fit larger models.
+2. **Increasing degree of parallelism**, so we can use lots of compute in parallel to speed up training.
 
-1. Reduce memory impact so we can fit larger models.
-2. Use lots of GPUs in parallel to speed up compute.
+There's no such thing as a free lunch: by distributing training we incur a *communication* overhead when GPUs have to talk to each other.
+Meta's breakthrough Llama 3 model was trained^[In particular we're referring to the *pre-training* phase for LLMs.] on a cluster of 24K GPUs, but with a per-GPU utilisation well below 50% [@llama3].
 
-There's no such thing as a free lunch; by distributing training we incur a *communication* overhead when GPUs have to talk to each other.
-As we'll see, it's relatively easy to design parallelisation techniques that achieve both of these; doing so without incurring prohibitive communication overheads is much more difficult, however.
-We'll be focusing on the communication aspect of these designs.
-We'll be particularly looking at how parallelisation paradigms are designed to minimise and hide communication, keeping our expensive GPUs as busy as possible.
-The goal is to reach linear scaling: throwing twice as many GPUs at the problem should go twice as fast (or the same speed, but with a doubly large model).
+We'll be taking an in-depth look at the wide variety of parallelism paradigms that have enabled training of gigantic models.
+As we'll see, it's relatively easy to design parallelism techniques that achieve both of the previous objectives; doing so without incurring prohibitive communication overheads, however, is a very difficult engineering and research challenge.
+The communication aspects of these designs will be focus of this post.
 
-We'll take a look at how parallelisation paradigms have evolved to cope with more data, more parameters and more GPUs.
-
-I intended this as a light compilation of various sources; for more detail, I provide references to the relevant resources throughout.
-
-[Outline of sections]
-Though I intend to stay light on implementation specifics, the abstractions provided by PyTorch are nonetheless useful for illustration.
-We'll be using PyTorch to illustrate and discuss implementation details. 
-The first two sections provide a brief overview of model training with PyTorch, a highly-level overview of transformers and the communication building blocks that are availableto us. 
-Section 3 takes a deep dive into how PyTorch assembles these together into the various parallelisation techniques it offers out-of-the-box.
+We assume only basic prior knowledge of neural networks and gradient descent.
+The first two sections provide background on the PyTorch framework (as well as the transformer model that underpins modern LLMs), and collective communication primitives respectively.
+The next section presents a deep-dive into all of the major parallelism techniques, including how PyTorch non-intrusively integrates these into its inherently local execution model.
+We'll conclude with how the parallelisms are composed together in practice by looking at Llama 3.
 
 # 1. PyTorch mental model
-Pytorch is the preeminent framework, though the stuff here also (mostly) applies to other frameworks.
-Useful for understanding how data flows throughout training.
+We'll be using PyTorch to illustrate model distribution throughout (though everything remains largely applicable to other frameworks).
+It's useful to first get an understanding of how data flows during the PyTorch model training process, in order to see the opportunities for parallelisation. 
 
 ### How do you train a PyTorch neural network?
 [[Further Reading](https://pytorch.org/tutorials/beginner/basics/intro.html)]
@@ -108,7 +103,7 @@ In each epoch:
 
 1. With `model(x)`, we call the `forward` method defined earlier to obtain predictions for the entire input batch. The outputs of each layer (**"activations"**) are cached for use in the backward pass. 
 2. We compute the (cross entropy) loss for these predictions and store them in the `loss` tensor.
-3. We calculate the derivative of the loss of each sample with respect to each parameter (**"gradients"**) with `loss.backward()`. PyTorch's autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the outer layer in the backward pass. It accumulates gradients in each tensor's `.grad` attribute^[Some tensors in a module don't have gradients, for example fixed transformers with static parameters.].
+3. We calculate the derivative of the loss of each sample with respect to each parameter (**"gradients"**) with `loss.backward()`. PyTorch's autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the outer layer in the backward pass. It accumulates gradients in each tensor's `.grad` attribute^[Some tensors in a module don't have gradients, for example fixed transforms with static parameters.].
 4. The optimizer defines how parameters are updated from gradients. `optimizer.step()` performs this adjustment, and `optimizer.zero_grad()` resets gradients so they don't accumulate in the next pass.
 
 ![Pebble graph for a four layer network illustrating how cached activations are built up in the forward pass, and used to calculate gradients in the backward pass ([graphic inspiration](https://siboehm.com/articles/22/data-parallel-training)).](images/pebble_graph.gif)
@@ -123,28 +118,28 @@ For larger models such as Meta's Llama 405B that's a 6.5TB memory requirement, w
 PyTorch offers two execution models: **eager** mode and **graph** mode. 
 In eager mode (the default), operators are immediately executed as they are encountered -- effectively, we can't "look ahead". 
 Graph mode synthesises operators into a graph, which is then compiled and executed as a whole.
-As of PyTorch 2.5, most of the parallelism offered only exists in eager mode -- which, as we'll see, can often lead to suboptimal sequences of operations.
+As of PyTorch 2.5, most of the parallelisms offered only exists in eager mode -- which, as we'll see, can often lead to suboptimal sequences of operations.
 
 ### The Transformer architecture
 [[Further Reading](https://arxiv.org/pdf/1706.03762)]
 
-[TODO]. 
+[WIP]
 As the largest models trained today are transformers, most of the distributed training literature has evolved around this architecture. 
-Transformers are usually made of several equal-size transformer blocks, which are very convenient for splitting/parallelisation.
+Transformers are usually made of several equal-size transformer blocks, which are very convenient for splitting/parallelisms.
 
 # 2.Communication Primitives
 [[Further Reading]](https://marek.ai/allreduce-the-basis-of-multi-device-communication-for-neural-network-training.html)
 
 Before going into distribution strategies, we need to discuss the primitives we have available for communicating data between GPUs.
 
-Let's start with a simple model: two GPUs (or **"ranks"**) with a point-to-point (p2p) connection -- this could be a fast NVLink interconnect if they're within the same host, or a slower InfiniBand or Ethernet network (perhaps with several hops) if they're not (more on this [later]()).
+Let's start with a simple model: two GPUs (or **"ranks"**) with a point-to-point (p2p) connection -- this could be a fast NVLink interconnect if they're within the same host, or a slower InfiniBand or Ethernet network (perhaps with several hops) if they're not.
 
 All primitives operate over a single tensor at each rank. 
 The simplest thing we can do is to <mark>send</mark> a tensor from one rank and receive on the other:
 
 <figure>
 <video width="80%" autoplay loop muted>
-  <source src="jupyter/media/videos/jupyter/1080p60/CollectiveP2P.mp4" type="video/mp4">
+  <source src="videos/CollectiveP2P.mp4" type="video/mp4">
 </video>
 <figcaption aria-hidden="true">P2P send, circles correspond to ranks and squares to tensors.</figcaption>
 </figure>
@@ -202,9 +197,9 @@ Each GPU will send a $\frac{D}{W}$-size datachunk $W-1$ times for the ReduceScat
 Though Ring AllReduce is bandwidth optimal, its end-to-end latency scales *linearly* with the number of ranks. A lower latency, tree-based alternative will be discussed in another post.
 <!-- TODO: summary table of each collective, overhead, latency, etc -->
 
-# 3. Parallelisation Paradigms
-In order to have some notion of correctness, let's define a distributed algorithm to be **locally consistent** if it is mathematically equivalent to local training.
-
+# 3. Parallelism Paradigms
+Now that we have an understanding of how data flows during the PyTorch model training process and the primitives we have available for communicating this data between GPUs, let's look at the various techniques that have emerged for distributing training.
+In order to have some notion of correctness for these techniques, we'll define a distributed algorithm to be **locally consistent** if it is mathematically equivalent to local training.
 <!-- TODO: summary table of parallelisation paradigms, and their compute/communication costs -->
 
 ### Distributed Data Parallel (DDP)
@@ -216,7 +211,7 @@ We described local training in [Section 1](#how-do-you-train-a-pytorch-neural-ne
 
 ![Local training example on a batch of 6 MNIST data samples ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/local_training.png)
 
-DDP duplicates the model across $W$ ranks, splitting batches into $W$ different $\beta=\frac{B}{W}$-size chunk for each rank to process:
+DDP duplicates the model across $W$ ranks, splitting batches into $W$ different $\beta=\frac{B}{W}$-size chunks for each rank to process:
 
 ![Data parallel training example with $W=2$ ranks ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/ddp_training.png)
 
@@ -388,7 +383,7 @@ PyTorch's FSDP experiments [@pytorchfsdp] show near-linear compute scaling, thou
 
 Like FSDP, pipeline parallelism aims to train models too large to fit within a single GPU.
 However, rather than *sharding* the model horizontally, we ***partition*** it vertically along its depth.
-Each of partition of consecutive layers is referred to as a **stage**. 
+Each partition of consecutive layers is referred to as a **stage**. 
 Returning to our four layer network from [Section 1](#how-do-you-train-a-pytorch-neural-network), we could partition it evenly across two ranks and send intermediate activations/gradients at partition boundaries between stages:
 
 ![Pebble graph of a four layer network, partitioned across two ranks into two stages of two layers each ([image credit](https://siboehm.com/articles/22/pipeline-parallel-training)).](images/pp_pebble_graph.gif)
@@ -401,12 +396,12 @@ To illustrate, here's what the same naive schedule would look like with a pipeli
 These dead zones in our schedule where GPUs are idle are called pipeline **bubbles**.
 They are caused by dependencies between operations: for example, rank 2 cannot start the 2nd forward stage until it has received 1st stage intermediate outputs from rank 1.
 
-<mark>GPipe</mark> [@gpipe] reduces bubbles by splitting a batch into **microbatches** and adding up each of their gradients to get back the gradient over the entire batch (as with DDP gradient accumulation), thus allowing more than one rank to do useful work at the same time.
+<mark>GPipe</mark> [@gpipe] reduces bubbles by splitting a batch into **microbatches** and adding up each of their gradients to get back the gradient over the entire batch (the same as DDP gradient accumulation), thus allowing more than one rank to do useful work at the same time.
 Here's the same four stage example, with 4-way batch-splitting:
 
 ![GPipe schedule with $d=4$ stages, $m=4$ microbatches; $Fi(j)$ denotes the $i^\text{th}$ stage forward computation over the $j^\text{th}$ microbatch.](images/pp_gpipe_bubbles.png)
 
-We can show empirically that, in this example, GPipe reduces relative bubble time by more than a third.
+We can show empirically that, in this example, GPipe reduces relative bubble time by more than two thirds.
 For a pipeline with $d$ evenly-partitioned stages and $m$ evenly-divided microbatches, a given stage spends $m$ forward timesteps doing useful work and $d-1$ forward timesteps waiting for new work to arrive during the forward pass.
 The same applies to the backward pass, therefore the overall fraction of ideal computation time spent in bubbles is:
 
@@ -446,8 +441,8 @@ O\left(B+\frac{B}{m}\frac{l}{d}\right)
 $$
 Why can we get away with recomputing the forward without significantly impacting overall compute efficiency^[Recomputing activations will still slow training speed; instead the SoTA is to *selectively* recompute only some activations [@selectiveactivations].]?
 
-1. In practice the backward is actually much more expensive (usually twice as much) than the forward.
-2. As we saw earlier pipeline parallelism can't achieve perfect compute-communication overlap. When used in conjunction with pipelining, forward recomputation can be scheduled earlier (during bubbles) as we don't need to wait for the gradients from later layers.
+- In practice the backward is actually much more expensive (usually twice as much) than the forward.
+- As we saw earlier pipeline parallelism can't achieve perfect compute-communication overlap. When used in conjunction with pipelining, forward recomputation can be scheduled earlier (during bubbles) as we don't need to wait for the gradients from later layers.
 
 The original GPipe paper [@gpipe] claims that, with activation checkpointing, using $m \geq 4d$ microbatches results in "negligible" bubble overhead.
 
@@ -455,7 +450,7 @@ The original GPipe paper [@gpipe] claims that, with activation checkpointing, us
 [[Further Reading](https://arxiv.org/pdf/2211.05953)]
 
 We can further decrease memory demand by reducing the number of "in-flight" microbatches for which we need to cache activations (or checkpoints).
-If you look at the original GPipe schedule, after completing the forward for the first microbatch, the last stage could instead start the backward right away and discard its activation. 
+If you look at the original GPipe schedule, after completing the forward for the first microbatch, the last stage could instead start the backward pass right away and then discard its activation. 
 <mark>PipeDream</mark> [@pipedream] schedules the last stage backward immediately after the corresponding forward, reducing memory demand compared to GPipe:
 
 ![1F1B PipeDream-flush schedule, ignoring communication with $d=4, m=8$. Based on figure from [@megatron2021].](images/pipedream_tile.png)
@@ -467,67 +462,108 @@ The schedule consists of three phases:
 3. Lastly we *flush* the pipeline by completing the backward passes for remaining microbatches without scheduling any new ones.
 
 Unlike GPipe, where all microbatches are in-flight at some point during the schedule, with PipeDream that number never exceeds the pipeline depth.
-Since reducing bubble time requires $m \gg p$, PipeDream can do so without affecting memory footprint. 
+Since reducing bubble time requires $m \gg d$, PipeDream can do so without affecting memory footprint. 
 However, for fixed $m$, the bubble fraction is no different between PipeDream and GPipe (you can see this by shifting all the blue forwarded passes left). 
 So how can we do better, without prohibitively increasing $m$ and thus the overall batchsize?
 
-Rather than each rank only having a single stage (of consecutive layers), we can form a *looping* pipeline by performing the computation for $v$ (non-consecutive) stages at each rank and connecting the last rank to the first, forming a coil. 
-For example, if rank 0 previously had 4 layers (e.g. layers 0-4) with $v=2$ loops, it would now have 2 stages of 2 layers each (e.g. layers 0-1 and 8-9).
-<mark>PTD-P</mark> [@megatron2021] is the looped version of the PipeDream 1F1B schedule:
+Rather than each rank only having a single stage (of consecutive layers), we can *loop* our pipeline by performing the computation for $v$ (non-consecutive) stages at each rank and connecting the last rank to the first, forming a coil. 
+For example, if rank 0 previously had 4 layers (e.g. layers 0-4), with $v=2$ loops it would now have 2 stages of 2 layers each (e.g. layers 0-1 and 8-9).
+<mark>Interleaved 1F1B</mark> [@megatron2021] is the looped version of the PipeDream schedule:
 
-![PTD-P (depth-first) schedule; $W=4$ ranks, $\ell=16$ layers, $v=4$ loops, $m=8$ microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from [@bfspipeline].](images/dfs_pipeline.png)
+![Interleaved 1F1B (DFS) schedule; $W=4$ ranks, $d=16$ stages, $v=4$ loops, $m=8$ microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from [@bfspipeline].](images/dfs_pipeline.png)
 
-Forward and backward for a stage is now shorter by a factor of $v$, so the bubble time at each rank is also reduced by $v$ to $(d-1)/v$.
+Forward and backward passes for a stage are now shorter by a factor of $v$, so the bubble time at each rank is also reduced by $v$ to $(d-1)/v$.
 The overall bubble fraction becomes:
 $$ \text{Bubble}_\text{looped}(d,m,v) = \frac{d-1}{vm} $$
 This reduced bubble size does not, however, come for free: the total communication volume is increased by the same factor of $v$.
-Another caveat is that PTD-P requires $m$ be a multiple of $W$.
+Another caveat is that Interleaved 1F1B requires $m$ be a multiple of $W$.
 
-You can imagine that 1F1B schedules like PTD-P and PipeDream are *depth-first*: when deciding between computing the same (forward) stage for the next microbatch or the next (backward) stage for the same microbatch, a rank will choose the latter -- sending earlier microbatches as deep as possible down the pipeline.
+You can imagine that 1F1B schedules like PipeDream and Interleaved 1F1B are *depth-first*: when deciding between computing the same (forward) stage for the next microbatch or the next (backward) stage for the same microbatch, a rank will choose the latter -- sending earlier microbatches as deep as possible down the pipeline.
 "All-forward all-backward" schedules like GPipe are *breadth-first*: a rank will prioritise completing all microbatches in the earliest unfinished stage.
 Naturally, you might ask what the looped anolog of GPipe looks like. 
 This is the <mark>breadth-first pipeline schedule</mark> (BFS) [@bfspipeline]:
 
-![Breadth-first pipeline schedule; $W=4$ ranks, $\ell=16$ layers, $v=4$ loops, $m=8$ microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from [@bfspipeline].](images/bfs_pipeline.png)
+![Breadth-first pipeline schedule; $W=4$ ranks, $d=16$ stages, $v=4$ loops, $m=8$ microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Notice that a complete iteration finishes faster than Interleaved 1F1B. Figure from [@bfspipeline].](images/bfs_pipeline.png)
 
-The bubble time fraction is exactly the same as PTD-P, though (like GPipe) peak memory consumption is increased as all microbatches are in-flight at some point.
+The bubble time fraction is exactly the same as Interleaved 1F1B ("DFS" from now on), though (like GPipe) peak memory consumption is increased as all microbatches are in-flight at some point.
 However, BFS achieves much better communication overlap: 
 
-1. A PTD-P rank will compute the forward over $d$ contiguous microbatches at a time; the first microbatch must complete the rest of the loop before the sequence is finished (i.e. in $<d-1$ fwd timesteps) to avoid starving the rank (impossible with non-zero communication delay). BFS, on the other hands, forwards the entire batch, providing $m-d$ extra microbatches to absorb communication overheads.
-2. The backward for the first stages finishes earlier, allowing us to start reducing gradients along the DP dimension earlier.
+- A DFS rank will compute the forward over $d$ contiguous microbatches at a time; the first microbatch must complete the rest of the loop before the sequence is finished (i.e. in $<d-1$ fwd timesteps) to avoid starving the rank (impossible with non-zero communication delay). BFS, on the other hands, has $m-d$ extra microbatches to absorb communication overheads because it forwards the entire batch.
+- The backward for the first stages finishes earlier, allowing us to start reducing gradients along the DP dimension earlier.
 
 More importantly, BFS can make use of FSDP.
-In a non-looping pipeline, FSDP is prohibitively expensive as we'd have unshard/reshard parameters and reduce gradients for each microbatch.
-With a looping pipeline, ranks hold several stages so these can be used as FSDP units.
-A rank can unshard an entire stage for the duration of a microbatch sequence and then subsequently reduce gradients for that stage.
-DFS still requires several FSDP iterations per unit as it alternates between stages, whereas BFS completes the full forward (or backward) for a stage before moving on to the next -- thus avoiding these repetitions.
+In a non-looping pipeline, a rank only has a single stage. To achieve any memory savings, FSDP units would have to be intra-stage thus requiring a complete FSDP iteration for each microbatch.
+With a looping pipeline, ranks hold several stages each of which can be used as a unit; we can keep a stage unsharded and accumulate gradeints for contiguous microbatches, only resharding/reducing at the end of the microbatch sequence.
+A BFS stage completes the forward (or backward) pass for all microbatches in one go, avoiding the repeated FSDP iterations that arise from alternating between stages in DFS.
 
-As with DP, FSDP is always on the outermost dimension when combined with PP.
-The benefits of combining BFS and FSDP are two-fold: first, FSDP compensates for BFS' larger memory footprint by sharding stages; and second, BFS reduces the size of FSDP sharding groups (and their expensive collectives) while maintaining the same overall degree of parallelism.
+The benefits of combining BFS and FSDP are two-fold: first, FSDP compensates for BFS' larger memory footprint by sharding stages; second, BFS reduces the size of FSDP sharding groups (and their expensive collectives) while maintaining the same overall degree of parallelism.
+
+Like DDP, FSDP is typically the outermost parallelism when combined with pipelining.
+Outer dimensions may spread across a multi-hop network with higher communication latency and lower bandwidth; FSDP has fewer, larger asynchronous collectives that can better absorb these communication delays.
 <!-- TODO: there's also some batchsize stuff (see BFS paper) that I don't quite understand yet -->
+<!-- TODO: Diagram? -->
 
-There are a lot more schedules not covered here.
-More advanced scheduling strategies, such as those used to train Llama 3, include hybrid schedules combining the memory savings of DFS with the communication efficiency of BFS.
+There are a lot other pipeline schedules we haven't covered here, a good reference is the [PyTorch documentation](https://pytorch.org/docs/stable/distributed.pipelining.html#module-torch.distributed.pipelining.schedules).
+More advanced scheduling strategies, such as those used to train Llama 3 [@llama3], include hybrid schedules that combine the memory savings of DFS with the communication efficiency of BFS.
 
 <!-- TODO: empirical performance? -->
 
 #### PP in PyTorch
-How is the model staged?
-We rely on balanced pipelines (even partitions). This is non-trivial in the general case; luckily it's pretty easy for transformers because they're made of equal-sized blocks.
+[WIP]
+<!-- How is the model staged? We rely on balanced pipelines (even partitions). This is non-trivial in the general case; luckily it's pretty easy for transformers because they're made of equal-sized blocks. -->
+<!-- How do we specify schedule? How do we combine with FSDP? -->
 
-How do we specify schedule?
-How do we combine with FSDP?
+### Tensor Parallel (TP)
+[[Further Reading](https://arxiv.org/pdf/1909.08053)]
 
-### Tensor and Sequence Parallel (TP / SP)
-[[Further Reading](https://arxiv.org/pdf/2104.04473)]
+Tensor parallelism is similar to FSDP: we split our model *horizontally* to reduce memory footprint and increase our degree of parallelism.
+However, TP shards are much more granular, with splits within a single layer rather than across units of several layers.
+
+The computational bottleneck for most modern models (such as the transformer) is the **general matrix multiply** (GEMM): multiplying an activation batch matrix $X$ with a large weight matrix $A$.
+The example we used in [Section 1](#how-do-you-train-a-pytorch-neural-network), a **multi-layer perceptron** (MLP), consists of a GEMM followed by a pointwise pointwise nonlinear activation function $\sigma(\cdot)$:
+$$ 
+Y = \sigma(XA)
+$$
+One way to paralellise the GEMM would be to split the weight matrix $A$ along its rows, and input $X$ along its columns:
+$$
+X = \begin{bmatrix} X_1 & X_2 \end{bmatrix}, A= \begin{bmatrix} A_1 \\ A_2 \end{bmatrix}
+$$
+Matrix multiplication can be thought of as a dot product between pairs of rows (on the left) and columns (on the right).
+It's therefore possible to compute independent dot products on different ranks and sum up the results:
+$$
+Y=X_1A_1+X_2A_2
+$$
+However, because $\sigma$ is a nonlinear, in general $\sigma(X_1 A_1 + X_2A_2) \neq \sigma(X_1 A_1) + \sigma(X_2 A_2)$.
+This approach would therefore require a synchronisation point before the activation function.
+If instead we only split weights along their columns $A=\begin{bmatrix} A_1 & A_2 \end{bmatrix}$, we end up concatenating rather than adding the outputs:
+$$
+Y=\begin{bmatrix} Y_1 & Y_2 \end{bmatrix}=\begin{bmatrix} \sigma(X A_1) & \sigma(X A_2) \end{bmatrix}
+$$
+By removing the pre-activation synchronisation, we can stack a second MLP layer before we have to synchronise again:
+$$
+Z = \sigma_1(YB)=\sigma_1(Y_1B_1 + Y_2B_2)
+$$
+The second layer weights are split column-wise, $B= [B_1; B_2]$, and we synchronise *before* the second activation function $\sigma_1$ (as in our original attempt).
+We end up sharding our two MLP layers with a single AllReduce synchronisation before the final activation:
+
+![Tensor parallelism over $W=2$ rank applied to two consecutive MLP layers. Here $\sigma_0$ and $\sigma_1$ are GeLU and dropout functions respectively. $f$ is the identify and $g$ is an AllReduce. Figure from [@megatron2019]](images/tp_mlp.png)
+
+Because TP requires an AllReduce *per layer* (or every two layers), it is almost exclusively used intranode.
+You can think of it as agglomerating the ranks in a node into a single, much larger rank (over which we can apply other parallelisms). 
+
+<!-- TODO: TP for attention layers -->
 
 #### TP in PyTorch
+[WIP]
 
 ### Context Parallel (CP)
+[WIP]
+<!-- aka sequence parallel (?) -->
+
 #### CP in PyTorch
 
-<!-- ND parallelism widget, that generates a hypothetical trace of collectives -->
+<!-- N-D parallelism widget, that generates a hypothetical trace of collectives -->
 
 # 4. Parallelism in Practice
 [WIP] Large models use FSDP, gigantic models use all of the above. 
-How do we choose batchsize, microbatchsize and other parameters?
+<!-- TODO: How do we choose batchsize, microbatchsize and other parameters? --->

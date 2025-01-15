@@ -112,19 +112,19 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_meta_tags-->
 <title>Bruce Mauger: Distributed Machine Learning: How Does it Work?</title>
 
-<meta property="description" itemprop="description" content="Distribution has become essential to training large models.&#10;Modern machine learning frameworks provide drop-in distribution, but few understand how these work -- and why they might be slowing down training."/>
+<meta property="description" itemprop="description" content="State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. &#10;How does this orchestration work? And how can it be done without incurring expensive communication overheads?"/>
 
 <link rel="canonical" href="brrm.io/posts/distributed-ml/"/>
 
 <!--  https://schema.org/Article -->
-<meta property="article:published" itemprop="datePublished" content="2024-12-26"/>
-<meta property="article:created" itemprop="dateCreated" content="2024-12-26"/>
+<meta property="article:published" itemprop="datePublished" content="2025-01-01"/>
+<meta property="article:created" itemprop="dateCreated" content="2025-01-01"/>
 <meta name="article:author" content="Bruce Mauger"/>
 
 <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
 <meta property="og:title" content="Bruce Mauger: Distributed Machine Learning: How Does it Work?"/>
 <meta property="og:type" content="article"/>
-<meta property="og:description" content="Distribution has become essential to training large models.&#10;Modern machine learning frameworks provide drop-in distribution, but few understand how these work -- and why they might be slowing down training."/>
+<meta property="og:description" content="State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. &#10;How does this orchestration work? And how can it be done without incurring expensive communication overheads?"/>
 <meta property="og:url" content="brrm.io/posts/distributed-ml/"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:site_name" content="Bruce Mauger"/>
@@ -132,14 +132,14 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--  https://dev.twitter.com/cards/types/summary -->
 <meta property="twitter:card" content="summary"/>
 <meta property="twitter:title" content="Bruce Mauger: Distributed Machine Learning: How Does it Work?"/>
-<meta property="twitter:description" content="Distribution has become essential to training large models.&#10;Modern machine learning frameworks provide drop-in distribution, but few understand how these work -- and why they might be slowing down training."/>
+<meta property="twitter:description" content="State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. &#10;How does this orchestration work? And how can it be done without incurring expensive communication overheads?"/>
 <meta property="twitter:url" content="brrm.io/posts/distributed-ml/"/>
 
 <!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
 <meta name="citation_title" content="Bruce Mauger: Distributed Machine Learning: How Does it Work?"/>
 <meta name="citation_fulltext_html_url" content="brrm.io/posts/distributed-ml/"/>
-<meta name="citation_online_date" content="2024/12/26"/>
-<meta name="citation_publication_date" content="2024/12/26"/>
+<meta name="citation_online_date" content="2025/01/01"/>
+<meta name="citation_publication_date" content="2025/01/01"/>
 <meta name="citation_author" content="Bruce Mauger"/>
 <!--/radix_placeholder_meta_tags-->
   
@@ -154,16 +154,18 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <meta name="citation_reference" content="citation_title=Reducing activation recomputation in large transformer models;citation_publisher=Curan;citation_volume=5;citation_author=Vijay Anand Korthikanti;citation_author=Jared Casper;citation_author=Sangkug Lym;citation_author=Lawrence McAfee;citation_author=Michael Andersch;citation_author=Mohammad Shoeybi;citation_author=Bryan Catanzaro"/>
   <meta name="citation_reference" content="citation_title=An empirical model of large-batch training;citation_author=Sam McCandlish;citation_author=Jared Kaplan;citation_author=Dario Amodei;citation_author=OpenAI Dota Team"/>
   <meta name="citation_reference" content="citation_title=Efficient large-scale language model training on GPU clusters using megatron-LM;citation_author=Deepak Narayanan;citation_author=Mohammad Shoeybi;citation_author=Jared Casper;citation_author=Patrick LeGresley;citation_author=Mostofa Patwary;citation_author=Vijay Anand Korthikanti;citation_author=Dmitri Vainbrand;citation_author=Prethvi Kashinkunti;citation_author=Julie Bernauer;citation_author=Bryan Catanzaro;citation_author=Amar Phanishayee;citation_author=Matei Zaharia"/>
+  <meta name="citation_reference" content="citation_title=Megatron-LM: Training multi-billion parameter language models using model parallelism;citation_author=Mohammad Shoeybi;citation_author=Mostofa Patwary;citation_author=Raul Puri;citation_author=Patrick LeGresley;citation_author=Jared Casper;citation_author=Bryan Catanzaro"/>
   <meta name="citation_reference" content="citation_title=Breadth-first pipeline parallelism;citation_author=Joel Lamy-Poirier"/>
+  <meta name="citation_reference" content="citation_title=The llama 3 herd of models;citation_author=AI @ Meta Llama Team"/>
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","date","output","citation","bibliography","csl","resources","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Distributed Machine Learning: How Does it Work?"]},{"type":"character","attributes":{},"value":["Distribution has become essential to training large models.\nModern machine learning frameworks provide drop-in distribution, but few understand how these work -- and why they might be slowing down training."]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Bruce Mauger"]}]}]},{"type":"character","attributes":{},"value":["12-26-2024"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["mathjax","self_contained","toc"]}},"value":[{"type":"character","attributes":{},"value":["https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"]},{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]}]}]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["distributed-ml.bib"]},{"type":"character","attributes":{},"value":["cambridge-university-press-numeric.csl"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["exclude"]}},"value":[{"type":"character","attributes":{},"value":["excalidraw","jupyter"]}]},{"type":"character","attributes":{},"value":["brrm.io/posts/distributed-ml/"]},{"type":"character","attributes":{},"value":["brrm.io/posts/distributed-ml/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","date","output","citation","bibliography","csl","resources","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Distributed Machine Learning: How Does it Work?"]},{"type":"character","attributes":{},"value":["State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. \nHow does this orchestration work? And how can it be done without incurring expensive communication overheads?"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Bruce Mauger"]}]}]},{"type":"character","attributes":{},"value":["01-01-2025"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["mathjax","self_contained","toc"]}},"value":[{"type":"character","attributes":{},"value":["https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"]},{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]}]}]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["distributed-ml.bib"]},{"type":"character","attributes":{},"value":["cambridge-university-press-numeric.csl"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["exclude"]}},"value":[{"type":"character","attributes":{},"value":["excalidraw","jupyter"]}]},{"type":"character","attributes":{},"value":["brrm.io/posts/distributed-ml/"]},{"type":"character","attributes":{},"value":["brrm.io/posts/distributed-ml/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["cambridge-university-press-numeric.csl","distributed-ml_files/anchor-4.2.2/anchor.min.js","distributed-ml_files/bowser-1.9.3/bowser.min.js","distributed-ml_files/d3v4-4.13.0/API.md","distributed-ml_files/d3v4-4.13.0/CHANGES.md","distributed-ml_files/d3v4-4.13.0/d3.min.js","distributed-ml_files/d3v4-4.13.0/LICENSE","distributed-ml_files/d3v4-4.13.0/README.md","distributed-ml_files/d3v6-6.2.0/API.md","distributed-ml_files/d3v6-6.2.0/CHANGES.md","distributed-ml_files/d3v6-6.2.0/d3.min.js","distributed-ml_files/d3v6-6.2.0/LICENSE","distributed-ml_files/d3v6-6.2.0/README.md","distributed-ml_files/distill-2.2.21/template.v2.js","distributed-ml_files/header-attrs-2.29/header-attrs.js","distributed-ml_files/htmltools-fill-0.5.8.1/fill.css","distributed-ml_files/htmlwidgets-1.6.4/htmlwidgets.js","distributed-ml_files/jquery-3.6.0/jquery-3.6.0.js","distributed-ml_files/jquery-3.6.0/jquery-3.6.0.min.js","distributed-ml_files/jquery-3.6.0/jquery-3.6.0.min.map","distributed-ml_files/popper-2.6.0/popper.min.js","distributed-ml_files/r2d3-binding-0.2.6/r2d3.js","distributed-ml_files/r2d3-render-0.1.0/r2d3-render.js","distributed-ml_files/tippy-6.2.7/tippy-bundle.umd.min.js","distributed-ml_files/tippy-6.2.7/tippy-light-border.css","distributed-ml_files/tippy-6.2.7/tippy.css","distributed-ml_files/tippy-6.2.7/tippy.umd.min.js","distributed-ml_files/webcomponents-2.0.0/webcomponents.js","distributed-ml.bib","images/bfs_pipeline.png","images/ddp_naive.png","images/ddp_overlap.png","images/ddp_training.png","images/dfs_pipeline.png","images/fsdp_comm_trace.png","images/fsdp_hybrid_sharding.png","images/fsdp_naive.png","images/local_training.png","images/pebble_graph.gif","images/pipedream_tile.png","images/pp_dp_2d.png","images/pp_gpipe_bubbles.png","images/pp_gpipe_comm.png","images/pp_naive_bubbles.png","images/pp_pebble_graph.gif","images/pytorch_ddp_grad_accum.png","images/pytorch_ddp_perf.png","images/pytorch_fsdp_eval.png","images/pytorch_fsdp_flatparam.png","images/pytorch_fsdp_units.png","videos/CollectiveAllReduce.mp4","videos/CollectiveAllToAll.mp4","videos/CollectiveBroadcast.mp4","videos/CollectiveP2P.mp4","videos/CollectiveReduce.mp4","videos/CollectiveReduceScatter.mp4"]}
+  {"type":"character","attributes":{},"value":["cambridge-university-press-numeric.csl","distributed-ml_files/anchor-4.2.2/anchor.min.js","distributed-ml_files/bowser-1.9.3/bowser.min.js","distributed-ml_files/d3v4-4.13.0/API.md","distributed-ml_files/d3v4-4.13.0/CHANGES.md","distributed-ml_files/d3v4-4.13.0/d3.min.js","distributed-ml_files/d3v4-4.13.0/LICENSE","distributed-ml_files/d3v4-4.13.0/README.md","distributed-ml_files/d3v6-6.2.0/API.md","distributed-ml_files/d3v6-6.2.0/CHANGES.md","distributed-ml_files/d3v6-6.2.0/d3.min.js","distributed-ml_files/d3v6-6.2.0/LICENSE","distributed-ml_files/d3v6-6.2.0/README.md","distributed-ml_files/distill-2.2.21/template.v2.js","distributed-ml_files/header-attrs-2.29/header-attrs.js","distributed-ml_files/htmltools-fill-0.5.8.1/fill.css","distributed-ml_files/htmlwidgets-1.6.4/htmlwidgets.js","distributed-ml_files/jquery-3.6.0/jquery-3.6.0.js","distributed-ml_files/jquery-3.6.0/jquery-3.6.0.min.js","distributed-ml_files/jquery-3.6.0/jquery-3.6.0.min.map","distributed-ml_files/popper-2.6.0/popper.min.js","distributed-ml_files/r2d3-binding-0.2.6/r2d3.js","distributed-ml_files/r2d3-render-0.1.0/r2d3-render.js","distributed-ml_files/tippy-6.2.7/tippy-bundle.umd.min.js","distributed-ml_files/tippy-6.2.7/tippy-light-border.css","distributed-ml_files/tippy-6.2.7/tippy.css","distributed-ml_files/tippy-6.2.7/tippy.umd.min.js","distributed-ml_files/webcomponents-2.0.0/webcomponents.js","distributed-ml.bib","images/bfs_pipeline.png","images/ddp_naive.png","images/ddp_overlap.png","images/ddp_training.png","images/dfs_pipeline.png","images/fsdp_comm_trace.png","images/fsdp_hybrid_sharding.png","images/fsdp_naive.png","images/local_training.png","images/pebble_graph.gif","images/pipedream_tile.png","images/pp_dp_2d.png","images/pp_gpipe_bubbles.png","images/pp_gpipe_comm.png","images/pp_naive_bubbles.png","images/pp_pebble_graph.gif","images/pytorch_ddp_grad_accum.png","images/pytorch_ddp_perf.png","images/pytorch_fsdp_eval.png","images/pytorch_fsdp_flatparam.png","images/pytorch_fsdp_units.png","images/tp_mlp.png","videos/CollectiveAllReduce.mp4","videos/CollectiveAllToAll.mp4","videos/CollectiveBroadcast.mp4","videos/CollectiveP2P.mp4","videos/CollectiveReduce.mp4","videos/CollectiveReduceScatter.mp4"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -2335,7 +2337,7 @@ MathJax.Hub.Config({
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Distributed Machine Learning: How Does it Work?","description":"Distribution has become essential to training large models.\nModern machine learning frameworks provide drop-in distribution, but few understand how these work -- and why they might be slowing down training.","authors":[{"author":"Bruce Mauger","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2024-12-26T00:00:00.000+01:00","citationText":"Mauger, 2024"}
+{"title":"Distributed Machine Learning: How Does it Work?","description":"State of the art AI requires orchestrating large clusters to perform a single synchronised calculation. \nHow does this orchestration work? And how can it be done without incurring expensive communication overheads?","authors":[{"author":"Bruce Mauger","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2025-01-01T00:00:00.000+01:00","citationText":"Mauger, 2025"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -2360,14 +2362,14 @@ MathJax.Hub.Config({
 
 <!--radix_placeholder_categories-->
 <!--/radix_placeholder_categories-->
-<p><p>Distribution has become essential to training large models.
-Modern machine learning frameworks provide drop-in distribution, but few understand how these work – and why they might be slowing down training.</p></p>
+<p><p>State of the art AI requires orchestrating large clusters to perform a single synchronised calculation.
+How does this orchestration work? And how can it be done without incurring expensive communication overheads?</p></p>
 </div>
 
 <div class="d-byline">
   Bruce Mauger  
   
-<br/>12-26-2024
+<br/>01-01-2025
 </div>
 
 <div class="d-article">
@@ -2381,40 +2383,37 @@ Modern machine learning frameworks provide drop-in distribution, but few underst
 <li><a href="#the-transformer-architecture" id="toc-the-transformer-architecture">The Transformer architecture</a></li>
 </ul></li>
 <li><a href="#communication-primitives" id="toc-communication-primitives">2.Communication Primitives</a></li>
-<li><a href="#parallelisation-paradigms" id="toc-parallelisation-paradigms">3. Parallelisation Paradigms</a>
+<li><a href="#parallelism-paradigms" id="toc-parallelism-paradigms">3. Parallelism Paradigms</a>
 <ul>
 <li><a href="#distributed-data-parallel-ddp" id="toc-distributed-data-parallel-ddp">Distributed Data Parallel (DDP)</a></li>
 <li><a href="#fully-sharded-data-parallel-fsdp" id="toc-fully-sharded-data-parallel-fsdp">Fully-Sharded Data Parallel (FSDP)</a></li>
 <li><a href="#pipeline-parallel-pp" id="toc-pipeline-parallel-pp">Pipeline Parallel (PP)</a></li>
-<li><a href="#tensor-and-sequence-parallel-tp-sp" id="toc-tensor-and-sequence-parallel-tp-sp">Tensor and Sequence Parallel (TP / SP)</a></li>
+<li><a href="#tensor-parallel-tp" id="toc-tensor-parallel-tp">Tensor Parallel (TP)</a></li>
 <li><a href="#context-parallel-cp" id="toc-context-parallel-cp">Context Parallel (CP)</a></li>
 </ul></li>
 <li><a href="#parallelism-in-practice" id="toc-parallelism-in-practice">4. Parallelism in Practice</a></li>
 </ul>
 </nav>
 </div>
-<p>Motivation: models &amp; clusters are <em>really</em> big.
-<!-- alternatively: you've just called torch.distribute(model), and your 100x GPU cluster is only running 50x faster than local, what's happened? --></p>
-<p>The objectives of distributed ML are two-fold:</p>
+<p>Many recent advances in AI are owed to training of larger and larger models.
+These neural networks are too big fit in and take too long to train with a single GPU.
+State of the art AI therefore requires orchestrating vast clusters of GPUs to perform a single synchronised calculation, with the objective of:</p>
 <ol type="1">
-<li>Reduce memory impact so we can fit larger models.</li>
-<li>Use lots of GPUs in parallel to speed up compute.</li>
+<li><strong>Reducing memory impact</strong>, so we can fit larger models.</li>
+<li><strong>Increasing degree of parallelism</strong>, so we can use lots of compute in parallel to speed up training.</li>
 </ol>
-<p>There’s no such thing as a free lunch; by distributing training we incur a <em>communication</em> overhead when GPUs have to talk to each other.
-As we’ll see, it’s relatively easy to design parallelisation techniques that achieve both of these; doing so without incurring prohibitive communication overheads is much more difficult, however.
-We’ll be focusing on the communication aspect of these designs.
-We’ll be particularly looking at how parallelisation paradigms are designed to minimise and hide communication, keeping our expensive GPUs as busy as possible.
-The goal is to reach linear scaling: throwing twice as many GPUs at the problem should go twice as fast (or the same speed, but with a doubly large model).</p>
-<p>We’ll take a look at how parallelisation paradigms have evolved to cope with more data, more parameters and more GPUs.</p>
-<p>I intended this as a light compilation of various sources; for more detail, I provide references to the relevant resources throughout.</p>
-<p>[Outline of sections]
-Though I intend to stay light on implementation specifics, the abstractions provided by PyTorch are nonetheless useful for illustration.
-We’ll be using PyTorch to illustrate and discuss implementation details.
-The first two sections provide a brief overview of model training with PyTorch, a highly-level overview of transformers and the communication building blocks that are availableto us.
-Section 3 takes a deep dive into how PyTorch assembles these together into the various parallelisation techniques it offers out-of-the-box.</p>
+<p>There’s no such thing as a free lunch: by distributing training we incur a <em>communication</em> overhead when GPUs have to talk to each other.
+Meta’s breakthrough Llama 3 model was trained<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> on a cluster of 24K GPUs, but with a per-GPU utilisation well below 50% <span class="citation" data-cites="llama3">[<a href="#ref-llama3" role="doc-biblioref">1</a>]</span>.</p>
+<p>We’ll be taking an in-depth look at the wide variety of parallelism paradigms that have enabled training of gigantic models.
+As we’ll see, it’s relatively easy to design parallelism techniques that achieve both of the previous objectives; doing so without incurring prohibitive communication overheads, however, is a very difficult engineering and research challenge.
+The communication aspects of these designs will be focus of this post.</p>
+<p>We assume only basic prior knowledge of neural networks and gradient descent.
+The first two sections provide background on the PyTorch framework (as well as the transformer model that underpins modern LLMs), and collective communication primitives respectively.
+The next section presents a deep-dive into all of the major parallelism techniques, including how PyTorch non-intrusively integrates these into its inherently local execution model.
+We’ll conclude with how the parallelisms are composed together in practice by looking at Llama 3.</p>
 <h1 id="pytorch-mental-model">1. PyTorch mental model</h1>
-<p>Pytorch is the preeminent framework, though the stuff here also (mostly) applies to other frameworks.
-Useful for understanding how data flows throughout training.</p>
+<p>We’ll be using PyTorch to illustrate model distribution throughout (though everything remains largely applicable to other frameworks).
+It’s useful to first get an understanding of how data flows during the PyTorch model training process, in order to see the opportunities for parallelisation.</p>
 <h3 id="how-do-you-train-a-pytorch-neural-network">How do you train a PyTorch neural network?</h3>
 <p>[<a href="https://pytorch.org/tutorials/beginner/basics/intro.html">Further Reading</a>]</p>
 <p>PyTorch’s fundamental data structure is the <code>Tensor</code>, a multi-dimensional matrix (think NumPy’s <code>ndarray</code>) used to store a model’s parameters and encode inputs/outputs.
@@ -2457,12 +2456,12 @@ For that we need a basic training loop:</p>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  optimizer.step()</span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  optimizer.zero_grad()</span></code></pre></div>
 </div>
-<p>We train our model for 10 epochs (iterations) over a single batch of <span class="math inline">\(B=10\)</span> (identical) data samples<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.
+<p>We train our model for 10 epochs (iterations) over a single batch of <span class="math inline">\(B=10\)</span> (identical) data samples<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.
 In each epoch:</p>
 <ol type="1">
 <li>With <code>model(x)</code>, we call the <code>forward</code> method defined earlier to obtain predictions for the entire input batch. The outputs of each layer (<strong>“activations”</strong>) are cached for use in the backward pass.</li>
 <li>We compute the (cross entropy) loss for these predictions and store them in the <code>loss</code> tensor.</li>
-<li>We calculate the derivative of the loss of each sample with respect to each parameter (<strong>“gradients”</strong>) with <code>loss.backward()</code>. PyTorch’s autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the outer layer in the backward pass. It accumulates gradients in each tensor’s <code>.grad</code> attribute<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</li>
+<li>We calculate the derivative of the loss of each sample with respect to each parameter (<strong>“gradients”</strong>) with <code>loss.backward()</code>. PyTorch’s autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the outer layer in the backward pass. It accumulates gradients in each tensor’s <code>.grad</code> attribute<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</li>
 <li>The optimizer defines how parameters are updated from gradients. <code>optimizer.step()</code> performs this adjustment, and <code>optimizer.zero_grad()</code> resets gradients so they don’t accumulate in the next pass.</li>
 </ol>
 <figure>
@@ -2471,27 +2470,27 @@ In each epoch:</p>
 </figure>
 <p>This process is known as <strong>stochastic gradient descent</strong>: we <em>iteratively</em> update parameters using <em>gradients</em> calculated over a <em>random</em> subset (batch) of the entire dataset.</p>
 <p>For each parameter in our network, we also need to store its gradient and relevant optimizer state.
-The popular Adam optimizer tracks <strong>momentum</strong> and <strong>variance</strong>, exponential averages of the first and second moments respectively of each parameter’s gradient <span class="citation" data-cites="adam2017">[<a href="#ref-adam2017" role="doc-biblioref">1</a>]</span>.
-The result is that each parameter can end up needing at least 16 bytes of memory, mostly attributable to high-precision optimizer state (assuming fp16/32 mixed precision<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>) <span class="citation" data-cites="mixedprecision2018">[<a href="#ref-mixedprecision2018" role="doc-biblioref">2</a>]</span>.
+The popular Adam optimizer tracks <strong>momentum</strong> and <strong>variance</strong>, exponential averages of the first and second moments respectively of each parameter’s gradient <span class="citation" data-cites="adam2017">[<a href="#ref-adam2017" role="doc-biblioref">2</a>]</span>.
+The result is that each parameter can end up needing at least 16 bytes of memory, mostly attributable to high-precision optimizer state (assuming fp16/32 mixed precision<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>) <span class="citation" data-cites="mixedprecision2018">[<a href="#ref-mixedprecision2018" role="doc-biblioref">3</a>]</span>.
 For larger models such as Meta’s Llama 405B that’s a 6.5TB memory requirement, which makes distributing model parameters over several GPUs a necessity.</p>
 <p>PyTorch offers two execution models: <strong>eager</strong> mode and <strong>graph</strong> mode.
 In eager mode (the default), operators are immediately executed as they are encountered – effectively, we can’t “look ahead”.
 Graph mode synthesises operators into a graph, which is then compiled and executed as a whole.
-As of PyTorch 2.5, most of the parallelism offered only exists in eager mode – which, as we’ll see, can often lead to suboptimal sequences of operations.</p>
+As of PyTorch 2.5, most of the parallelisms offered only exists in eager mode – which, as we’ll see, can often lead to suboptimal sequences of operations.</p>
 <h3 id="the-transformer-architecture">The Transformer architecture</h3>
 <p>[<a href="https://arxiv.org/pdf/1706.03762">Further Reading</a>]</p>
-<p>[TODO].
+<p>[WIP]
 As the largest models trained today are transformers, most of the distributed training literature has evolved around this architecture.
-Transformers are usually made of several equal-size transformer blocks, which are very convenient for splitting/parallelisation.</p>
+Transformers are usually made of several equal-size transformer blocks, which are very convenient for splitting/parallelisms.</p>
 <h1 id="communication-primitives">2.Communication Primitives</h1>
 <p><a href="https://marek.ai/allreduce-the-basis-of-multi-device-communication-for-neural-network-training.html">[Further Reading]</a></p>
 <p>Before going into distribution strategies, we need to discuss the primitives we have available for communicating data between GPUs.</p>
-<p>Let’s start with a simple model: two GPUs (or <strong>“ranks”</strong>) with a point-to-point (p2p) connection – this could be a fast NVLink interconnect if they’re within the same host, or a slower InfiniBand or Ethernet network (perhaps with several hops) if they’re not (more on this <a href="">later</a>).</p>
+<p>Let’s start with a simple model: two GPUs (or <strong>“ranks”</strong>) with a point-to-point (p2p) connection – this could be a fast NVLink interconnect if they’re within the same host, or a slower InfiniBand or Ethernet network (perhaps with several hops) if they’re not.</p>
 <p>All primitives operate over a single tensor at each rank.
 The simplest thing we can do is to <mark>send</mark> a tensor from one rank and receive on the other:</p>
 <figure>
 <video width="80%" autoplay loop muted>
-<source src="jupyter/media/videos/jupyter/1080p60/CollectiveP2P.mp4" type="video/mp4">
+<source src="videos/CollectiveP2P.mp4" type="video/mp4">
 </video>
 <figcaption aria-hidden="true">
 P2P send, circles correspond to ranks and squares to tensors.
@@ -2510,7 +2509,7 @@ One way to do this is with an <mark>AllToAll</mark> collective, a complete graph
 <p>This isn’t very bandwidth efficient: a <strong>world-size</strong> of <span class="math inline">\(W\)</span> ranks synchronising <span class="math inline">\(D\)</span>-sized tensors results in <span class="math inline">\(D(W-1)\)</span> per-GPU traffic, some of which may be contending for the same underlying network links.
 Moreover, we often only need an <em>aggregate</em> of the distributed tensors – for example we might want to average some parameters we’ve replicated across the ranks.
 So how might we accomplish this with less bandwidth?
-If each rank <strong>reduces</strong> (applying an associative<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> operator e.g. sum, min, max, etc.) the tensor it receives with its own local tensor, before passing the result onto the next rank, we obtain a <strong>ring-based</strong> <mark>Reduce</mark> collective:</p>
+If each rank <strong>reduces</strong> (applying an associative<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> operator e.g. sum, min, max, etc.) the tensor it receives with its own local tensor, before passing the result onto the next rank, we obtain a <strong>ring-based</strong> <mark>Reduce</mark> collective:</p>
 <figure>
 <video width="80%" autoplay loop muted>
 <source src="videos/CollectiveReduce.mp4" type="video/mp4">
@@ -2548,9 +2547,10 @@ However, with its use of a ring, AllReduce improves communication overhead by an
 Each GPU will send a <span class="math inline">\(\frac{D}{W}\)</span>-size datachunk <span class="math inline">\(W-1\)</span> times for the ReduceScatter and <span class="math inline">\(W-1\)</span> times for the AllGather, for a total per-GPU traffic of <span class="math inline">\(2(W-1)\frac{D}{W}\)</span>. Crucially, this is independent of the number of GPUs in the collective!</p>
 <p>Though Ring AllReduce is bandwidth optimal, its end-to-end latency scales <em>linearly</em> with the number of ranks. A lower latency, tree-based alternative will be discussed in another post.
 <!-- TODO: summary table of each collective, overhead, latency, etc --></p>
-<h1 id="parallelisation-paradigms">3. Parallelisation Paradigms</h1>
-<p>In order to have some notion of correctness, let’s define a distributed algorithm to be <strong>locally consistent</strong> if it is mathematically equivalent to local training.</p>
-<!-- TODO: summary table of parallelisation paradigms, and their compute/communication costs -->
+<h1 id="parallelism-paradigms">3. Parallelism Paradigms</h1>
+<p>Now that we have an understanding of how data flows during the PyTorch model training process and the primitives we have available for communicating this data between GPUs, let’s look at the various techniques that have emerged for distributing training.
+In order to have some notion of correctness for these techniques, we’ll define a distributed algorithm to be <strong>locally consistent</strong> if it is mathematically equivalent to local training.
+<!-- TODO: summary table of parallelisation paradigms, and their compute/communication costs --></p>
 <h3 id="distributed-data-parallel-ddp">Distributed Data Parallel (DDP)</h3>
 <p><a href="https://www.vldb.org/pvldb/vol13/p3005-li.pdf">[Further Reading]</a></p>
 <p>As its name would imply, DDP splits our <em>dataset</em> across ranks (each with an identical copy of the model), with periodic synchronisation to ensure model replicas are consistent. DDP is useful when our model is still small enough to fit on a single GPU, but we’d like to speed up training by having several GPUs work on a single batch in parallel.</p>
@@ -2559,13 +2559,13 @@ Each GPU will send a <span class="math inline">\(\frac{D}{W}\)</span>-size datac
 <img src="images/local_training.png" alt="Local training example on a batch of 6 MNIST data samples (image credit)." />
 <figcaption aria-hidden="true">Local training example on a batch of 6 MNIST data samples (<a href="https://siboehm.com/articles/22/data-parallel-training">image credit</a>).</figcaption>
 </figure>
-<p>DDP duplicates the model across <span class="math inline">\(W\)</span> ranks, splitting batches into <span class="math inline">\(W\)</span> different <span class="math inline">\(\beta=\frac{B}{W}\)</span>-size chunk for each rank to process:</p>
+<p>DDP duplicates the model across <span class="math inline">\(W\)</span> ranks, splitting batches into <span class="math inline">\(W\)</span> different <span class="math inline">\(\beta=\frac{B}{W}\)</span>-size chunks for each rank to process:</p>
 <figure>
 <img src="images/ddp_training.png" alt="Data parallel training example with W=2 ranks (image credit)." />
 <figcaption aria-hidden="true">Data parallel training example with <span class="math inline">\(W=2\)</span> ranks (<a href="https://siboehm.com/articles/22/data-parallel-training">image credit</a>).</figcaption>
 </figure>
 <p>Without any communication overhead, this should result in a linear <span class="math inline">\(W\times\)</span> speedup.
-The forward and backward passes are independent sample-wise calculations<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, and hence our batches can be independently processed without any communication.</p>
+The forward and backward passes are independent sample-wise calculations<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>, and hence our batches can be independently processed without any communication.</p>
 <aside style="margin-bottom: -200%">
 Why don’t we synchronise <em>parameters</em> rather than <em>gradients</em>?
 If we’re using stochasting gradient descent, there wouldn’t be any difference:
@@ -2590,7 +2590,7 @@ Because the gradient of a sum is the sum of the gradients of each term, we can c
 This can be done efficiently using the previously discussed AllReduce collective (along with a single Broadcast from the root rank after model construction, to synchronise initial parameters).</p>
 <p>Lastly, it’s worth noting that batchsize limits the maximum degree of DDP parallelism.
 We need to maintain chunk sizes bigger than a <em>minimum batchsize per GPU</em> (<span class="math inline">\(\beta_\text{min}\)</span>), below which compute intensity/utilisation decreases substantially.
-On the other hand, stochastic gradient descent is maximally efficient when overall batchsize is well-below an empirical value known as the <em>critical batch size</em><a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>, <span class="math inline">\(B \ll B_\text{crit}\)</span> <span class="citation" data-cites="empiricallargebatchtraining">[<a href="#ref-empiricallargebatchtraining" role="doc-biblioref">3</a>]</span>.
+On the other hand, stochastic gradient descent is maximally efficient when overall batchsize is well-below an empirical value known as the <em>critical batch size</em><a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>, <span class="math inline">\(B \ll B_\text{crit}\)</span> <span class="citation" data-cites="empiricallargebatchtraining">[<a href="#ref-empiricallargebatchtraining" role="doc-biblioref">4</a>]</span>.
 This small batchsize regime is unattainable for larger clusters since <span class="math inline">\(B \geq W\beta_\text{min} &gt; B_\text{crit}\)</span>.</p>
 <h4 id="ddp-in-pytorch">DDP in PyTorch</h4>
 <p>PyTorch’s distribution API is designed for non-intrusive scaling out from local training.
@@ -2612,22 +2612,22 @@ This allows us to overlap computation with (non-blocking) communication, speedin
 </figure>
 <p>Collective communications are more efficient on large tensors. Therefore, in practice, rather than launching a dedicated AllReduce immediately as soon as a layer’s gradient tensor is ready, we use <strong>Gradient Bucketing</strong>: we wait for a short period and bucket multiple tensors at a time into one AllReduce.</p>
 <p>To non-intrusively integrate with its eager execution model, PyTorch implements DDP by registering one autograd <strong>hook</strong> (a callback) with each parameter tensor, which fires after the corresponding gradients are updated (during the <code>loss.backward()</code> call).
-Once all hooks in a bucket<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> have fired, an asynchronous AllReduce is triggered. PyTorch’s DDP paper <span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">4</a>]</span> shows interleaving brings significant performance gains, particularly when using the recommended NCCL communication backend:</p>
+Once all hooks in a bucket<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> have fired, an asynchronous AllReduce is triggered. PyTorch’s DDP paper <span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">5</a>]</span> shows interleaving brings significant performance gains, particularly when using the recommended NCCL communication backend:</p>
 <figure>
-<img src="images/pytorch_ddp_perf.png" alt="Per-iteration normalised latency breakdown, comparing non-overlapping vs overlapping communication; training on 32 GPUs across 4 machines. Figure from [4]." />
-<figcaption aria-hidden="true">Per-iteration normalised latency breakdown, comparing non-overlapping vs overlapping communication; training on 32 GPUs across 4 machines. Figure from <span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">4</a>]</span>.</figcaption>
+<img src="images/pytorch_ddp_perf.png" alt="Per-iteration normalised latency breakdown, comparing non-overlapping vs overlapping communication; training on 32 GPUs across 4 machines. Figure from [5]." />
+<figcaption aria-hidden="true">Per-iteration normalised latency breakdown, comparing non-overlapping vs overlapping communication; training on 32 GPUs across 4 machines. Figure from <span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">5</a>]</span>.</figcaption>
 </figure>
 <p>Amortised communication overhead can be further reduced with <strong>Gradient Accumulation</strong>: rather than synchronising gradients every iteration, we accumulate (via the <code>no_sync</code> context manager) the gradients of <span class="math inline">\(n\)</span> local training iterations before synchronising gradients globally and updating parameters.
-<span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">4</a>]</span> claims this enables near-linear scaling for smaller GPU clusters, with “negligible accuracy penalty”:</p>
+<span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">5</a>]</span> claims this enables near-linear scaling for smaller GPU clusters, with “negligible accuracy penalty”:</p>
 <figure>
-<img src="images/pytorch_ddp_grad_accum.png" alt="Per-iteration latencies (left), and final training loss (right) for n iterations of gradient accumulation. Figure from [4]." />
-<figcaption aria-hidden="true">Per-iteration latencies (left), and final training loss (right) for <span class="math inline">\(n\)</span> iterations of gradient accumulation. Figure from <span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">4</a>]</span>.</figcaption>
+<img src="images/pytorch_ddp_grad_accum.png" alt="Per-iteration latencies (left), and final training loss (right) for n iterations of gradient accumulation. Figure from [5]." />
+<figcaption aria-hidden="true">Per-iteration latencies (left), and final training loss (right) for <span class="math inline">\(n\)</span> iterations of gradient accumulation. Figure from <span class="citation" data-cites="pytorchddp">[<a href="#ref-pytorchddp" role="doc-biblioref">5</a>]</span>.</figcaption>
 </figure>
 <h3 id="fully-sharded-data-parallel-fsdp">Fully-Sharded Data Parallel (FSDP)</h3>
 <p>[<a href="https://arxiv.org/pdf/2304.11277">Further Reading</a>]</p>
 <p>DDP speeds up training by distributing our dataset across multiple ranks, but what happens when our model can’t fit within a single GPU?
 DDP’s newer alternative, FSDP, addresses this by also splitting model parameters.
-FSDP is a PyTorch native implementation of DeepSpeed’s ZeRO <span class="citation" data-cites="zero2020">[<a href="#ref-zero2020" role="doc-biblioref">5</a>]</span>, with some further optimisations.</p>
+FSDP is a PyTorch native implementation of DeepSpeed’s ZeRO <span class="citation" data-cites="zero2020">[<a href="#ref-zero2020" role="doc-biblioref">6</a>]</span>, with some further optimisations.</p>
 <p>FSDP reduces memory footprint by <mark>sharding</mark> model parameters: the model is split <em>horizontally</em> so that each rank only holds a subset (<strong>“shard”</strong>) of the parameters (and associated gradients and optimizer state) in any given layer.
 The naive approach to guaranteeing local consistency is to compute the partial activations of a layer corresponding to the local shard, and then to communicate these activations with the other ranks before proceeding onto the next layer:</p>
 <figure>
@@ -2647,11 +2647,11 @@ Consider what happens to <code>unit1</code> consisting of <code>[layer1, layer2]
 <li>After completing local forward computation, we free peer shards (but keep activations).</li>
 <li>Before the backward pass through <code>layer2</code>, we AllGather the shards again.</li>
 <li>After gradients are calculated, we free peer shards and then ReduceScatter to sum up and shard gradients (equivalent to each rank Reducing the gradients in its shard).</li>
-<li>Finally, after completing full forward &amp; backward passes through all units, we update our shard of the parameters in the optimizer step<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>.</li>
+<li>Finally, after completing full forward &amp; backward passes through all units, we update our shard of the parameters in the optimizer step<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>.</li>
 </ol>
 <figure>
-<img src="images/pytorch_fsdp_units.png" alt="FSDP example with three units, fully sharded over two ranks. Figure from [6]." />
-<figcaption aria-hidden="true">FSDP example with three units, fully sharded over two ranks. Figure from <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">6</a>]</span>.</figcaption>
+<img src="images/pytorch_fsdp_units.png" alt="FSDP example with three units, fully sharded over two ranks. Figure from [7]." />
+<figcaption aria-hidden="true">FSDP example with three units, fully sharded over two ranks. Figure from <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">7</a>]</span>.</figcaption>
 </figure>
 <p>In effect, FSDP decomposes DDP’s AllReduce into a ReduceScatter and an AllGather in the backward and forward passes respectively – the only extra communication incurred is when we AllGather parameters again during backpropagation.</p>
 <h4 id="sharding-strategies">Sharding Strategies</h4>
@@ -2674,22 +2674,22 @@ Though we can keep reducing memory overhead with larger sharding groups, our deg
 <p>Using our traffic calculations from <a href="#communication-primitives">Section 2</a>, the per-GPU communication of an <span class="math inline">\(M\)</span>-size model is <span class="math inline">\(2(\frac{W}{F}-1)(\frac{M}{W})\)</span> for the replication group, and <span class="math inline">\(3(F-1)(\frac{M}{F})\)</span> for the sharding group.
 Clearly communication within the sharding group is much more expensive, therefore we often try to minimise the number of hops between the ranks in a sharding group – sometimes we may even use smaller sharding factors to ensure they’re within the same host.</p>
 <h4 id="fsdp-in-pytorch">FSDP in PyTorch</h4>
-<p>Just like DDP, the FSDP API is designed as a thin <code>nn.Module</code> wrapper class: <code>sharded_model = FSDP(model, process_group=...)</code><a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>.
-Sharding strategy is set with the <code>sharding_strategy</code> arg: <code>FULL_SHARD</code>, <code>NO_SHARD</code> and <code>HYBRID_SHARD</code> correspond to aforementioned fully sharded, fully replicated and hybrid strategies respectively<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>.
+<p>Just like DDP, the FSDP API is designed as a thin <code>nn.Module</code> wrapper class: <code>sharded_model = FSDP(model, process_group=...)</code><a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>.
+Sharding strategy is set with the <code>sharding_strategy</code> arg: <code>FULL_SHARD</code>, <code>NO_SHARD</code> and <code>HYBRID_SHARD</code> correspond to aforementioned fully sharded, fully replicated and hybrid strategies respectively<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a>.
 Before going into all the other levers that FSDP exposes to the user, let’s first get a quick understanding of how it’s implemented under the hood.</p>
 <p>The communication backends (e.g. NCCL) that provide collective implementations usually require AllGather and ReduceScatter to have the same input tensor size at each rank.
 Moreover, for a fixed communication volume issuing fewer, larger collectives reduces communication overheads (as discussed in DDP’s Gradient Bucketing).
-Thus, during construction FSDP concatenates all parameters (and gradients) within a unit into a single flattened 1-D <code>FlatParameter</code> tensor, along with the padding necessary to ensure equal-sized shards at each rank in the sharding group<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a>.
+Thus, during construction FSDP concatenates all parameters (and gradients) within a unit into a single flattened 1-D <code>FlatParameter</code> tensor, along with the padding necessary to ensure equal-sized shards at each rank in the sharding group<a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a>.
 The <code>FlatParameter</code> tensor has the exact data layout expected by AllGather and ReduceScatter, allowing us to call the collectives directly without copying any tensors.</p>
 <figure>
-<img src="images/pytorch_fsdp_flatparam.png" alt="FlatParameter example for a fully sharded (W=F=16) FSDP unit, consisting of one 4 \times 3 nn.Linear layer. Figure from [6]." />
-<figcaption aria-hidden="true"><code>FlatParameter</code> example for a fully sharded (<span class="math inline">\(W=F=16)\)</span> FSDP unit, consisting of one <span class="math inline">\(4 \times 3\)</span> <code>nn.Linear</code> layer. Figure from <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">6</a>]</span>.</figcaption>
+<img src="images/pytorch_fsdp_flatparam.png" alt="FlatParameter example for a fully sharded (W=F=16) FSDP unit, consisting of one 4 \times 3 nn.Linear layer. Figure from [7]." />
+<figcaption aria-hidden="true"><code>FlatParameter</code> example for a fully sharded (<span class="math inline">\(W=F=16)\)</span> FSDP unit, consisting of one <span class="math inline">\(4 \times 3\)</span> <code>nn.Linear</code> layer. Figure from <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">7</a>]</span>.</figcaption>
 </figure>
 <p>For an <span class="math inline">\(M\)</span>-size model split into <span class="math inline">\(K\)</span> units with sizes <span class="math inline">\(M_1, \ldots, M_K\)</span>, where <span class="math inline">\(\sum_{i=1}^K M_i=M\)</span>, the maximum memory usage is in <span class="math inline">\(O(\frac{M}{F} + \max_{i=1}^K M_i)\)</span>.
 More precisely, it is the sum of the sharded parameters, gradients and optimizer state, combined with the largest unsharded unit’s parameters and gradients (but <em>not</em> the more expensive optimizer state, which always remains sharded).
 Conversely, even though total communication is not affected by the number of units, the number of collectives over which it is spread is <span class="math inline">\(O(K)\)</span>.
 Therefore the number of units presents yet another memory-communication tradeoff.
-PyTorch lets the user control this with the <code>auto_wrap_policy</code> argument to <code>FSDP</code>, or by manually wrapping individual submodules rather than a single wrapper around the entire model<a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a>.</p>
+PyTorch lets the user control this with the <code>auto_wrap_policy</code> argument to <code>FSDP</code>, or by manually wrapping individual submodules rather than a single wrapper around the entire model<a href="#fn13" class="footnote-ref" id="fnref13" role="doc-noteref"><sup>13</sup></a>.</p>
 <p>As with DDP’s Gradient Bucketing, FSDP tries to overlap communication and computation as much as possible.
 Here’s what that looks like for our previous three unit, six layer example:</p>
 <aside style="margin-bottom: -200%">
@@ -2702,7 +2702,7 @@ FSDP, like DDP, is implemented by registering forward/backward hooks as well as 
 <p>In DDP’s backward pass, we were able to compute gradients and then asynchronously AllReduce them afterwards.
 This isn’t possible for FSDP’s forward: we need to AllGather parameters <em>before</em> computing, and (because of eager execution) we don’t know <em>which</em> <code>FlatParameter</code> to gather next – thus we can’t reorder the async AllGather of the next unit before the synchronous computation of the current unit.
 The solution, implicit forward prefetching (always enabled), is to use a separate <strong>stream</strong> (queue of device instructions) for communication, bypassing the false dependency on the default compute stream.</p>
-<p>You may have noticed the poor compute-communication overlap in the backward pass: the ReduceScatter for the current unit blocks the AllGather for the next, which in turn blocks the next gradient computation<a href="#fn13" class="footnote-ref" id="fnref13" role="doc-noteref"><sup>13</sup></a>.
+<p>You may have noticed the poor compute-communication overlap in the backward pass: the ReduceScatter for the current unit blocks the AllGather for the next, which in turn blocks the next gradient computation<a href="#fn14" class="footnote-ref" id="fnref14" role="doc-noteref"><sup>14</sup></a>.
 <em>Explicit</em> backward prefetching issues the AllGather for the next unit before the ReduceScatter for the current one.
 To know which <code>FlatParameter</code> to gather next, FSDP records the reverse forward execution order of modules each iteration.
 Two variants exist: <code>backward_prefetch=BACKWARD_PRE</code> which overlaps the next AllGather with the current gradient computation, and <code>BACKWARD_POST</code> which waits until the current parameters are freed (using less memory but reducing overlap).
@@ -2711,17 +2711,17 @@ By default FSDP limits the rate at which prefetch AllGathers are issued to ensur
 Because this naively sidesteps eager execution, it doesn’t always work.
 In our example, it’s actually unit 3 that holds the last layer and we end up AllGathering parameters we already have and are about to free!</p>
 <p>Lastly, we should note that with hybrid sharding there would also be an async AllReduce (on yet another communication stream) for each unit after their ReduceScatter is done.</p>
-<p>PyTorch’s FSDP experiments <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">6</a>]</span> show near-linear compute scaling, though this regresses substantially for larger clusters where “a near-perfect overlap between communication and computation is no longer attainable”:</p>
+<p>PyTorch’s FSDP experiments <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">7</a>]</span> show near-linear compute scaling, though this regresses substantially for larger clusters where “a near-perfect overlap between communication and computation is no longer attainable”:</p>
 <figure>
-<img src="images/pytorch_fsdp_eval.png" alt="Fully-sharded training of the T5-11B transformer; TFLOPS per GPU for batchsizes 8 and 16; A100 80GB GPUs with 2Tb/s RoCE interconnects. Figure from [6]." />
-<figcaption aria-hidden="true">Fully-sharded training of the T5-11B transformer; TFLOPS per GPU for batchsizes 8 and 16; A100 80GB GPUs with 2Tb/s RoCE interconnects. Figure from <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">6</a>]</span>.</figcaption>
+<img src="images/pytorch_fsdp_eval.png" alt="Fully-sharded training of the T5-11B transformer; TFLOPS per GPU for batchsizes 8 and 16; A100 80GB GPUs with 2Tb/s RoCE interconnects. Figure from [7]." />
+<figcaption aria-hidden="true">Fully-sharded training of the T5-11B transformer; TFLOPS per GPU for batchsizes 8 and 16; A100 80GB GPUs with 2Tb/s RoCE interconnects. Figure from <span class="citation" data-cites="pytorchfsdp">[<a href="#ref-pytorchfsdp" role="doc-biblioref">7</a>]</span>.</figcaption>
 </figure>
 <!-- Hypothesis: contention of network resources should depend on % network utilisation rather than absolute number of GPUs. So on e.g. a network designed for only 8 GPUs, we should see the subtantial dip at 8 GPUs rather than 512 like in the figure. -->
 <h3 id="pipeline-parallel-pp">Pipeline Parallel (PP)</h3>
 <p>[<a href="https://arxiv.org/pdf/1811.06965">Further Reading</a>]</p>
 <p>Like FSDP, pipeline parallelism aims to train models too large to fit within a single GPU.
 However, rather than <em>sharding</em> the model horizontally, we <strong><em>partition</em></strong> it vertically along its depth.
-Each of partition of consecutive layers is referred to as a <strong>stage</strong>.
+Each partition of consecutive layers is referred to as a <strong>stage</strong>.
 Returning to our four layer network from <a href="#how-do-you-train-a-pytorch-neural-network">Section 1</a>, we could partition it evenly across two ranks and send intermediate activations/gradients at partition boundaries between stages:</p>
 <figure>
 <img src="images/pp_pebble_graph.gif" alt="Pebble graph of a four layer network, partitioned across two ranks into two stages of two layers each (image credit)." />
@@ -2735,13 +2735,13 @@ To illustrate, here’s what the same naive schedule would look like with a pipe
 </figure>
 <p>These dead zones in our schedule where GPUs are idle are called pipeline <strong>bubbles</strong>.
 They are caused by dependencies between operations: for example, rank 2 cannot start the 2nd forward stage until it has received 1st stage intermediate outputs from rank 1.</p>
-<p><mark>GPipe</mark> <span class="citation" data-cites="gpipe">[<a href="#ref-gpipe" role="doc-biblioref">7</a>]</span> reduces bubbles by splitting a batch into <strong>microbatches</strong> and adding up each of their gradients to get back the gradient over the entire batch (as with DDP gradient accumulation), thus allowing more than one rank to do useful work at the same time.
+<p><mark>GPipe</mark> <span class="citation" data-cites="gpipe">[<a href="#ref-gpipe" role="doc-biblioref">8</a>]</span> reduces bubbles by splitting a batch into <strong>microbatches</strong> and adding up each of their gradients to get back the gradient over the entire batch (the same as DDP gradient accumulation), thus allowing more than one rank to do useful work at the same time.
 Here’s the same four stage example, with 4-way batch-splitting:</p>
 <figure>
 <img src="images/pp_gpipe_bubbles.png" alt="GPipe schedule with d=4 stages, m=4 microbatches; Fi(j) denotes the i^\text{th} stage forward computation over the j^\text{th} microbatch." />
 <figcaption aria-hidden="true">GPipe schedule with <span class="math inline">\(d=4\)</span> stages, <span class="math inline">\(m=4\)</span> microbatches; <span class="math inline">\(Fi(j)\)</span> denotes the <span class="math inline">\(i^\text{th}\)</span> stage forward computation over the <span class="math inline">\(j^\text{th}\)</span> microbatch.</figcaption>
 </figure>
-<p>We can show empirically that, in this example, GPipe reduces relative bubble time by more than a third.
+<p>We can show empirically that, in this example, GPipe reduces relative bubble time by more than two thirds.
 For a pipeline with <span class="math inline">\(d\)</span> evenly-partitioned stages and <span class="math inline">\(m\)</span> evenly-divided microbatches, a given stage spends <span class="math inline">\(m\)</span> forward timesteps doing useful work and <span class="math inline">\(d-1\)</span> forward timesteps waiting for new work to arrive during the forward pass.
 The same applies to the backward pass, therefore the overall fraction of ideal computation time spent in bubbles is:</p>
 <p><span class="math display">\[
@@ -2768,29 +2768,29 @@ In practice, this is implemented with the pipeline as the inner dimension and wi
 <p>[<a href="https://arxiv.org/pdf/1604.06174">Further Reading</a>]</p>
 <p>While we’ve discussed ways of reducing memory demand, you may have spotted another easy target: activations.
 With GPipe, stages need to cache activations for each microbatch from the start of its forward to the end of its corresponding backward.
-For an <span class="math inline">\(\ell\)</span> layer network (assuming each layer is roughly equal size) with batchsize <span class="math inline">\(B\)</span>, the peak per-stage memory demand for caching activations is<a href="#fn14" class="footnote-ref" id="fnref14" role="doc-noteref"><sup>14</sup></a>:
+For an <span class="math inline">\(\ell\)</span> layer network (assuming each layer is roughly equal size) with batchsize <span class="math inline">\(B\)</span>, the peak per-stage memory demand for caching activations is<a href="#fn15" class="footnote-ref" id="fnref15" role="doc-noteref"><sup>15</sup></a>:
 <span class="math display">\[
 O\left(B \frac{\ell}{d}\right)
 \]</span>
-With <mark>activation checkpointing</mark><a href="#fn15" class="footnote-ref" id="fnref15" role="doc-noteref"><sup>15</sup></a> (aka gradient checkpointing) <span class="citation" data-cites="chen2016">[<a href="#ref-chen2016" role="doc-biblioref">8</a>]</span>, we only store boundary activations and recompute the forward for each microbatch when it’s time to do its backward.
+With <mark>activation checkpointing</mark><a href="#fn16" class="footnote-ref" id="fnref16" role="doc-noteref"><sup>16</sup></a> (aka gradient checkpointing) <span class="citation" data-cites="chen2016">[<a href="#ref-chen2016" role="doc-biblioref">9</a>]</span>, we only store boundary activations and recompute the forward for each microbatch when it’s time to do its backward.
 Boundary activations take <span class="math inline">\(O(B)\)</span> space and we only need to cache activations for a single microbatch at any given moment (while computing its gradient), reducing peak memory demand to:
 <span class="math display">\[
 O\left(B+\frac{B}{m}\frac{l}{d}\right)
 \]</span>
-Why can we get away with recomputing the forward without significantly impacting overall compute efficiency<a href="#fn16" class="footnote-ref" id="fnref16" role="doc-noteref"><sup>16</sup></a>?</p>
-<ol type="1">
+Why can we get away with recomputing the forward without significantly impacting overall compute efficiency<a href="#fn17" class="footnote-ref" id="fnref17" role="doc-noteref"><sup>17</sup></a>?</p>
+<ul>
 <li>In practice the backward is actually much more expensive (usually twice as much) than the forward.</li>
 <li>As we saw earlier pipeline parallelism can’t achieve perfect compute-communication overlap. When used in conjunction with pipelining, forward recomputation can be scheduled earlier (during bubbles) as we don’t need to wait for the gradients from later layers.</li>
-</ol>
-<p>The original GPipe paper <span class="citation" data-cites="gpipe">[<a href="#ref-gpipe" role="doc-biblioref">7</a>]</span> claims that, with activation checkpointing, using <span class="math inline">\(m \geq 4d\)</span> microbatches results in “negligible” bubble overhead.</p>
+</ul>
+<p>The original GPipe paper <span class="citation" data-cites="gpipe">[<a href="#ref-gpipe" role="doc-biblioref">8</a>]</span> claims that, with activation checkpointing, using <span class="math inline">\(m \geq 4d\)</span> microbatches results in “negligible” bubble overhead.</p>
 <h4 id="other-schedules">Other Schedules</h4>
 <p>[<a href="https://arxiv.org/pdf/2211.05953">Further Reading</a>]</p>
 <p>We can further decrease memory demand by reducing the number of “in-flight” microbatches for which we need to cache activations (or checkpoints).
-If you look at the original GPipe schedule, after completing the forward for the first microbatch, the last stage could instead start the backward right away and discard its activation.
-<mark>PipeDream</mark> <span class="citation" data-cites="pipedream">[<a href="#ref-pipedream" role="doc-biblioref">10</a>]</span> schedules the last stage backward immediately after the corresponding forward, reducing memory demand compared to GPipe:</p>
+If you look at the original GPipe schedule, after completing the forward for the first microbatch, the last stage could instead start the backward pass right away and then discard its activation.
+<mark>PipeDream</mark> <span class="citation" data-cites="pipedream">[<a href="#ref-pipedream" role="doc-biblioref">11</a>]</span> schedules the last stage backward immediately after the corresponding forward, reducing memory demand compared to GPipe:</p>
 <figure>
-<img src="images/pipedream_tile.png" alt="1F1B PipeDream-flush schedule, ignoring communication with d=4, m=8. Based on figure from [11]." />
-<figcaption aria-hidden="true">1F1B PipeDream-flush schedule, ignoring communication with <span class="math inline">\(d=4, m=8\)</span>. Based on figure from <span class="citation" data-cites="megatron2021">[<a href="#ref-megatron2021" role="doc-biblioref">11</a>]</span>.</figcaption>
+<img src="images/pipedream_tile.png" alt="1F1B PipeDream-flush schedule, ignoring communication with d=4, m=8. Based on figure from [12]." />
+<figcaption aria-hidden="true">1F1B PipeDream-flush schedule, ignoring communication with <span class="math inline">\(d=4, m=8\)</span>. Based on figure from <span class="citation" data-cites="megatron2021">[<a href="#ref-megatron2021" role="doc-biblioref">12</a>]</span>.</figcaption>
 </figure>
 <p>The schedule consists of three phases:</p>
 <ol type="1">
@@ -2799,117 +2799,163 @@ If you look at the original GPipe schedule, after completing the forward for the
 <li>Lastly we <em>flush</em> the pipeline by completing the backward passes for remaining microbatches without scheduling any new ones.</li>
 </ol>
 <p>Unlike GPipe, where all microbatches are in-flight at some point during the schedule, with PipeDream that number never exceeds the pipeline depth.
-Since reducing bubble time requires <span class="math inline">\(m \gg p\)</span>, PipeDream can do so without affecting memory footprint.
+Since reducing bubble time requires <span class="math inline">\(m \gg d\)</span>, PipeDream can do so without affecting memory footprint.
 However, for fixed <span class="math inline">\(m\)</span>, the bubble fraction is no different between PipeDream and GPipe (you can see this by shifting all the blue forwarded passes left).
 So how can we do better, without prohibitively increasing <span class="math inline">\(m\)</span> and thus the overall batchsize?</p>
-<p>Rather than each rank only having a single stage (of consecutive layers), we can form a <em>looping</em> pipeline by performing the computation for <span class="math inline">\(v\)</span> (non-consecutive) stages at each rank and connecting the last rank to the first, forming a coil.
-For example, if rank 0 previously had 4 layers (e.g. layers 0-4) with <span class="math inline">\(v=2\)</span> loops, it would now have 2 stages of 2 layers each (e.g. layers 0-1 and 8-9).
-<mark>PTD-P</mark> <span class="citation" data-cites="megatron2021">[<a href="#ref-megatron2021" role="doc-biblioref">11</a>]</span> is the looped version of the PipeDream 1F1B schedule:</p>
+<p>Rather than each rank only having a single stage (of consecutive layers), we can <em>loop</em> our pipeline by performing the computation for <span class="math inline">\(v\)</span> (non-consecutive) stages at each rank and connecting the last rank to the first, forming a coil.
+For example, if rank 0 previously had 4 layers (e.g. layers 0-4), with <span class="math inline">\(v=2\)</span> loops it would now have 2 stages of 2 layers each (e.g. layers 0-1 and 8-9).
+<mark>Interleaved 1F1B</mark> <span class="citation" data-cites="megatron2021">[<a href="#ref-megatron2021" role="doc-biblioref">12</a>]</span> is the looped version of the PipeDream schedule:</p>
 <figure>
-<img src="images/dfs_pipeline.png" alt="PTD-P (depth-first) schedule; W=4 ranks, \ell=16 layers, v=4 loops, m=8 microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from [12]." />
-<figcaption aria-hidden="true">PTD-P (depth-first) schedule; <span class="math inline">\(W=4\)</span> ranks, <span class="math inline">\(\ell=16\)</span> layers, <span class="math inline">\(v=4\)</span> loops, <span class="math inline">\(m=8\)</span> microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from <span class="citation" data-cites="bfspipeline">[<a href="#ref-bfspipeline" role="doc-biblioref">12</a>]</span>.</figcaption>
+<img src="images/dfs_pipeline.png" alt="Interleaved 1F1B (DFS) schedule; W=4 ranks, d=16 stages, v=4 loops, m=8 microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from [13]." />
+<figcaption aria-hidden="true">Interleaved 1F1B (DFS) schedule; <span class="math inline">\(W=4\)</span> ranks, <span class="math inline">\(d=16\)</span> stages, <span class="math inline">\(v=4\)</span> loops, <span class="math inline">\(m=8\)</span> microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from <span class="citation" data-cites="bfspipeline">[<a href="#ref-bfspipeline" role="doc-biblioref">13</a>]</span>.</figcaption>
 </figure>
-<p>Forward and backward for a stage is now shorter by a factor of <span class="math inline">\(v\)</span>, so the bubble time at each rank is also reduced by <span class="math inline">\(v\)</span> to <span class="math inline">\((d-1)/v\)</span>.
+<p>Forward and backward passes for a stage are now shorter by a factor of <span class="math inline">\(v\)</span>, so the bubble time at each rank is also reduced by <span class="math inline">\(v\)</span> to <span class="math inline">\((d-1)/v\)</span>.
 The overall bubble fraction becomes:
 <span class="math display">\[ \text{Bubble}_\text{looped}(d,m,v) = \frac{d-1}{vm} \]</span>
 This reduced bubble size does not, however, come for free: the total communication volume is increased by the same factor of <span class="math inline">\(v\)</span>.
-Another caveat is that PTD-P requires <span class="math inline">\(m\)</span> be a multiple of <span class="math inline">\(W\)</span>.</p>
-<p>You can imagine that 1F1B schedules like PTD-P and PipeDream are <em>depth-first</em>: when deciding between computing the same (forward) stage for the next microbatch or the next (backward) stage for the same microbatch, a rank will choose the latter – sending earlier microbatches as deep as possible down the pipeline.
+Another caveat is that Interleaved 1F1B requires <span class="math inline">\(m\)</span> be a multiple of <span class="math inline">\(W\)</span>.</p>
+<p>You can imagine that 1F1B schedules like PipeDream and Interleaved 1F1B are <em>depth-first</em>: when deciding between computing the same (forward) stage for the next microbatch or the next (backward) stage for the same microbatch, a rank will choose the latter – sending earlier microbatches as deep as possible down the pipeline.
 “All-forward all-backward” schedules like GPipe are <em>breadth-first</em>: a rank will prioritise completing all microbatches in the earliest unfinished stage.
 Naturally, you might ask what the looped anolog of GPipe looks like.
-This is the <mark>breadth-first pipeline schedule</mark> (BFS) <span class="citation" data-cites="bfspipeline">[<a href="#ref-bfspipeline" role="doc-biblioref">12</a>]</span>:</p>
+This is the <mark>breadth-first pipeline schedule</mark> (BFS) <span class="citation" data-cites="bfspipeline">[<a href="#ref-bfspipeline" role="doc-biblioref">13</a>]</span>:</p>
 <figure>
-<img src="images/bfs_pipeline.png" alt="Breadth-first pipeline schedule; W=4 ranks, \ell=16 layers, v=4 loops, m=8 microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from [12]." />
-<figcaption aria-hidden="true">Breadth-first pipeline schedule; <span class="math inline">\(W=4\)</span> ranks, <span class="math inline">\(\ell=16\)</span> layers, <span class="math inline">\(v=4\)</span> loops, <span class="math inline">\(m=8\)</span> microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from <span class="citation" data-cites="bfspipeline">[<a href="#ref-bfspipeline" role="doc-biblioref">12</a>]</span>.</figcaption>
+<img src="images/bfs_pipeline.png" alt="Breadth-first pipeline schedule; W=4 ranks, d=16 stages, v=4 loops, m=8 microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Notice that a complete iteration finishes faster than Interleaved 1F1B. Figure from [13]." />
+<figcaption aria-hidden="true">Breadth-first pipeline schedule; <span class="math inline">\(W=4\)</span> ranks, <span class="math inline">\(d=16\)</span> stages, <span class="math inline">\(v=4\)</span> loops, <span class="math inline">\(m=8\)</span> microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Notice that a complete iteration finishes faster than Interleaved 1F1B. Figure from <span class="citation" data-cites="bfspipeline">[<a href="#ref-bfspipeline" role="doc-biblioref">13</a>]</span>.</figcaption>
 </figure>
-<p>The bubble time fraction is exactly the same as PTD-P, though (like GPipe) peak memory consumption is increased as all microbatches are in-flight at some point.
+<p>The bubble time fraction is exactly the same as Interleaved 1F1B (“DFS” from now on), though (like GPipe) peak memory consumption is increased as all microbatches are in-flight at some point.
 However, BFS achieves much better communication overlap:</p>
-<ol type="1">
-<li>A PTD-P rank will compute the forward over <span class="math inline">\(d\)</span> contiguous microbatches at a time; the first microbatch must complete the rest of the loop before the sequence is finished (i.e. in <span class="math inline">\(&lt;d-1\)</span> fwd timesteps) to avoid starving the rank (impossible with non-zero communication delay). BFS, on the other hands, forwards the entire batch, providing <span class="math inline">\(m-d\)</span> extra microbatches to absorb communication overheads.</li>
+<ul>
+<li>A DFS rank will compute the forward over <span class="math inline">\(d\)</span> contiguous microbatches at a time; the first microbatch must complete the rest of the loop before the sequence is finished (i.e. in <span class="math inline">\(&lt;d-1\)</span> fwd timesteps) to avoid starving the rank (impossible with non-zero communication delay). BFS, on the other hands, has <span class="math inline">\(m-d\)</span> extra microbatches to absorb communication overheads because it forwards the entire batch.</li>
 <li>The backward for the first stages finishes earlier, allowing us to start reducing gradients along the DP dimension earlier.</li>
-</ol>
+</ul>
 <p>More importantly, BFS can make use of FSDP.
-In a non-looping pipeline, FSDP is prohibitively expensive as we’d have unshard/reshard parameters and reduce gradients for each microbatch.
-With a looping pipeline, ranks hold several stages so these can be used as FSDP units.
-A rank can unshard an entire stage for the duration of a microbatch sequence and then subsequently reduce gradients for that stage.
-DFS still requires several FSDP iterations per unit as it alternates between stages, whereas BFS completes the full forward (or backward) for a stage before moving on to the next – thus avoiding these repetitions.</p>
-<p>As with DP, FSDP is always on the outermost dimension when combined with PP.
-The benefits of combining BFS and FSDP are two-fold: first, FSDP compensates for BFS’ larger memory footprint by sharding stages; and second, BFS reduces the size of FSDP sharding groups (and their expensive collectives) while maintaining the same overall degree of parallelism.
-<!-- TODO: there's also some batchsize stuff (see BFS paper) that I don't quite understand yet --></p>
-<p>There are a lot more schedules not covered here.
-More advanced scheduling strategies, such as those used to train Llama 3, include hybrid schedules combining the memory savings of DFS with the communication efficiency of BFS.</p>
+In a non-looping pipeline, a rank only has a single stage. To achieve any memory savings, FSDP units would have to be intra-stage thus requiring a complete FSDP iteration for each microbatch.
+With a looping pipeline, ranks hold several stages each of which can be used as a unit; we can keep a stage unsharded and accumulate gradeints for contiguous microbatches, only resharding/reducing at the end of the microbatch sequence.
+A BFS stage completes the forward (or backward) pass for all microbatches in one go, avoiding the repeated FSDP iterations that arise from alternating between stages in DFS.</p>
+<p>The benefits of combining BFS and FSDP are two-fold: first, FSDP compensates for BFS’ larger memory footprint by sharding stages; second, BFS reduces the size of FSDP sharding groups (and their expensive collectives) while maintaining the same overall degree of parallelism.</p>
+<p>Like DDP, FSDP is typically the outermost parallelism when combined with pipelining.
+Outer dimensions may spread across a multi-hop network with higher communication latency and lower bandwidth; FSDP has fewer, larger asynchronous collectives that can better absorb these communication delays.
+<!-- TODO: there's also some batchsize stuff (see BFS paper) that I don't quite understand yet -->
+<!-- TODO: Diagram? --></p>
+<p>There are a lot other pipeline schedules we haven’t covered here, a good reference is the <a href="https://pytorch.org/docs/stable/distributed.pipelining.html#module-torch.distributed.pipelining.schedules">PyTorch documentation</a>.
+More advanced scheduling strategies, such as those used to train Llama 3 <span class="citation" data-cites="llama3">[<a href="#ref-llama3" role="doc-biblioref">1</a>]</span>, include hybrid schedules that combine the memory savings of DFS with the communication efficiency of BFS.</p>
+<!-- TODO: empirical performance? -->
 <h4 id="pp-in-pytorch">PP in PyTorch</h4>
-<p>How is the model staged?
-We rely on balanced pipelines (even partitions). This is non-trivial in the general case; luckily it’s pretty easy for transformers because they’re made of equal-sized blocks.</p>
-<p>How do we specify schedule?
-How do we combine with FSDP?</p>
-<h3 id="tensor-and-sequence-parallel-tp-sp">Tensor and Sequence Parallel (TP / SP)</h3>
-<p>[<a href="https://arxiv.org/pdf/2104.04473">Further Reading</a>]</p>
+<p>[WIP]
+<!-- How is the model staged? We rely on balanced pipelines (even partitions). This is non-trivial in the general case; luckily it's pretty easy for transformers because they're made of equal-sized blocks. -->
+<!-- How do we specify schedule? How do we combine with FSDP? --></p>
+<h3 id="tensor-parallel-tp">Tensor Parallel (TP)</h3>
+<p>[<a href="https://arxiv.org/pdf/1909.08053">Further Reading</a>]</p>
+<p>Tensor parallelism is similar to FSDP: we split our model <em>horizontally</em> to reduce memory footprint and increase our degree of parallelism.
+However, TP shards are much more granular, with splits within a single layer rather than across units of several layers.</p>
+<p>The computational bottleneck for most modern models (such as the transformer) is the <strong>general matrix multiply</strong> (GEMM): multiplying an activation batch matrix <span class="math inline">\(X\)</span> with a large weight matrix <span class="math inline">\(A\)</span>.
+The example we used in <a href="#how-do-you-train-a-pytorch-neural-network">Section 1</a>, a <strong>multi-layer perceptron</strong> (MLP), consists of a GEMM followed by a pointwise pointwise nonlinear activation function <span class="math inline">\(\sigma(\cdot)\)</span>:
+<span class="math display">\[
+Y = \sigma(XA)
+\]</span>
+One way to paralellise the GEMM would be to split the weight matrix <span class="math inline">\(A\)</span> along its rows, and input <span class="math inline">\(X\)</span> along its columns:
+<span class="math display">\[
+X = \begin{bmatrix} X_1 &amp; X_2 \end{bmatrix}, A= \begin{bmatrix} A_1 \\ A_2 \end{bmatrix}
+\]</span>
+Matrix multiplication can be thought of as a dot product between pairs of rows (on the left) and columns (on the right).
+It’s therefore possible to compute independent dot products on different ranks and sum up the results:
+<span class="math display">\[
+Y=X_1A_1+X_2A_2
+\]</span>
+However, because <span class="math inline">\(\sigma\)</span> is a nonlinear, in general <span class="math inline">\(\sigma(X_1 A_1 + X_2A_2) \neq \sigma(X_1 A_1) + \sigma(X_2 A_2)\)</span>.
+This approach would therefore require a synchronisation point before the activation function.
+If instead we only split weights along their columns <span class="math inline">\(A=\begin{bmatrix} A_1 &amp; A_2 \end{bmatrix}\)</span>, we end up concatenating rather than adding the outputs:
+<span class="math display">\[
+Y=\begin{bmatrix} Y_1 &amp; Y_2 \end{bmatrix}=\begin{bmatrix} \sigma(X A_1) &amp; \sigma(X A_2) \end{bmatrix}
+\]</span>
+By removing the pre-activation synchronisation, we can stack a second MLP layer before we have to synchronise again:
+<span class="math display">\[
+Z = \sigma_1(YB)=\sigma_1(Y_1B_1 + Y_2B_2)
+\]</span>
+The second layer weights are split column-wise, <span class="math inline">\(B= [B_1; B_2]\)</span>, and we synchronise <em>before</em> the second activation function <span class="math inline">\(\sigma_1\)</span> (as in our original attempt).
+We end up sharding our two MLP layers with a single AllReduce synchronisation before the final activation:</p>
+<figure>
+<img src="images/tp_mlp.png" alt="Tensor parallelism over W=2 rank applied to two consecutive MLP layers. Here \sigma_0 and \sigma_1 are GeLU and dropout functions respectively. f is the identify and g is an AllReduce. Figure from [14]" />
+<figcaption aria-hidden="true">Tensor parallelism over <span class="math inline">\(W=2\)</span> rank applied to two consecutive MLP layers. Here <span class="math inline">\(\sigma_0\)</span> and <span class="math inline">\(\sigma_1\)</span> are GeLU and dropout functions respectively. <span class="math inline">\(f\)</span> is the identify and <span class="math inline">\(g\)</span> is an AllReduce. Figure from <span class="citation" data-cites="megatron2019">[<a href="#ref-megatron2019" role="doc-biblioref">14</a>]</span></figcaption>
+</figure>
+<p>Because TP requires an AllReduce <em>per layer</em> (or every two layers), it is almost exclusively used intranode.
+You can think of it as agglomerating the ranks in a node into a single, much larger rank (over which we can apply other parallelisms).</p>
+<!-- TODO: TP for attention layers -->
 <h4 id="tp-in-pytorch">TP in PyTorch</h4>
+<p>[WIP]</p>
 <h3 id="context-parallel-cp">Context Parallel (CP)</h3>
+<p>[WIP]
+<!-- aka sequence parallel (?) --></p>
 <h4 id="cp-in-pytorch">CP in PyTorch</h4>
-<!-- ND parallelism widget, that generates a hypothetical trace of collectives -->
+<!-- N-D parallelism widget, that generates a hypothetical trace of collectives -->
 <h1 id="parallelism-in-practice">4. Parallelism in Practice</h1>
 <p>[WIP] Large models use FSDP, gigantic models use all of the above.
-How do we choose batchsize, microbatchsize and other parameters?</p>
+<!-- TODO: How do we choose batchsize, microbatchsize and other parameters? ---></p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="ref-llama3" class="csl-entry" role="listitem">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">A. @. M. Llama Team, <a href="https://arxiv.org/abs/2407.21783">The llama 3 herd of models</a>. (2024).</div>
+</div>
 <div id="ref-adam2017" class="csl-entry" role="listitem">
-<div class="csl-left-margin">1. </div><div class="csl-right-inline">D. P. Kingma &amp; J. Ba, <a href="https://arxiv.org/abs/1412.6980">Adam: A method for stochastic optimization</a>. (2017).</div>
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">D. P. Kingma &amp; J. Ba, <a href="https://arxiv.org/abs/1412.6980">Adam: A method for stochastic optimization</a>. (2017).</div>
 </div>
 <div id="ref-mixedprecision2018" class="csl-entry" role="listitem">
-<div class="csl-left-margin">2. </div><div class="csl-right-inline">P. Micikevicius, S. Narang, J. Alben, G. Diamos, E. Elsen, D. Garcia, B. Ginsburg, M. Houston, O. Kuchaiev, G. Venkatesh, &amp; H. Wu, <a href="https://arxiv.org/abs/1710.03740">Mixed precision training</a>. (2018).</div>
+<div class="csl-left-margin">3. </div><div class="csl-right-inline">P. Micikevicius, S. Narang, J. Alben, G. Diamos, E. Elsen, D. Garcia, B. Ginsburg, M. Houston, O. Kuchaiev, G. Venkatesh, &amp; H. Wu, <a href="https://arxiv.org/abs/1710.03740">Mixed precision training</a>. (2018).</div>
 </div>
 <div id="ref-empiricallargebatchtraining" class="csl-entry" role="listitem">
-<div class="csl-left-margin">3. </div><div class="csl-right-inline">S. McCandlish, J. Kaplan, D. Amodei, &amp; O. D. Team, <a href="https://arxiv.org/abs/1812.06162">An empirical model of large-batch training</a>. (2018).</div>
+<div class="csl-left-margin">4. </div><div class="csl-right-inline">S. McCandlish, J. Kaplan, D. Amodei, &amp; O. D. Team, <a href="https://arxiv.org/abs/1812.06162">An empirical model of large-batch training</a>. (2018).</div>
 </div>
 <div id="ref-pytorchddp" class="csl-entry" role="listitem">
-<div class="csl-left-margin">4. </div><div class="csl-right-inline">S. Li, Y. Zhao, R. Varma, O. Salpekar, P. Noordhuis, T. Li, A. Paszke, J. Smith, B. Vaughan, P. Damania, &amp; S. Chintala, <a href="https://arxiv.org/abs/2006.15704">PyTorch distributed: Experiences on accelerating data parallel training</a>. (2020).</div>
+<div class="csl-left-margin">5. </div><div class="csl-right-inline">S. Li, Y. Zhao, R. Varma, O. Salpekar, P. Noordhuis, T. Li, A. Paszke, J. Smith, B. Vaughan, P. Damania, &amp; S. Chintala, <a href="https://arxiv.org/abs/2006.15704">PyTorch distributed: Experiences on accelerating data parallel training</a>. (2020).</div>
 </div>
 <div id="ref-zero2020" class="csl-entry" role="listitem">
-<div class="csl-left-margin">5. </div><div class="csl-right-inline">S. Rajbhandari, J. Rasley, O. Ruwase, &amp; Y. He, <a href="https://arxiv.org/abs/1910.02054">ZeRO: Memory optimizations toward training trillion parameter models</a>. (2020).</div>
+<div class="csl-left-margin">6. </div><div class="csl-right-inline">S. Rajbhandari, J. Rasley, O. Ruwase, &amp; Y. He, <a href="https://arxiv.org/abs/1910.02054">ZeRO: Memory optimizations toward training trillion parameter models</a>. (2020).</div>
 </div>
 <div id="ref-pytorchfsdp" class="csl-entry" role="listitem">
-<div class="csl-left-margin">6. </div><div class="csl-right-inline">Y. Zhao, A. Gu, R. Varma, L. Luo, C.-C. Huang, M. Xu, L. Wright, H. Shojanazeri, M. Ott, S. Shleifer, A. Desmaison, C. Balioglu, P. Damania, B. Nguyen, G. Chauhan, Y. Hao, A. Mathews, &amp; S. Li, <a href="https://arxiv.org/abs/2304.11277">PyTorch FSDP: Experiences on scaling fully sharded data parallel</a>. (2023).</div>
+<div class="csl-left-margin">7. </div><div class="csl-right-inline">Y. Zhao, A. Gu, R. Varma, L. Luo, C.-C. Huang, M. Xu, L. Wright, H. Shojanazeri, M. Ott, S. Shleifer, A. Desmaison, C. Balioglu, P. Damania, B. Nguyen, G. Chauhan, Y. Hao, A. Mathews, &amp; S. Li, <a href="https://arxiv.org/abs/2304.11277">PyTorch FSDP: Experiences on scaling fully sharded data parallel</a>. (2023).</div>
 </div>
 <div id="ref-gpipe" class="csl-entry" role="listitem">
-<div class="csl-left-margin">7. </div><div class="csl-right-inline">Y. Huang, Y. Cheng, A. Bapna, O. Firat, M. X. Chen, D. Chen, H. Lee, J. Ngiam, Q. V. Le, Y. Wu, &amp; Z. Chen, <a href="https://arxiv.org/abs/1811.06965">GPipe: Efficient training of giant neural networks using pipeline parallelism</a>. (2019).</div>
+<div class="csl-left-margin">8. </div><div class="csl-right-inline">Y. Huang, Y. Cheng, A. Bapna, O. Firat, M. X. Chen, D. Chen, H. Lee, J. Ngiam, Q. V. Le, Y. Wu, &amp; Z. Chen, <a href="https://arxiv.org/abs/1811.06965">GPipe: Efficient training of giant neural networks using pipeline parallelism</a>. (2019).</div>
 </div>
 <div id="ref-chen2016" class="csl-entry" role="listitem">
-<div class="csl-left-margin">8. </div><div class="csl-right-inline">T. Chen, B. Xu, C. Zhang, &amp; C. Guestrin, <a href="https://arxiv.org/abs/1604.06174">Training deep nets with sublinear memory cost</a>. (2016).</div>
+<div class="csl-left-margin">9. </div><div class="csl-right-inline">T. Chen, B. Xu, C. Zhang, &amp; C. Guestrin, <a href="https://arxiv.org/abs/1604.06174">Training deep nets with sublinear memory cost</a>. (2016).</div>
 </div>
 <div id="ref-selectiveactivations" class="csl-entry" role="listitem">
-<div class="csl-left-margin">9. </div><div class="csl-right-inline">V. A. Korthikanti, J. Casper, S. Lym, L. McAfee, M. Andersch, M. Shoeybi, &amp; B. Catanzaro, <a href="https://proceedings.mlsys.org/paper_files/paper/2023/file/80083951326cf5b35e5100260d64ed81-Paper-mlsys2023.pdf">Reducing activation recomputation in large transformer models</a>. In D. Song, M. Carbin, &amp; T. Chen,eds., <em>Proceedings of machine learning and systems</em> (Curan, 2023), pp. 341–353.</div>
+<div class="csl-left-margin">10. </div><div class="csl-right-inline">V. A. Korthikanti, J. Casper, S. Lym, L. McAfee, M. Andersch, M. Shoeybi, &amp; B. Catanzaro, <a href="https://proceedings.mlsys.org/paper_files/paper/2023/file/80083951326cf5b35e5100260d64ed81-Paper-mlsys2023.pdf">Reducing activation recomputation in large transformer models</a>. In D. Song, M. Carbin, &amp; T. Chen,eds., <em>Proceedings of machine learning and systems</em> (Curan, 2023), pp. 341–353.</div>
 </div>
 <div id="ref-pipedream" class="csl-entry" role="listitem">
-<div class="csl-left-margin">10. </div><div class="csl-right-inline">A. Harlap, D. Narayanan, A. Phanishayee, V. Seshadri, N. Devanur, G. Ganger, &amp; P. Gibbons, <a href="https://arxiv.org/abs/1806.03377">PipeDream: Fast and efficient pipeline parallel DNN training</a>. (2018).</div>
+<div class="csl-left-margin">11. </div><div class="csl-right-inline">A. Harlap, D. Narayanan, A. Phanishayee, V. Seshadri, N. Devanur, G. Ganger, &amp; P. Gibbons, <a href="https://arxiv.org/abs/1806.03377">PipeDream: Fast and efficient pipeline parallel DNN training</a>. (2018).</div>
 </div>
 <div id="ref-megatron2021" class="csl-entry" role="listitem">
-<div class="csl-left-margin">11. </div><div class="csl-right-inline">D. Narayanan, M. Shoeybi, J. Casper, P. LeGresley, M. Patwary, V. A. Korthikanti, D. Vainbrand, P. Kashinkunti, J. Bernauer, B. Catanzaro, A. Phanishayee, &amp; M. Zaharia, <a href="https://arxiv.org/abs/2104.04473">Efficient large-scale language model training on GPU clusters using megatron-LM</a>. (2021).</div>
+<div class="csl-left-margin">12. </div><div class="csl-right-inline">D. Narayanan, M. Shoeybi, J. Casper, P. LeGresley, M. Patwary, V. A. Korthikanti, D. Vainbrand, P. Kashinkunti, J. Bernauer, B. Catanzaro, A. Phanishayee, &amp; M. Zaharia, <a href="https://arxiv.org/abs/2104.04473">Efficient large-scale language model training on GPU clusters using megatron-LM</a>. (2021).</div>
 </div>
 <div id="ref-bfspipeline" class="csl-entry" role="listitem">
-<div class="csl-left-margin">12. </div><div class="csl-right-inline">J. Lamy-Poirier, <a href="https://arxiv.org/abs/2211.05953">Breadth-first pipeline parallelism</a>. (2023).</div>
+<div class="csl-left-margin">13. </div><div class="csl-right-inline">J. Lamy-Poirier, <a href="https://arxiv.org/abs/2211.05953">Breadth-first pipeline parallelism</a>. (2023).</div>
+</div>
+<div id="ref-megatron2019" class="csl-entry" role="listitem">
+<div class="csl-left-margin">14. </div><div class="csl-right-inline">M. Shoeybi, M. Patwary, R. Puri, P. LeGresley, J. Casper, &amp; B. Catanzaro, <a href="https://arxiv.org/abs/1909.08053">Megatron-LM: Training multi-billion parameter language models using model parallelism</a>. (2020).</div>
 </div>
 </div>
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p>In practice an epoch will loop over an entire training set consisting of several batches (each with their own parameter updates), potentially followed by evaluation on separate validation batches.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Some tensors in a module don’t have gradients, for example fixed transformers with static parameters.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>FP16 weights and gradients + FP32 master copy of weights + FP32 momentum and variance.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>Floating point addition is not associative, but in practice the difference is small enough to be safely ignored.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>Except for batch-wise operations like <code>BatchNorm</code>, which won’t be locally consistent (unless we use their expensive synchronised implementations like <code>SyncBatchNorm</code>).<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>A batch is used to approximate the gradient over the entire training set; for large batches the approximation is already very good, and further increasing batchsize provides negligible improvement (i.e. no longer reducing number of training steps), wasting compute. Moreover, large batchsizes can harm out-of-sample performance by reducing stochasticity.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>Bucket size is user-configurable. Larger buckets lower communication overhead but reduce overlap with compute. Buckets are allocated heuristically during model construction, by the reverse order of <code>model.parameters()</code>.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn8"><p>Note that because the optimizer step will only operate on the sharded parameters, any optimizer that depends on global state over all parameters won’t be locally consistent.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn9"><p>The actual class is <code>distributed.fsdp.FullyShardedDataParallel</code>. Note that the optimizer should be initialised <em>afterwards</em>, using the sharded module.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn10"><p>There’s also <code>NO_GRAD_OP</code> which keeps parameters unsharded during the entire forward-backward computation.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn11"><p>Before forward computation, FSDP replaces the original parameters with views into their unsharded <code>FlatParameter</code> so that autograd behaves correctly. Keeping the original parameters registered requires using the recently added <code>use_orig_params</code> flag.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn12"><p>e.g. for a transformer model we’ll usually wrap each transformer block, with a final wrapper around the root module sharding the initial embedding and final linear layers.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn13"><p>We can’t get around this with an extra stream, PyTorch only uses one internal NCCL stream for a given process group.<a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn14"><p>A stage has <span class="math inline">\(\frac{l}{d}\)</span> layers, each of which caches <span class="math inline">\(O(B)\)</span> of activations.<a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn15"><p>Not to be confused with <em>model</em> checkpointing, where we periodically save the entire model to disk, usually at the end of an epoch.<a href="#fnref15" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn16"><p>Recomputing activations will still slow training speed; instead the SoTA is to <em>selectively</em> recompute only some activations <span class="citation" data-cites="selectiveactivations">[<a href="#ref-selectiveactivations" role="doc-biblioref">9</a>]</span>.<a href="#fnref16" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>In particular we’re referring to the <em>pre-training</em> phase for LLMs.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>In practice an epoch will loop over an entire training set consisting of several batches (each with their own parameter updates), potentially followed by evaluation on separate validation batches.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Some tensors in a module don’t have gradients, for example fixed transforms with static parameters.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>FP16 weights and gradients + FP32 master copy of weights + FP32 momentum and variance.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Floating point addition is not associative, but in practice the difference is small enough to be safely ignored.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Except for batch-wise operations like <code>BatchNorm</code>, which won’t be locally consistent (unless we use their expensive synchronised implementations like <code>SyncBatchNorm</code>).<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>A batch is used to approximate the gradient over the entire training set; for large batches the approximation is already very good, and further increasing batchsize provides negligible improvement (i.e. no longer reducing number of training steps), wasting compute. Moreover, large batchsizes can harm out-of-sample performance by reducing stochasticity.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>Bucket size is user-configurable. Larger buckets lower communication overhead but reduce overlap with compute. Buckets are allocated heuristically during model construction, by the reverse order of <code>model.parameters()</code>.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>Note that because the optimizer step will only operate on the sharded parameters, any optimizer that depends on global state over all parameters won’t be locally consistent.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>The actual class is <code>distributed.fsdp.FullyShardedDataParallel</code>. Note that the optimizer should be initialised <em>afterwards</em>, using the sharded module.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>There’s also <code>NO_GRAD_OP</code> which keeps parameters unsharded during the entire forward-backward computation.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p>Before forward computation, FSDP replaces the original parameters with views into their unsharded <code>FlatParameter</code> so that autograd behaves correctly. Keeping the original parameters registered requires using the recently added <code>use_orig_params</code> flag.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p>e.g. for a transformer model we’ll usually wrap each transformer block, with a final wrapper around the root module sharding the initial embedding and final linear layers.<a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn14"><p>We can’t get around this with an extra stream, PyTorch only uses one internal NCCL stream for a given process group.<a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn15"><p>A stage has <span class="math inline">\(\frac{l}{d}\)</span> layers, each of which caches <span class="math inline">\(O(B)\)</span> of activations.<a href="#fnref15" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn16"><p>Not to be confused with <em>model</em> checkpointing, where we periodically save the entire model to disk, usually at the end of an epoch.<a href="#fnref16" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn17"><p>Recomputing activations will still slow training speed; instead the SoTA is to <em>selectively</em> recompute only some activations <span class="citation" data-cites="selectiveactivations">[<a href="#ref-selectiveactivations" role="doc-biblioref">10</a>]</span>.<a href="#fnref17" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 <!--radix_placeholder_article_footer-->
@@ -2937,13 +2983,13 @@ How do we choose batchsize, microbatchsize and other parameters?</p>
   <div id="references-listing"></div>
   <h3 id="citation">Citation</h3>
   <p>For attribution, please cite this work as</p>
-  <pre class="citation-appendix short">Mauger (2024, Dec. 26). Bruce Mauger: Distributed Machine Learning: How Does it Work?. Retrieved from brrm.io/posts/distributed-ml/</pre>
+  <pre class="citation-appendix short">Mauger (2025, Jan. 1). Bruce Mauger: Distributed Machine Learning: How Does it Work?. Retrieved from brrm.io/posts/distributed-ml/</pre>
   <p>BibTeX citation</p>
-  <pre class="citation-appendix long">@misc{mauger2024distributed,
+  <pre class="citation-appendix long">@misc{mauger2025distributed,
   author = {Mauger, Bruce},
   title = {Bruce Mauger: Distributed Machine Learning: How Does it Work?},
   url = {brrm.io/posts/distributed-ml/},
-  year = {2024}
+  year = {2025}
 }</pre>
 </div>
 <!--/radix_placeholder_appendices-->
