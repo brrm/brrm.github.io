@@ -7,7 +7,7 @@
     <description>random scribbles
 </description>
     <generator>Distill</generator>
-    <lastBuildDate>Thu, 26 Dec 2024 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 25 Dec 2024 00:00:00 +0000</lastBuildDate>
     <item>
       <title>Distributed Machine Learning: How Does it Work?</title>
       <dc:creator>Bruce Mauger</dc:creator>
@@ -15,7 +15,7 @@
       <description>Distribution has become essential to training large models.
 Modern machine learning frameworks provide drop-in distribution, but few understand how these work -- and why they might be slowing down training.</description>
       <guid>brrm.io/posts/distributed-ml</guid>
-      <pubDate>Thu, 26 Dec 2024 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 25 Dec 2024 00:00:00 +0000</pubDate>
     </item>
     <item>
       <title>Boosting for Causal Effect Estimation</title>

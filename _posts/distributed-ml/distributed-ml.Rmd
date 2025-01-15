@@ -103,15 +103,17 @@ for t in range(epochs):
   optimizer.zero_grad()
 ```
 
-We train our model for 10 epochs (iterations) over a single batch of 10 (identical) data samples^[In practice an epoch will loop over an entire training set consisting of several batches (each with their own parameter updates), potentially followed by evaluation on separate validation batches.].
+We train our model for 10 epochs (iterations) over a single batch of $B=10$ (identical) data samples^[In practice an epoch will loop over an entire training set consisting of several batches (each with their own parameter updates), potentially followed by evaluation on separate validation batches.].
 In each epoch:
 
 1. With `model(x)`, we call the `forward` method defined earlier to obtain predictions for the entire input batch. The outputs of each layer (**"activations"**) are cached for use in the backward pass. 
 2. We compute the (cross entropy) loss for these predictions and store them in the `loss` tensor.
-3. We calculate the derivative of the loss of each sample with respect to each parameter with `loss.backward()`. PyTorch's autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the outer layer in the backward pass. It accumulates gradients in each tensor's `.grad` attribute^[Some tensors in a module don't have gradients, for example fixed transformers with static parameters.].
+3. We calculate the derivative of the loss of each sample with respect to each parameter (**"gradients"**) with `loss.backward()`. PyTorch's autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the outer layer in the backward pass. It accumulates gradients in each tensor's `.grad` attribute^[Some tensors in a module don't have gradients, for example fixed transformers with static parameters.].
 4. The optimizer defines how parameters are updated from gradients. `optimizer.step()` performs this adjustment, and `optimizer.zero_grad()` resets gradients so they don't accumulate in the next pass.
 
 ![Pebble graph for a four layer network illustrating how cached activations are built up in the forward pass, and used to calculate gradients in the backward pass ([graphic inspiration](https://siboehm.com/articles/22/data-parallel-training)).](images/pebble_graph.gif)
+
+This process is known as **stochastic gradient descent**: we *iteratively* update parameters using *gradients* calculated over a *random* subset (batch) of the entire dataset.
 
 For each parameter in our network, we also need to store its gradient and relevant optimizer state.
 The popular Adam optimizer tracks **momentum** and **variance**, exponential averages of the first and second moments respectively of each parameter's gradient [@adam2017]. 
@@ -121,13 +123,14 @@ For larger models such as Meta's Llama 405B that's a 6.5TB memory requirement, w
 PyTorch offers two execution models: **eager** mode and **graph** mode. 
 In eager mode (the default), operators are immediately executed as they are encountered -- effectively, we can't "look ahead". 
 Graph mode synthesises operators into a graph, which is then compiled and executed as a whole.
-As of PyTorch 2.5, most of the parallelism offered only exists in eager mode -- which, as we'll see, can often lead to silly sequences of operations.
+As of PyTorch 2.5, most of the parallelism offered only exists in eager mode -- which, as we'll see, can often lead to suboptimal sequences of operations.
 
 ### The Transformer architecture
 [[Further Reading](https://arxiv.org/pdf/1706.03762)]
 
-The largest models trained today are transformers. 
-Naturally, distributed training has evolved around the architecture, making it a valuable mental model.
+[TODO]. 
+As the largest models trained today are transformers, most of the distributed training literature has evolved around this architecture. 
+Transformers are usually made of several equal-size transformer blocks, which are very convenient for splitting/parallelisation.
 
 # 2.Communication Primitives
 [[Further Reading]](https://marek.ai/allreduce-the-basis-of-multi-device-communication-for-neural-network-training.html)
@@ -213,7 +216,7 @@ We described local training in [Section 1](#how-do-you-train-a-pytorch-neural-ne
 
 ![Local training example on a batch of 6 MNIST data samples ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/local_training.png)
 
-DDP duplicates the model across $W$ ranks, splitting batches into $W$ chunks^[In practice we may use larger batches, so that the per-GPU batchsize remains relatively similar.] for each rank to process:
+DDP duplicates the model across $W$ ranks, splitting batches into $W$ different $\beta=\frac{B}{W}$-size chunk for each rank to process:
 
 ![Data parallel training example with $W=2$ ranks ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/ddp_training.png)
 
@@ -235,7 +238,7 @@ To achieve local consistency, we need to synchronise our gradients before the op
 Conveniently, the most commonly used loss functions are means over the sample-wise losses in the batch:
 
 $$
-\text{loss}(\text{batch}) = \frac{1}{\text{batchsize}} \sum_{j=0}^\text{batchsize} \text{loss}(\text{fwd}(\text{input}_j), \text{target}_j)
+\text{loss}(\text{batch}) = \frac{1}{B} \sum_{j=0}^B \text{loss}(\text{fwd}(\text{input}_j), \text{target}_j)
 $$
 Because the gradient of a sum is the sum of the gradients of each term, we can calculate gradients for the chunks at each rank independently and average them together to obtain the gradient over the entire batch:
 
@@ -243,6 +246,11 @@ $$
 \nabla \theta = \frac{1}{W}\sum_{r=0}^W \nabla \theta_r^\text{local}
 $$
 This can be done efficiently using the previously discussed AllReduce collective (along with a single Broadcast from the root rank after model construction, to synchronise initial parameters).
+
+Lastly, it's worth noting that batchsize limits the maximum degree of DDP parallelism.
+We need to maintain chunk sizes bigger than a *minimum batchsize per GPU* ($\beta_\text{min}$), below which compute intensity/utilisation decreases substantially.
+On the other hand, stochastic gradient descent is maximally efficient when overall batchsize is well-below an empirical value known as the *critical batch size*^[A batch is used to approximate the gradient over the entire training set; for large batches the approximation is already very good, and further increasing batchsize provides negligible improvement (i.e. no longer reducing number of training steps), wasting compute. Moreover, large batchsizes can harm out-of-sample performance by reducing stochasticity.], $B \ll B_\text{crit}$ [@empiricallargebatchtraining].
+This small batchsize regime is unattainable for larger clusters since $B \geq W\beta_\text{min} > B_\text{crit}$.
 
 #### DDP in PyTorch
 PyTorch's distribution API is designed for non-intrusive scaling out from local training. 
@@ -272,11 +280,6 @@ Amortised communication overhead can be further reduced with **Gradient Accumula
 [@pytorchddp] claims this enables near-linear scaling for smaller GPU clusters, with "negligible accuracy penalty":
 
 ![Per-iteration latencies (left), and final training loss (right) for $n$ iterations of gradient accumulation. Figure from [@pytorchddp].](images/pytorch_ddp_grad_accum.png)
-
-Lastly, it's worth noting that batch-size limits the maximum degree of DDP parallelism.
-If we split the same batch over more GPUs, the per-GPU batchsize decreases and so does compute intensity/efficiency.
-We could increase overall batchsize, but training becomes less stable.
-
 
 ### Fully-Sharded Data Parallel (FSDP)
 [[Further Reading](https://arxiv.org/pdf/2304.11277)]
@@ -328,6 +331,7 @@ For example, with $W=16$ ranks and $F=8$ hybrid sharding, the $r=9$ rank would A
 
 You might've spotted that setting $F=1$ results in a single replication group (with no memory savings) -- this simplifies to vanilla DDP using AllReduce for gradient synchronisation.
 It's worth noting that with any sharding strategy, ranks are expected to have distinct input batch chunks (otherwise we'd simply be duplicating gradient calculations). 
+Though we can keep reducing memory overhead with larger sharding groups, our degree of compute parallelism will encounter the same batchsize limitations as DDP.
 
 Using our traffic calculations from [Section 2](#communication-primitives), the per-GPU communication of an $M$-size model is $2(\frac{W}{F}-1)(\frac{M}{W})$ for the replication group, and $3(F-1)(\frac{M}{F})$ for the sharding group.
 Clearly communication within the sharding group is much more expensive, therefore we often try to minimise the number of hops between the ranks in a sharding group -- sometimes we may even use smaller sharding factors to ensure they're within the same host.
@@ -383,8 +387,8 @@ PyTorch's FSDP experiments [@pytorchfsdp] show near-linear compute scaling, thou
 [[Further Reading](https://arxiv.org/pdf/1811.06965)]
 
 Like FSDP, pipeline parallelism aims to train models too large to fit within a single GPU.
-However, rather than *sharding* the model horizontally, we ***partition*** it vertically.
-Each of these partitions is referred to as a **stage**. 
+However, rather than *sharding* the model horizontally, we ***partition*** it vertically along its depth.
+Each of partition of consecutive layers is referred to as a **stage**. 
 Returning to our four layer network from [Section 1](#how-do-you-train-a-pytorch-neural-network), we could partition it evenly across two ranks and send intermediate activations/gradients at partition boundaries between stages:
 
 ![Pebble graph of a four layer network, partitioned across two ranks into two stages of two layers each ([image credit](https://siboehm.com/articles/22/pipeline-parallel-training)).](images/pp_pebble_graph.gif)
@@ -402,23 +406,24 @@ Here's the same four stage example, with 4-way batch-splitting:
 
 ![GPipe schedule with $d=4$ stages, $m=4$ microbatches; $Fi(j)$ denotes the $i^\text{th}$ stage forward computation over the $j^\text{th}$ microbatch.](images/pp_gpipe_bubbles.png)
 
-We can show empirically that, in this example, GPipe nearly halves the bubble time.
-For a pipeline with $d$ evenly-partitioned stages and $m$ evenly-divided microbatches, a given stage spends $m$ timesteps doing useful work and $n-1$ timesteps waiting for new work to arrive during the forward pass.
-Assuming both forward and backward take one unit time per microbatch, the time wasted on bubbles is:
+We can show empirically that, in this example, GPipe reduces relative bubble time by more than a third.
+For a pipeline with $d$ evenly-partitioned stages and $m$ evenly-divided microbatches, a given stage spends $m$ forward timesteps doing useful work and $d-1$ forward timesteps waiting for new work to arrive during the forward pass.
+The same applies to the backward pass, therefore the overall fraction of ideal computation time spent in bubbles is:
 
 $$
-1 - \frac{2dm}{2d(m+d-1)}=1-\frac{m}{m+d-1}=\frac{d-1}{m+d-1}
+\text{Bubble}(d,m)=\frac{d-1}{m}
 $$
+For the bubble time fraction to be small we need $m \gg d$.
+Our naive model parallelism example ($m=1, d=4$) has a bubble ratio of $3$, compared to $0.75$ for GPipe ($m=4, d=4$).
 
-Our naive model parallelism example ($m=1, d=4$) has a bubble fraction of $0.75$, compared to $0.42$ for GPipe ($m=4, d=4$).
 So far we've ignored communication overheads.
 Unlike other parallelisation paradigms, pipelining does not require any collective communication primitives; we simply asynchronously send (p2p) intermediates as soon as they're ready.
 Here's what our GPipe example looks like once we include communication:
 
 ![GPipe schedule with $d=4$ stages and $m=4$ microbatches, communication included.](images/pp_gpipe_comm.png)
 
-For illustration purposes, here sending a microbatch takes longer than computing a stage (pipelining is often internode so this is not uncommon), reducing our compute efficiency.
-Perfect compute-communication overlap is impossible for pipeline parallelism because necessarily we can't start working on the first microbatch until the previous stage has finished processing, and sent, the same microbatch.
+For illustration purposes, here sending a microbatch takes longer than computing a stage (pipelining is typically internode so this is not uncommon), reducing our compute efficiency.
+Perfect compute-communication overlap is impossible for pipeline parallelism because necessarily we can't start working on the first microbatch until the previous stage has finished processing and then sent the same microbatch.
 
 Notably, pipeline parallelism is orthogonal to DDP and both can be combined to obtain a 2D parallelism similar to hybrid FSDP.
 In practice, this is implemented with the pipeline as the inner dimension and with bucketed AllReduces in the outer dimension (interleaved with the backward pass of the final microbatch).
@@ -439,7 +444,7 @@ Boundary activations take $O(B)$ space and we only need to cache activations for
 $$
 O\left(B+\frac{B}{m}\frac{l}{d}\right)
 $$
-Why can we get away with recomputing the forward without significantly impacting overall compute efficiency?
+Why can we get away with recomputing the forward without significantly impacting overall compute efficiency^[Recomputing activations will still slow training speed; instead the SoTA is to *selectively* recompute only some activations [@selectiveactivations].]?
 
 1. In practice the backward is actually much more expensive (usually twice as much) than the forward.
 2. As we saw earlier pipeline parallelism can't achieve perfect compute-communication overlap. When used in conjunction with pipelining, forward recomputation can be scheduled earlier (during bubbles) as we don't need to wait for the gradients from later layers.
@@ -447,18 +452,64 @@ Why can we get away with recomputing the forward without significantly impacting
 The original GPipe paper [@gpipe] claims that, with activation checkpointing, using $m \geq 4d$ microbatches results in "negligible" bubble overhead.
 
 #### Other Schedules
-Omit communication from here on, use the standard "tile" diagrams.
+[[Further Reading](https://arxiv.org/pdf/2211.05953)]
 
-PipeDream (1F1B) [@pipedream] aims to reduce peak memory demand by reducing number of in-flight microbatches.
-Warmup, steady state, and flush^[There are versions without the flush, but model versions go out-of-sync (or we need multiple versions).]
-Does not change bubbles.
-In the warmup phase later stages are still waiting on activations from earlier stages; conversely, when flushing the pipeline, later stages have completed their backward passes but are waiting on earlier stages to finish theirs.
+We can further decrease memory demand by reducing the number of "in-flight" microbatches for which we need to cache activations (or checkpoints).
+If you look at the original GPipe schedule, after completing the forward for the first microbatch, the last stage could instead start the backward right away and discard its activation. 
+<mark>PipeDream</mark> [@pipedream] schedules the last stage backward immediately after the corresponding forward, reducing memory demand compared to GPipe:
 
-![1F1B PipeDream (flushed) schedule, ignoring communication with $d=4, m=4$. Based on figure from [@pipedream].](images/pipedream_tile.png)
+![1F1B PipeDream-flush schedule, ignoring communication with $d=4, m=8$. Based on figure from [@megatron2021].](images/pipedream_tile.png)
 
-When does it update? All at same timestep? Or as soon as finished with all microbatches?
+The schedule consists of three phases: 
 
-ZeroBubble, BFS/DFS (Llama?)
+1. The *warmup* where deeper stages are waiting on activations from earlier stages. We limit the number of contiguous microbatches over which we compute a forward pass to the pipeline depth, thus also limiting the number of in-flight microbatches.
+2. The *steady state* where ranks perform one forward pass followed by one backward pass (known as "1F1B"). 
+3. Lastly we *flush* the pipeline by completing the backward passes for remaining microbatches without scheduling any new ones.
+
+Unlike GPipe, where all microbatches are in-flight at some point during the schedule, with PipeDream that number never exceeds the pipeline depth.
+Since reducing bubble time requires $m \gg p$, PipeDream can do so without affecting memory footprint. 
+However, for fixed $m$, the bubble fraction is no different between PipeDream and GPipe (you can see this by shifting all the blue forwarded passes left). 
+So how can we do better, without prohibitively increasing $m$ and thus the overall batchsize?
+
+Rather than each rank only having a single stage (of consecutive layers), we can form a *looping* pipeline by performing the computation for $v$ (non-consecutive) stages at each rank and connecting the last rank to the first, forming a coil. 
+For example, if rank 0 previously had 4 layers (e.g. layers 0-4) with $v=2$ loops, it would now have 2 stages of 2 layers each (e.g. layers 0-1 and 8-9).
+<mark>PTD-P</mark> [@megatron2021] is the looped version of the PipeDream 1F1B schedule:
+
+![PTD-P (depth-first) schedule; $W=4$ ranks, $\ell=16$ layers, $v=4$ loops, $m=8$ microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from [@bfspipeline].](images/dfs_pipeline.png)
+
+Forward and backward for a stage is now shorter by a factor of $v$, so the bubble time at each rank is also reduced by $v$ to $(d-1)/v$.
+The overall bubble fraction becomes:
+$$ \text{Bubble}_\text{looped}(d,m,v) = \frac{d-1}{vm} $$
+This reduced bubble size does not, however, come for free: the total communication volume is increased by the same factor of $v$.
+Another caveat is that PTD-P requires $m$ be a multiple of $W$.
+
+You can imagine that 1F1B schedules like PTD-P and PipeDream are *depth-first*: when deciding between computing the same (forward) stage for the next microbatch or the next (backward) stage for the same microbatch, a rank will choose the latter -- sending earlier microbatches as deep as possible down the pipeline.
+"All-forward all-backward" schedules like GPipe are *breadth-first*: a rank will prioritise completing all microbatches in the earliest unfinished stage.
+Naturally, you might ask what the looped anolog of GPipe looks like. 
+This is the <mark>breadth-first pipeline schedule</mark> (BFS) [@bfspipeline]:
+
+![Breadth-first pipeline schedule; $W=4$ ranks, $\ell=16$ layers, $v=4$ loops, $m=8$ microbatches. Data-parallel AllReduce illustrated on odd rows, pipeline-parallel communication omitted. Figure from [@bfspipeline].](images/bfs_pipeline.png)
+
+The bubble time fraction is exactly the same as PTD-P, though (like GPipe) peak memory consumption is increased as all microbatches are in-flight at some point.
+However, BFS achieves much better communication overlap: 
+
+1. A PTD-P rank will compute the forward over $d$ contiguous microbatches at a time; the first microbatch must complete the rest of the loop before the sequence is finished (i.e. in $<d-1$ fwd timesteps) to avoid starving the rank (impossible with non-zero communication delay). BFS, on the other hands, forwards the entire batch, providing $m-d$ extra microbatches to absorb communication overheads.
+2. The backward for the first stages finishes earlier, allowing us to start reducing gradients along the DP dimension earlier.
+
+More importantly, BFS can make use of FSDP.
+In a non-looping pipeline, FSDP is prohibitively expensive as we'd have unshard/reshard parameters and reduce gradients for each microbatch.
+With a looping pipeline, ranks hold several stages so these can be used as FSDP units.
+A rank can unshard an entire stage for the duration of a microbatch sequence and then subsequently reduce gradients for that stage.
+DFS still requires several FSDP iterations per unit as it alternates between stages, whereas BFS completes the full forward (or backward) for a stage before moving on to the next -- thus avoiding these repetitions.
+
+As with DP, FSDP is always on the outermost dimension when combined with PP.
+The benefits of combining BFS and FSDP are two-fold: first, FSDP compensates for BFS' larger memory footprint by sharding stages; and second, BFS reduces the size of FSDP sharding groups (and their expensive collectives) while maintaining the same overall degree of parallelism.
+<!-- TODO: there's also some batchsize stuff (see BFS paper) that I don't quite understand yet -->
+
+There are a lot more schedules not covered here.
+More advanced scheduling strategies, such as those used to train Llama 3, include hybrid schedules combining the memory savings of DFS with the communication efficiency of BFS.
+
+<!-- TODO: empirical performance? -->
 
 #### PP in PyTorch
 How is the model staged?
@@ -468,6 +519,8 @@ How do we specify schedule?
 How do we combine with FSDP?
 
 ### Tensor and Sequence Parallel (TP / SP)
+[[Further Reading](https://arxiv.org/pdf/2104.04473)]
+
 #### TP in PyTorch
 
 ### Context Parallel (CP)
@@ -476,4 +529,5 @@ How do we combine with FSDP?
 <!-- ND parallelism widget, that generates a hypothetical trace of collectives -->
 
 # 4. Parallelism in Practice
-[WIP] Large models use FSDP, gigantic models use all of the above.
+[WIP] Large models use FSDP, gigantic models use all of the above. 
+How do we choose batchsize, microbatchsize and other parameters?
