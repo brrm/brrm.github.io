@@ -45,11 +45,11 @@ The communication aspects of these designs will be focus of this post.
 We assume only basic prior knowledge of neural networks and gradient descent.
 The first two sections provide background on the PyTorch framework (as well as the transformer model that underpins modern LLMs), and collective communication primitives respectively.
 The next section presents a deep-dive into all of the major parallelism techniques, including how PyTorch non-intrusively integrates these into its inherently local execution model.
-We'll conclude with how the parallelisms are composed together in practice by looking at Llama 3.
+We'll conclude by looking at how parallelisms are composed together in practice, in particular for Llama 3.
 
 # 1. PyTorch mental model
 We'll be using PyTorch to illustrate model distribution throughout (though everything remains largely applicable to other frameworks).
-It's useful to first get an understanding of how data flows during the PyTorch model training process, in order to see the opportunities for parallelisation. 
+It's useful to first get an understanding of how data flows during the PyTorch model training process, in order to spot opportunities for parallelisation. 
 
 ### How do you train a PyTorch neural network?
 [[Further Reading](https://pytorch.org/tutorials/beginner/basics/intro.html)]
@@ -118,7 +118,7 @@ For larger models such as Meta's Llama 405B that's a 6.5TB memory requirement, w
 PyTorch offers two execution models: **eager** mode and **graph** mode. 
 In eager mode (the default), operators are immediately executed as they are encountered -- effectively, we can't "look ahead". 
 Graph mode synthesises operators into a graph, which is then compiled and executed as a whole.
-As of PyTorch 2.5, most of the parallelisms offered only exists in eager mode -- which, as we'll see, can often lead to suboptimal sequences of operations.
+As of PyTorch 2.5, most of the parallelisms offered only exist in eager mode -- which, as we'll see, can often lead to suboptimal sequences of operations.
 
 ### The Transformer architecture
 [[Further Reading](https://arxiv.org/pdf/1706.03762)]
@@ -329,7 +329,7 @@ It's worth noting that with any sharding strategy, ranks are expected to have di
 Though we can keep reducing memory overhead with larger sharding groups, our degree of compute parallelism will encounter the same batchsize limitations as DDP.
 
 Using our traffic calculations from [Section 2](#communication-primitives), the per-GPU communication of an $M$-size model is $2(\frac{W}{F}-1)(\frac{M}{W})$ for the replication group, and $3(F-1)(\frac{M}{F})$ for the sharding group.
-Clearly communication within the sharding group is much more expensive, therefore we often try to minimise the number of hops between the ranks in a sharding group -- sometimes we may even use smaller sharding factors to ensure they're within the same host.
+Because communication within the sharding group is more expensive (and intertwined with the critical path), we usually try to minimise the number of hops between the ranks in a sharding group -- sometimes we may even use smaller sharding factors to ensure they're within the same host.
 
 #### FSDP in PyTorch
 Just like DDP, the FSDP API is designed as a thin `nn.Module` wrapper class: `sharded_model = FSDP(model, process_group=...)`^[The actual class is `distributed.fsdp.FullyShardedDataParallel`. Note that the optimizer should be initialised *afterwards*, using the sharded module.].
@@ -520,7 +520,7 @@ Tensor parallelism is similar to FSDP: we split our model *horizontally* to redu
 However, TP shards are much more granular, with splits within a single layer rather than across units of several layers.
 
 The computational bottleneck for most modern models (such as the transformer) is the **general matrix multiply** (GEMM): multiplying an activation batch matrix $X$ with a large weight matrix $A$.
-The example we used in [Section 1](#how-do-you-train-a-pytorch-neural-network), a **multi-layer perceptron** (MLP), consists of a GEMM followed by a pointwise pointwise nonlinear activation function $\sigma(\cdot)$:
+The example we used in [Section 1](#how-do-you-train-a-pytorch-neural-network), a **multi-layer perceptron** (MLP), consists of a GEMM followed by a pointwise nonlinear activation function $\sigma(\cdot)$:
 $$ 
 Y = \sigma(XA)
 $$

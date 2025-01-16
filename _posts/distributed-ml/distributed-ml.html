@@ -1620,10 +1620,10 @@ The communication aspects of these designs will be focus of this post.</p>
 <p>We assume only basic prior knowledge of neural networks and gradient descent.
 The first two sections provide background on the PyTorch framework (as well as the transformer model that underpins modern LLMs), and collective communication primitives respectively.
 The next section presents a deep-dive into all of the major parallelism techniques, including how PyTorch non-intrusively integrates these into its inherently local execution model.
-We’ll conclude with how the parallelisms are composed together in practice by looking at Llama 3.</p>
+We’ll conclude by looking at how parallelisms are composed together in practice, in particular for Llama 3.</p>
 <h1 id="pytorch-mental-model">1. PyTorch mental model</h1>
 <p>We’ll be using PyTorch to illustrate model distribution throughout (though everything remains largely applicable to other frameworks).
-It’s useful to first get an understanding of how data flows during the PyTorch model training process, in order to see the opportunities for parallelisation.</p>
+It’s useful to first get an understanding of how data flows during the PyTorch model training process, in order to spot opportunities for parallelisation.</p>
 <h3 id="how-do-you-train-a-pytorch-neural-network">How do you train a PyTorch neural network?</h3>
 <p>[<a href="https://pytorch.org/tutorials/beginner/basics/intro.html">Further Reading</a>]</p>
 <p>PyTorch’s fundamental data structure is the <code>Tensor</code>, a multi-dimensional matrix (think NumPy’s <code>ndarray</code>) used to store a model’s parameters and encode inputs/outputs.
@@ -1686,7 +1686,7 @@ For larger models such as Meta’s Llama 405B that’s a 6.5TB memory requiremen
 <p>PyTorch offers two execution models: <strong>eager</strong> mode and <strong>graph</strong> mode.
 In eager mode (the default), operators are immediately executed as they are encountered – effectively, we can’t “look ahead”.
 Graph mode synthesises operators into a graph, which is then compiled and executed as a whole.
-As of PyTorch 2.5, most of the parallelisms offered only exists in eager mode – which, as we’ll see, can often lead to suboptimal sequences of operations.</p>
+As of PyTorch 2.5, most of the parallelisms offered only exist in eager mode – which, as we’ll see, can often lead to suboptimal sequences of operations.</p>
 <h3 id="the-transformer-architecture">The Transformer architecture</h3>
 <p>[<a href="https://arxiv.org/pdf/1706.03762">Further Reading</a>]</p>
 <p>[WIP]
@@ -1882,7 +1882,7 @@ For example, with <span class="math inline">\(W=16\)</span> ranks and <span clas
 It’s worth noting that with any sharding strategy, ranks are expected to have distinct input batch chunks (otherwise we’d simply be duplicating gradient calculations).
 Though we can keep reducing memory overhead with larger sharding groups, our degree of compute parallelism will encounter the same batchsize limitations as DDP.</p>
 <p>Using our traffic calculations from <a href="#communication-primitives">Section 2</a>, the per-GPU communication of an <span class="math inline">\(M\)</span>-size model is <span class="math inline">\(2(\frac{W}{F}-1)(\frac{M}{W})\)</span> for the replication group, and <span class="math inline">\(3(F-1)(\frac{M}{F})\)</span> for the sharding group.
-Clearly communication within the sharding group is much more expensive, therefore we often try to minimise the number of hops between the ranks in a sharding group – sometimes we may even use smaller sharding factors to ensure they’re within the same host.</p>
+Because communication within the sharding group is more expensive (and intertwined with the critical path), we usually try to minimise the number of hops between the ranks in a sharding group – sometimes we may even use smaller sharding factors to ensure they’re within the same host.</p>
 <h4 id="fsdp-in-pytorch">FSDP in PyTorch</h4>
 <p>Just like DDP, the FSDP API is designed as a thin <code>nn.Module</code> wrapper class: <code>sharded_model = FSDP(model, process_group=...)</code><a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>.
 Sharding strategy is set with the <code>sharding_strategy</code> arg: <code>FULL_SHARD</code>, <code>NO_SHARD</code> and <code>HYBRID_SHARD</code> correspond to aforementioned fully sharded, fully replicated and hybrid strategies respectively<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a>.
@@ -2059,7 +2059,7 @@ More advanced scheduling strategies, such as those used to train Llama 3 <span c
 <p>Tensor parallelism is similar to FSDP: we split our model <em>horizontally</em> to reduce memory footprint and increase our degree of parallelism.
 However, TP shards are much more granular, with splits within a single layer rather than across units of several layers.</p>
 <p>The computational bottleneck for most modern models (such as the transformer) is the <strong>general matrix multiply</strong> (GEMM): multiplying an activation batch matrix <span class="math inline">\(X\)</span> with a large weight matrix <span class="math inline">\(A\)</span>.
-The example we used in <a href="#how-do-you-train-a-pytorch-neural-network">Section 1</a>, a <strong>multi-layer perceptron</strong> (MLP), consists of a GEMM followed by a pointwise pointwise nonlinear activation function <span class="math inline">\(\sigma(\cdot)\)</span>:
+The example we used in <a href="#how-do-you-train-a-pytorch-neural-network">Section 1</a>, a <strong>multi-layer perceptron</strong> (MLP), consists of a GEMM followed by a pointwise nonlinear activation function <span class="math inline">\(\sigma(\cdot)\)</span>:
 <span class="math display">\[
 Y = \sigma(XA)
 \]</span>
