@@ -89,7 +89,7 @@ y = torch.zeros(10, 1) # expected output (target) batch tensor
 epochs = 10
 for t in range(epochs): 
   # Compute prediction and loss
-  pred = model(x)
+  pred = model(X)
   loss = torch.nn.functional.cross_entropy(pred, y)
   
   # Update parameters
@@ -101,9 +101,9 @@ for t in range(epochs):
 We train our model for 10 epochs (iterations) over a single batch of $B=10$ (identical) data samples^[In practice an epoch will loop over an entire training set consisting of several batches (each with their own parameter updates), potentially followed by evaluation on separate validation batches.].
 In each epoch:
 
-1. With `model(x)`, we call the `forward` method defined earlier to obtain predictions for the entire input batch. The outputs of each layer (**"activations"**) are cached for use in the backward pass. 
+1. With `model(X)`, we call the `forward` method defined earlier to obtain predictions for the entire input batch. The outputs of each layer (**"activations"**) are cached for use in the backward pass. 
 2. We compute the (cross entropy) loss for these predictions and store them in the `loss` tensor.
-3. We calculate the derivative of the loss of each sample with respect to each parameter (**"gradients"**) with `loss.backward()`. PyTorch's autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the outer layer in the backward pass. It accumulates gradients in each tensor's `.grad` attribute^[Some tensors in a module don't have gradients, for example fixed transforms with static parameters.].
+3. We calculate the derivative of the loss over all samples in the batch with respect to each parameter (**"gradients"**) with `loss.backward()`. PyTorch's autograd does this automatically by building a computational graph in the forward pass, and then applying backpropagation starting from the outer layer in the backward pass. It accumulates gradients in each tensor's `.grad` attribute^[Some tensors in a module don't have gradients, for example fixed transforms with static parameters.].
 4. The optimizer defines how parameters are updated from gradients. `optimizer.step()` performs this adjustment, and `optimizer.zero_grad()` resets gradients so they don't accumulate in the next pass.
 
 ![Pebble graph for a four layer network illustrating how cached activations are built up in the forward pass, and used to calculate gradients in the backward pass ([graphic inspiration](https://siboehm.com/articles/22/data-parallel-training)).](images/pebble_graph.gif)
@@ -264,7 +264,7 @@ This allows us to overlap computation with (non-blocking) communication, speedin
 
 ![Faster DDP implementation with overlapping computation and communication ([image credit](https://siboehm.com/articles/22/data-parallel-training)).](images/ddp_overlap.png)
 
-Collective communications are more efficient on large tensors. Therefore, in practice, rather than launching a dedicated AllReduce immediately as soon as a layer's gradient tensor is ready, we use **Gradient Bucketing**: we wait for a short period and bucket multiple tensors at a time into one AllReduce.
+Collective communications are more efficient for larger tensors. Therefore, in practice, rather than launching a dedicated AllReduce immediately as soon as a layer's gradient tensor is ready, we use **Gradient Bucketing**: we wait for a short period and bucket multiple tensors at a time into one AllReduce.
 
 To non-intrusively integrate with its eager execution model, PyTorch implements DDP by registering one autograd **hook** (a callback) with each parameter tensor, which fires after the corresponding gradients are updated (during the `loss.backward()` call).
 Once all hooks in a bucket^[Bucket size is user-configurable. Larger buckets lower communication overhead but reduce overlap with compute. Buckets are allocated heuristically during model construction, by the reverse order of `model.parameters()`.] have fired, an asynchronous AllReduce is triggered. PyTorch's DDP paper [@pytorchddp] shows interleaving brings significant performance gains, particularly when using the recommended NCCL communication backend:
@@ -495,13 +495,14 @@ More importantly, BFS can make use of FSDP.
 In a non-looping pipeline, a rank only has a single stage. To achieve any memory savings, FSDP units would have to be intra-stage thus requiring a complete FSDP iteration for each microbatch.
 With a looping pipeline, ranks hold several stages each of which can be used as a unit; we can keep a stage unsharded and accumulate gradeints for contiguous microbatches, only resharding/reducing at the end of the microbatch sequence.
 A BFS stage completes the forward (or backward) pass for all microbatches in one go, avoiding the repeated FSDP iterations that arise from alternating between stages in DFS.
+<!-- TODO: there's also some batchsize stuff (see BFS paper) that I don't quite understand yet -->
 
 The benefits of combining BFS and FSDP are two-fold: first, FSDP compensates for BFS' larger memory footprint by sharding stages; second, BFS reduces the size of FSDP sharding groups (and their expensive collectives) while maintaining the same overall degree of parallelism.
 
 Like DDP, FSDP is typically the outermost parallelism when combined with pipelining.
 Outer dimensions may spread across a multi-hop network with higher communication latency and lower bandwidth; FSDP has fewer, larger asynchronous collectives that can better absorb these communication delays.
-<!-- TODO: there's also some batchsize stuff (see BFS paper) that I don't quite understand yet -->
 <!-- TODO: Diagram? -->
+<!-- And with FSDP + BFS, each FSDP instance operates independently -->
 
 There are a lot other pipeline schedules we haven't covered here, a good reference is the [PyTorch documentation](https://pytorch.org/docs/stable/distributed.pipelining.html#module-torch.distributed.pipelining.schedules).
 More advanced scheduling strategies, such as those used to train Llama 3 [@llama3], include hybrid schedules that combine the memory savings of DFS with the communication efficiency of BFS.
